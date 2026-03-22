@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
-import { AppProvider, useAppContext } from './context/AppContext';
+import { AppProvider } from './context/AppContext';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -11,9 +11,8 @@ import BillHistory from './pages/BillHistory';
 import CustomerLedger from './pages/CustomerLedger';
 import SupplierLedger from './pages/SupplierLedger';
 import Reports from './pages/Reports';
-
-// Placeholders
-const Settings = () => <div className="p-4 bg-white rounded-2xl shadow-sm border border-slate-100"><h2 className="text-2xl font-bold text-slate-800">Settings</h2></div>;
+import Settings from './pages/Settings';
+import DayClosing from './pages/DayClosing';
 
 const AppRoutes = () => {
   return (
@@ -26,6 +25,7 @@ const AppRoutes = () => {
         <Route path="customers" element={<CustomerLedger />} />
         <Route path="suppliers" element={<SupplierLedger />} />
         <Route path="reports" element={<Reports />} />
+        <Route path="day-closing" element={<DayClosing />} />
         <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
