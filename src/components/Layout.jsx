@@ -117,13 +117,13 @@ export default function Layout() {
         {/* Mobile Nav Overlay */}
         {mobileMenuOpen && (
           <div 
-            className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 top-16 transition-opacity" 
+            className="lg:hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[70] top-16 transition-opacity" 
             onClick={() => setMobileMenuOpen(false)}
           />
         )}
 
         {/* Mobile Nav Dropdown */}
-        <nav className={`lg:hidden fixed w-[85%] max-w-sm h-[calc(100vh-4rem)] top-16 right-0 bg-white border-l border-slate-200 z-50 shadow-2xl transition-transform duration-300 transform ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+        <nav className={`lg:hidden fixed w-[85%] max-w-sm h-[calc(100vh-4rem)] top-16 right-0 bg-white border-l border-slate-200 z-[80] shadow-2xl transition-transform duration-300 transform ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
            <div className="overflow-y-auto h-full py-6">
               <ul className="px-4 space-y-2">
                 <li className="mb-4 px-2">

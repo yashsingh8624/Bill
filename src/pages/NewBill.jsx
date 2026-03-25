@@ -43,7 +43,17 @@ export default function NewBill() {
   const [includePrevBalance, setIncludePrevBalance] = useState(false);
   const [selectedCustomerPrevBalance, setSelectedCustomerPrevBalance] = useState(0);
 
-  // Handle Customer Selection
+  // Auto-select existing customer by name
+  useEffect(() => {
+    if (customerName && !selectedCustomerId) {
+      const matched = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase());
+      if (matched) {
+        setSelectedCustomerId(matched.id);
+      }
+    }
+  }, [customerName, customers, selectedCustomerId]);
+
+  // Handle Customer Selection Details
   useEffect(() => {
     if (selectedCustomerId) {
       const cust = customers.find(c => c.id === selectedCustomerId);
@@ -132,7 +142,7 @@ export default function NewBill() {
     
     let custId = selectedCustomerId;
     if (!custId) {
-      const existing = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase() && c.phone === customerPhone);
+      const existing = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase());
       if (existing) {
         custId = existing.id;
       } else {

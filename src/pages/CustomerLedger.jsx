@@ -77,11 +77,28 @@ export default function CustomerLedger() {
   const customerBills = currentCustomer ? bills.filter(b => b.customerId === currentCustomer.id) : [];
   const customerTxns = currentCustomer ? getTransactionsByEntityId(currentCustomer.id) : [];
 
+  const getCustomerTotals = (customer) => {
+    if (!customer) return { totalBilled: 0, totalPaid: 0, outstanding: 0 };
+    
+    const cBills = bills.filter(b => b.customerId === customer.id && !b.isDeleted);
+    const cTxns = getTransactionsByEntityId(customer.id);
+    
+    const totalBilled = cBills.reduce((sum, b) => sum + ((b.total || b.grandTotal || 0) - (b.prevBalanceIncluded || 0)), 0);
+    const totalPaid = cBills.reduce((sum, b) => sum + (b.amountPaid || 0), 0) + 
+                      cTxns.reduce((sum, t) => sum + (t.amount || 0), 0);
+    
+    return {
+      totalBilled,
+      totalPaid,
+      outstanding: totalBilled - totalPaid
+    };
+  };
+
   const handleSendWhatsApp = () => {
     if (!currentCustomer || !currentCustomer.phone) return;
-    const amount = currentCustomer.balance || 0;
+    const { outstanding } = getCustomerTotals(currentCustomer);
     const phone = currentCustomer.phone.startsWith('+91') ? currentCustomer.phone : `+91${currentCustomer.phone}`;
-    const message = `Dear ${currentCustomer.name}, aapka pending balance ₹${amount.toFixed(2)} hai. Kripya jald clear karein. Dhanyawad.\n- ${userSettings.ownerName} | ${userSettings.businessName}`;
+    const message = `Dear ${currentCustomer.name}, aapka pending balance ₹${outstanding.toFixed(2)} hai. Kripya jald clear karein. Dhanyawad.\n- ${userSettings.ownerName} | ${userSettings.businessName}`;
     const url = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
@@ -143,8 +160,8 @@ export default function CustomerLedger() {
                          </td>
                          <td className="py-4 px-6 text-slate-600 font-medium">{customer.phone || '-'}</td>
                          <td className="py-4 px-6 text-right">
-                            <span className={`font-black ${customer.balance > 0 ? 'text-red-500 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100' : 'text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100'}`}>
-                              ₹{(customer.balance || 0).toFixed(2)}
+                            <span className={`font-black ${getCustomerTotals(customer).outstanding > 0 ? 'text-red-500 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100' : 'text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100'}`}>
+                              ₹{getCustomerTotals(customer).outstanding.toFixed(2)}
                             </span>
                          </td>
                          <td className="py-4 px-6 text-center">
@@ -203,20 +220,28 @@ export default function CustomerLedger() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Outstanding</p>
-                <h3 className={`text-3xl font-black ${(currentCustomer.balance || 0) > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                  ₹{(currentCustomer.balance || 0).toFixed(2)}
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Billed</p>
+                <h3 className="text-3xl font-black text-slate-800">
+                  ₹{getCustomerTotals(currentCustomer).totalBilled.toFixed(2)}
+                </h3>
+              </div>
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Paid</p>
+                <h3 className="text-3xl font-black text-indigo-600">
+                  ₹{getCustomerTotals(currentCustomer).totalPaid.toFixed(2)}
+                </h3>
+              </div>
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
+                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Outstanding</p>
+                <h3 className={`text-3xl font-black ${getCustomerTotals(currentCustomer).outstanding > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                  ₹{getCustomerTotals(currentCustomer).outstanding.toFixed(2)}
                 </h3>
               </div>
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Bills</p>
                 <h3 className="text-3xl font-black text-slate-800">{customerBills.length}</h3>
-              </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Payments</p>
-                <h3 className="text-3xl font-black text-indigo-600">{customerTxns.filter(t => t.type === 'PAYMENT_RECEIVED').length}</h3>
               </div>
             </div>
 
@@ -246,7 +271,7 @@ export default function CustomerLedger() {
                             id: b.id,
                             date: b.date,
                             desc: `Bill #${b.invoiceNo}`,
-                            debit: b.total || b.grandTotal, 
+                            debit: (b.total || b.grandTotal || 0) - (b.prevBalanceIncluded || 0), 
                             credit: b.amountPaid || 0,
                             type: 'BILL'
                           })),
@@ -337,7 +362,7 @@ export default function CustomerLedger() {
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Customer</p>
                 <p className="font-black text-slate-800 text-xl">{currentCustomer?.name}</p>
                 <div className="mt-2 text-sm bg-white border border-slate-100 inline-block px-3 py-1 rounded-lg">
-                   Due: <span className="font-black text-red-500">₹{(currentCustomer?.balance || 0).toFixed(2)}</span>
+                   Due: <span className="font-black text-red-500">₹{getCustomerTotals(currentCustomer).outstanding.toFixed(2)}</span>
                 </div>
               </div>
               

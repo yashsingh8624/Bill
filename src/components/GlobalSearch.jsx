@@ -57,8 +57,14 @@ export default function GlobalSearch({ isOpen, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] px-4 backdrop-blur-sm bg-slate-900/40 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in slide-in-from-top-4 duration-300">
+    <div 
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-[10vh] px-4 backdrop-blur-sm bg-slate-900/40 animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in slide-in-from-top-4 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center px-4 py-4 border-b border-slate-100 gap-3">
           <Search className="text-slate-400" size={20} />
           <input
