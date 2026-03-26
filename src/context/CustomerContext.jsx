@@ -15,7 +15,7 @@ export const CustomerProvider = ({ children }) => {
   const addCustomer = (customer) => {
     setCustomers(prev => [...prev, { 
       ...customer, 
-      id: generateId(), 
+      id: customer.id || generateId(), 
       balance: 0, 
       previousBalance: customer.previousBalance || 0,
       includePrevBalance: customer.includePrevBalance || false 

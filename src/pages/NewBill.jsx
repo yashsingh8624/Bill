@@ -54,29 +54,22 @@ export default function NewBill() {
     }
   }, [customerName, customers, selectedCustomerId]);
 
-  // BUG 3 FIX: Fetch fresh previous balance from localStorage when customer changes
+  // BUG 3 FIX: Fetch clear previous balance automatically
   useEffect(() => {
     if (selectedCustomerId) {
-      // Read FRESH data from localStorage, not from stale React state
-      const freshCustomers = safeGet('smartbill_customers', []);
+      // 1. Fetch FRESH data straight from localStorage to avoid stale closures
       const freshBills = safeGet('smartbill_bills', []);
-      const cust = freshCustomers.find(c => c.id === selectedCustomerId);
       
-      if (cust) {
-        setCustomerName(cust.name);
-        setCustomerPhone(cust.phone || '');
-        
-        // Calculate total outstanding from all non-deleted bills for this customer
-        const customerBills = freshBills.filter(b => b.customerId === selectedCustomerId && !b.isDeleted);
-        const totalOutstanding = customerBills.reduce((sum, b) => sum + (b.outstanding || 0), 0);
-        
-        // Use the greater of: stored balance or calculated outstanding
-        const storedBalance = (cust.balance || 0) + (cust.previousBalance || 0);
-        const prevBalance = Math.max(storedBalance, totalOutstanding);
-        
-        setSelectedCustomerPrevBalance(prevBalance > 0 ? prevBalance : 0);
-        setIncludePrevBalance(false); // Default to not included; user can toggle
-      }
+      // 2. Customer's non-deleted bills
+      const customerBills = freshBills.filter(b => b.customerId === selectedCustomerId && !b.isDeleted);
+      
+      // 3. Sum of all outstanding is the truest form of previousBalance
+      const sumOutstanding = customerBills.reduce((sum, b) => sum + (b.finalOutstanding || b.outstanding || 0), 0);
+      
+      // 4. Update UI state instantly
+      setSelectedCustomerPrevBalance(sumOutstanding);
+      // Auto-fill and auto-toggle the previous balance inclusion
+      setIncludePrevBalance(sumOutstanding > 0);
     } else {
       setSelectedCustomerPrevBalance(0);
       setIncludePrevBalance(false);
@@ -169,7 +162,11 @@ export default function NewBill() {
 
     const prevBalanceAmount = includePrevBalance ? selectedCustomerPrevBalance : 0;
 
-    // Capture the bill data with all required fields
+    // BUG 4 FIX: Ensure save never fails and properly includes paid and outstanding.
+    // Ensure all critical data is accurately mapped mathematically.
+    // CORE LOGIC: finalOutstanding = (totalAmount + previousBalance) - paidAmount 
+    const finalOut = Math.max(0, (itemsTotal + prevBalanceAmount) - amountPaid);
+
     const billData = {
       invoiceNo,
       date,
@@ -183,19 +180,17 @@ export default function NewBill() {
       gstRate,
       cgst,
       sgst,
-      total: grandTotal, 
+      total: itemsTotal, // Base item logic
       grandTotal,
       totalAmount: itemsTotal,
       previousBalance: prevBalanceAmount,
       prevBalanceIncluded: prevBalanceAmount,
       paymentMode,
-      amountPaid,
-      outstanding,
-      finalOutstanding: outstanding
+      paidAmount: amountPaid,
+      amountPaid, // Kept for legacy compatibility
+      outstanding: finalOut, // Kept for legacy compatibility
+      finalOutstanding: finalOut
     };
-
-    // BUG 4 FIX: Removed the undefined updateCustomer call.
-    // BillContext.addBill() now handles all customer balance updates atomically.
 
     addBill(billData);
     
@@ -478,7 +473,19 @@ export default function NewBill() {
               )}
               <div className="pt-3 border-t border-slate-600 flex justify-between items-center">
                 <span className="text-lg">Grand Total</span>
-                <span className="text-3xl font-black text-emerald-400 tracking-tight">₹{grandTotal.toFixed(2)}</span>
+                <span className="text-3xl font-black text-white tracking-tight">₹{grandTotal.toFixed(2)}</span>
+              </div>
+              <div className="pt-3 border-t border-slate-700 space-y-2 mt-3">
+                 <div className="flex justify-between items-center text-sm font-bold">
+                    <span className="text-slate-400">Amount Paid</span>
+                    <span className="text-emerald-400">₹{amountPaid.toFixed(2)}</span>
+                 </div>
+                 {outstanding > 0 && (
+                    <div className="flex justify-between items-center text-sm font-black">
+                       <span className="text-slate-300">Outstanding Balance</span>
+                       <span className="text-rose-500">₹{outstanding.toFixed(2)}</span>
+                    </div>
+                 )}
               </div>
             </div>
             

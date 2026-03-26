@@ -166,16 +166,11 @@ export default function Layout() {
               <LayoutDashboard size={20} />
               <span className="text-[9px] font-black uppercase tracking-tighter">Home</span>
            </Link>
-           <Link to="/new-bill" className={`flex flex-col items-center gap-1 transition-all ${location.pathname === '/new-bill' ? 'text-indigo-600 bg-indigo-50/50 rounded-xl px-3 py-1 scale-110' : 'text-slate-400'}`}>
-              <Plus size={20} />
-              <span className="text-[9px] font-black uppercase tracking-tighter">New Bill</span>
-           </Link>
-           <Link 
-              to="/new-bill"
-              className="flex flex-col items-center justify-center -mt-10 bg-indigo-600 text-white w-14 h-14 rounded-2xl shadow-xl shadow-indigo-600/40 border-4 border-slate-50 active:scale-90 transition-transform"
-            >
-               <Plus size={24} strokeWidth={3} />
-            </Link>
+           <button onClick={() => setIsSearchOpen(true)} className={`flex flex-col items-center gap-1 transition-all text-slate-400 hover:text-indigo-600`}>
+              <Search size={20} />
+              <span className="text-[9px] font-black uppercase tracking-tighter">Search</span>
+           </button>
+           <QuickActionFAB />
            <Link to="/bills" className={`flex flex-col items-center gap-1 transition-all ${location.pathname === '/bills' ? 'text-indigo-600 bg-indigo-50/50 rounded-xl px-3 py-1 scale-110' : 'text-slate-400'}`}>
               <History size={20} />
               <span className="text-[9px] font-black uppercase tracking-tighter">History</span>
@@ -188,7 +183,6 @@ export default function Layout() {
 
         {/* Global Components */}
         <GlobalSearch isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-        <QuickActionFAB />
       </div>
     </div>
   );
