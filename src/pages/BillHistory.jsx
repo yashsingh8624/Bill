@@ -166,6 +166,16 @@ export default function BillHistory() {
                   <span className="font-black text-slate-700 uppercase tracking-wider text-xs">Final Net Total</span>
                   <span className="text-3xl font-black text-indigo-700 tracking-tighter">₹{(selectedBill.grandTotal || selectedBill.total || 0).toFixed(2)}</span>
                 </div>
+                <div className="flex justify-between items-center pt-3 mt-1 border-t border-slate-200">
+                  <span className="font-bold text-slate-600 text-sm">Amount Paid</span>
+                  <span className="font-black text-emerald-600 text-lg">₹{(selectedBill.amountPaid || 0).toFixed(2)}</span>
+                </div>
+                {(selectedBill.outstanding || 0) > 0 && (
+                  <div className="flex justify-between items-center pt-3 mt-1 border-t border-slate-200">
+                    <span className="font-bold text-slate-600 text-sm">Outstanding Balance</span>
+                    <span className="font-black text-red-600 text-lg">₹{(selectedBill.outstanding || 0).toFixed(2)}</span>
+                  </div>
+                )}
               </div>
             </div>
             

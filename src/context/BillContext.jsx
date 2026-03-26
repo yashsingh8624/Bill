@@ -18,14 +18,20 @@ export const BillProvider = ({ children }) => {
 
   const generateBillNumber = () => {
     const settings = safeGet('smartbill_settings', { invoicePrefix: 'INV' });
-    return `${settings.invoicePrefix}-${new Date().getFullYear()}-${String(bills.length + 1).padStart(4, '0')}`;
+    const currentBills = safeGet('smartbill_bills', []);
+    return `${settings.invoicePrefix}-${new Date().getFullYear()}-${String(currentBills.length + 1).padStart(4, '0')}`;
   };
 
   const addBill = (bill) => {
     const newBill = { ...bill, id: generateId(), date: bill.date || new Date().toISOString() };
-    setBills(prev => [newBill, ...prev]);
     
-    // Deduct stock
+    // 1. Save bill to state AND localStorage immediately
+    const currentBills = safeGet('smartbill_bills', []);
+    const updatedBills = [newBill, ...currentBills];
+    safeSet('smartbill_bills', updatedBills);
+    setBills(updatedBills);
+    
+    // 2. Deduct stock
     setProducts(prevProducts => prevProducts.map(p => {
       const itemInBill = bill.items?.find(i => i.productId === p.id);
       if (itemInBill) {
@@ -44,13 +50,44 @@ export const BillProvider = ({ children }) => {
       return p;
     }));
 
-    // Add to customer balance if any outstanding
-    if (bill.customerId && bill.outstanding > 0) {
-      const cust = customers.find(c => c.id === bill.customerId);
-      if(cust) {
-        updateCustomer(bill.customerId, { balance: (cust.balance || 0) + bill.outstanding });
+    // 3. Update customer balance — read FRESH from localStorage to avoid stale state
+    if (bill.customerId) {
+      const freshCustomers = safeGet('smartbill_customers', []);
+      const cust = freshCustomers.find(c => c.id === bill.customerId);
+      
+      if (cust) {
+        const currentBalance = cust.balance || 0;
+        const billOutstanding = bill.outstanding || 0;
+        
+        // If previous balance was included in this bill, reset it and add the new outstanding
+        let newBalance = currentBalance;
+        let newPreviousBalance = cust.previousBalance || 0;
+        
+        if (bill.prevBalanceIncluded > 0) {
+          // Previous balance is now accounted for in this bill's outstanding
+          newPreviousBalance = 0;
+          newBalance = 0; // Reset current balance since it's folded into the bill
+          newBalance += billOutstanding; // Add the new outstanding (which includes prev balance)
+        } else {
+          newBalance = currentBalance + billOutstanding;
+        }
+        
+        // Update in fresh array and persist immediately
+        const updatedCustomers = freshCustomers.map(c => 
+          c.id === bill.customerId 
+            ? { ...c, balance: newBalance, previousBalance: newPreviousBalance }
+            : c
+        );
+        safeSet('smartbill_customers', updatedCustomers);
+        
+        // Also update React state so UI re-renders
+        updateCustomer(bill.customerId, { 
+          balance: newBalance, 
+          previousBalance: newPreviousBalance 
+        });
       }
     }
+    
     return newBill;
   };
   
@@ -59,9 +96,15 @@ export const BillProvider = ({ children }) => {
       if (b.id === id && !b.isDeleted) {
         // Reverse customer balance if outstanding
         if (b.customerId && b.outstanding > 0) {
-           const cust = customers.find(c => c.id === b.customerId);
+           const freshCustomers = safeGet('smartbill_customers', []);
+           const cust = freshCustomers.find(c => c.id === b.customerId);
            if (cust) {
-              updateCustomer(b.customerId, { balance: Math.max(0, (cust.balance || 0) - b.outstanding) });
+              const newBalance = Math.max(0, (cust.balance || 0) - b.outstanding);
+              const updatedCustomers = freshCustomers.map(c =>
+                c.id === b.customerId ? { ...c, balance: newBalance } : c
+              );
+              safeSet('smartbill_customers', updatedCustomers);
+              updateCustomer(b.customerId, { balance: newBalance });
            }
         }
         

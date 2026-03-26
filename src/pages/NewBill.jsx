@@ -5,6 +5,7 @@ import { useCustomers } from '../context/CustomerContext';
 import { useSettings } from '../context/SettingsContext';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, IndianRupee, Save, Download, RefreshCw } from 'lucide-react';
+import { safeGet } from '../utils/storage';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -53,21 +54,34 @@ export default function NewBill() {
     }
   }, [customerName, customers, selectedCustomerId]);
 
-  // Handle Customer Selection Details
+  // BUG 3 FIX: Fetch fresh previous balance from localStorage when customer changes
   useEffect(() => {
     if (selectedCustomerId) {
-      const cust = customers.find(c => c.id === selectedCustomerId);
+      // Read FRESH data from localStorage, not from stale React state
+      const freshCustomers = safeGet('smartbill_customers', []);
+      const freshBills = safeGet('smartbill_bills', []);
+      const cust = freshCustomers.find(c => c.id === selectedCustomerId);
+      
       if (cust) {
         setCustomerName(cust.name);
         setCustomerPhone(cust.phone || '');
-        setSelectedCustomerPrevBalance(cust.previousBalance || cust.balance || 0);
-        setIncludePrevBalance(cust.includePrevBalance || false);
+        
+        // Calculate total outstanding from all non-deleted bills for this customer
+        const customerBills = freshBills.filter(b => b.customerId === selectedCustomerId && !b.isDeleted);
+        const totalOutstanding = customerBills.reduce((sum, b) => sum + (b.outstanding || 0), 0);
+        
+        // Use the greater of: stored balance or calculated outstanding
+        const storedBalance = (cust.balance || 0) + (cust.previousBalance || 0);
+        const prevBalance = Math.max(storedBalance, totalOutstanding);
+        
+        setSelectedCustomerPrevBalance(prevBalance > 0 ? prevBalance : 0);
+        setIncludePrevBalance(false); // Default to not included; user can toggle
       }
     } else {
       setSelectedCustomerPrevBalance(0);
       setIncludePrevBalance(false);
     }
-  }, [selectedCustomerId, customers]);
+  }, [selectedCustomerId]);
 
   // Combined Product Search Handler
   const handleItemNameChange = (e) => {
@@ -135,6 +149,8 @@ export default function NewBill() {
   const amountPaid = amountPaidInput === '' 
     ? (paymentMode === 'Credit' ? 0 : grandTotal) 
     : parseFloat(amountPaidInput) || 0;
+  
+  // CORE LOGIC: finalOutstanding = (totalAmount + previousBalance) - paidAmount
   const outstanding = Math.max(0, grandTotal - amountPaid);
 
   const handleSaveBill = (isNew = false) => {
@@ -151,7 +167,9 @@ export default function NewBill() {
       }
     }
 
-    // Capture the bill data
+    const prevBalanceAmount = includePrevBalance ? selectedCustomerPrevBalance : 0;
+
+    // Capture the bill data with all required fields
     const billData = {
       invoiceNo,
       date,
@@ -167,20 +185,22 @@ export default function NewBill() {
       sgst,
       total: grandTotal, 
       grandTotal,
-      prevBalanceIncluded: includePrevBalance ? selectedCustomerPrevBalance : 0,
+      totalAmount: itemsTotal,
+      previousBalance: prevBalanceAmount,
+      prevBalanceIncluded: prevBalanceAmount,
       paymentMode,
       amountPaid,
-      outstanding
+      outstanding,
+      finalOutstanding: outstanding
     };
 
-    // If Udhaar was included, we effectively reset it because it's now in the bill's outstanding
-    if (includePrevBalance && custId) {
-      updateCustomer(custId, { previousBalance: 0, balance: 0 }); // Temporarily zero out to avoid double counting in addBill
-    }
+    // BUG 4 FIX: Removed the undefined updateCustomer call.
+    // BillContext.addBill() now handles all customer balance updates atomically.
 
     addBill(billData);
     
     if (isNew) {
+       // Generate fresh bill number from localStorage
        setInvoiceNo(generateBillNumber());
        setItems([]);
        setCustomerName('');
@@ -188,6 +208,7 @@ export default function NewBill() {
        setSelectedCustomerId('');
        setAmountPaidInput('');
        setIncludePrevBalance(false);
+       setSelectedCustomerPrevBalance(0);
     } else {
        navigate('/bills');
     }
