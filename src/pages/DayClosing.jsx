@@ -7,7 +7,7 @@ export default function DayClosing() {
   const [isClosed, setIsClosed] = useState(false);
   
   const today = new Date().toISOString().split('T')[0];
-  const todayBills = useMemo(() => bills.filter(b => b.date === today && !b.isDeleted), [bills, today]);
+  const todayBills = useMemo(() => bills.filter(b => b.date && b.date.startsWith(today) && !b.isDeleted), [bills, today]);
 
   const stats = useMemo(() => {
     return todayBills.reduce((acc, b) => {

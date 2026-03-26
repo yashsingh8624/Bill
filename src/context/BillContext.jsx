@@ -23,7 +23,16 @@ export const BillProvider = ({ children }) => {
   };
 
   const addBill = (bill) => {
-    const newBill = { ...bill, id: generateId(), date: bill.date || new Date().toISOString() };
+    const billDate = bill.date || new Date().toISOString();
+    const dateObj = new Date(billDate);
+    const newBill = { 
+      ...bill, 
+      id: generateId(), 
+      date: billDate,
+      readableDate: dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+      month: dateObj.getMonth() + 1,
+      year: dateObj.getFullYear()
+    };
     
     // 1. Save bill to state AND localStorage immediately
     const currentBills = safeGet('smartbill_bills', []);

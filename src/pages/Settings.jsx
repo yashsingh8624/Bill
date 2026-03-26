@@ -83,12 +83,21 @@ export default function Settings() {
 
     // 4. Bills
     const billsData = bills.map(b => ({
-      Invoice: b.invoiceNo, Date: b.date, Customer: b.customerName, Phone: b.customerPhone, Total: b.grandTotal||b.total||0, Paid: b.amountPaid, Outstanding: b.outstanding, PaymentMode: b.paymentMode
+      Invoice: b.invoiceNo, 
+      Date: b.readableDate || new Date(b.date).toLocaleDateString(), 
+      Customer: b.customerName, 
+      Phone: b.customerPhone, 
+      Total: b.grandTotal||b.total||0, 
+      Paid: b.amountPaid, 
+      Outstanding: b.outstanding, 
+      PaymentMode: b.paymentMode,
+      Month: b.month || (new Date(b.date).getMonth() + 1),
+      Year: b.year || new Date(b.date).getFullYear()
     }));
     const billsWs = XLSX.utils.json_to_sheet(billsData);
     XLSX.utils.book_append_sheet(wb, billsWs, "Bills");
 
-    XLSX.writeFile(wb, `${formData.businessName.replace(/\s+/g, '_')}_Complete_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(wb, `${formData.businessName.replace(/\s+/g, '_')}_Master_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
   };
 
   const handleRestore = (e) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useBills } from '../context/BillContext';
 import { useInventory } from '../context/InventoryContext';
 import { useCustomers } from '../context/CustomerContext';
@@ -7,16 +7,17 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, IndianRupee, Save, Download, RefreshCw } from 'lucide-react';
 import { safeGet } from '../utils/storage';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { useToast } from '../context/ToastContext';
+import { generateInvoicePDF } from '../utils/pdfGenerator';
 
 export default function NewBill() {
   const { addBill, generateBillNumber } = useBills();
   const { products } = useInventory();
   const { customers, addCustomer } = useCustomers();
   const { userSettings } = useSettings();
+  const { showToast } = useToast();
   
   const navigate = useNavigate();
-  const printRef = useRef();
 
   // Bill Details
   const [invoiceNo, setInvoiceNo] = useState(generateBillNumber());
@@ -39,6 +40,7 @@ export default function NewBill() {
   const [gstRate, setGstRate] = useState(18); // 5, 12, 18, 28
   const [paymentMode, setPaymentMode] = useState('Cash'); // Cash, UPI, Credit
   const [amountPaidInput, setAmountPaidInput] = useState('');
+  const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
 
   // Udhaar System
   const [includePrevBalance, setIncludePrevBalance] = useState(false);
@@ -193,6 +195,9 @@ export default function NewBill() {
     };
 
     addBill(billData);
+    showToast(`Bill ${invoiceNo} Saved!`, 'success');
+    setShowSuccessOverlay(true);
+    setTimeout(() => setShowSuccessOverlay(false), 1500);
     
     if (isNew) {
        // Generate fresh bill number from localStorage
@@ -209,16 +214,26 @@ export default function NewBill() {
     }
   };
 
-  const generatePDF = async () => {
-    const element = printRef.current;
-    if (!element) return;
-    const canvas = await html2canvas(element, { scale: 2 });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`Bill_${invoiceNo}.pdf`);
+  const handleGeneratePDF = () => {
+    if (items.length === 0) return;
+    generateInvoicePDF({
+      invoiceNo,
+      date,
+      customerName,
+      customerPhone,
+      items,
+      subTotal,
+      gstEnabled,
+      gstRate,
+      cgst,
+      sgst,
+      grandTotal,
+      prevBalanceIncluded: includePrevBalance ? selectedCustomerPrevBalance : 0,
+      paymentMode,
+      amountPaid,
+      outstanding
+    }, userSettings);
+    showToast('Invoice PDF Generated', 'success');
   };
 
   const recentCustomers = [...customers].sort((a,b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 5);
@@ -232,11 +247,11 @@ export default function NewBill() {
         </div>
         <div className="flex gap-3">
           <button 
-            onClick={generatePDF}
+            onClick={handleGeneratePDF}
             disabled={items.length === 0}
-            className="px-4 py-2 bg-white text-slate-700 hover:text-indigo-600 border border-slate-200 rounded-xl font-medium flex items-center gap-2 shadow-sm transition-all disabled:opacity-50"
+            className="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all disabled:opacity-50"
           >
-            <Download size={18} /> PDF
+            <Download size={18} /> Download Invoice
           </button>
         </div>
       </div>
@@ -253,7 +268,7 @@ export default function NewBill() {
                 {recentCustomers.map(c => (
                   <button 
                     key={c.id} type="button" 
-                    onClick={() => setSelectedCustomerId(c.id)}
+                    onClick={() => { setSelectedCustomerId(c.id); setCustomerName(c.name); setCustomerPhone(c.phone || ''); }}
                     className="text-xs px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition-colors"
                   >
                     {c.name}
@@ -510,83 +525,19 @@ export default function NewBill() {
         </div>
       </div>
 
-      <div className="hidden">
-        <div ref={printRef} className="bg-white p-10 w-[800px] text-slate-800 border-2 border-slate-900 mx-auto font-sans">
-          <div className="flex justify-between items-start border-b-2 border-slate-800 pb-6 mb-6">
-            <div>
-              <h1 className="text-3xl font-black text-slate-900 uppercase tracking-tight">{userSettings.businessName}</h1>
-              <p className="text-slate-600 mt-1 flex items-center gap-2">WhatsApp: <span className="font-medium">{userSettings.ownerPhone}</span></p>
+      {/* Legacy Print Div Removed */}
+      
+      {showSuccessOverlay && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-indigo-600/90 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="text-center animate-in zoom-in-95 duration-300">
+            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+              <Save size={48} className="text-indigo-600 animate-bounce" />
             </div>
-            <div className="text-right">
-              <h2 className="text-2xl font-bold text-slate-400 uppercase">Invoice</h2>
-              <p className="font-medium mt-1 text-slate-800"><span className="text-slate-500">Invoice No:</span> {invoiceNo}</p>
-              <p className="font-medium text-slate-800"><span className="text-slate-500">Date:</span> {new Date(date).toLocaleDateString()}</p>
-            </div>
-          </div>
-          
-          <div className="mb-8 p-4 bg-slate-50 rounded-lg border border-slate-200">
-            <h3 className="text-sm font-bold text-slate-500 uppercase mb-2">Billed To:</h3>
-            <p className="text-lg font-bold text-slate-900">{customerName}</p>
-            {customerPhone && <p className="text-slate-700 font-medium">Phone: {customerPhone}</p>}
-          </div>
-
-          <table className="w-full mb-8 border-collapse">
-            <thead>
-              <tr className="bg-slate-800 text-white">
-                <th className="py-3 px-4 text-left font-bold uppercase text-sm border border-slate-800">Item Description</th>
-                <th className="py-3 px-4 text-right font-bold uppercase text-sm border border-slate-800 w-24">Rate</th>
-                <th className="py-3 px-4 text-center font-bold uppercase text-sm border border-slate-800 w-20">Qty</th>
-                <th className="py-3 px-4 text-right font-bold uppercase text-sm border border-slate-800 w-32">Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, idx) => (
-                <tr key={idx} className="border-b border-slate-200">
-                  <td className="py-3 px-4 font-medium border-x border-slate-200">{item.name}</td>
-                  <td className="py-3 px-4 text-right border-x border-slate-200">₹{item.price.toFixed(2)}</td>
-                  <td className="py-3 px-4 text-center border-x border-slate-200">{item.quantity}</td>
-                  <td className="py-3 px-4 text-right font-bold border-x border-slate-200">₹{item.amount.toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="flex justify-end mt-4">
-            <div className="w-80">
-              <div className="flex justify-between py-2 border-b border-slate-200 text-slate-700">
-                <span className="font-bold">SubTotal</span>
-                <span className="font-bold">₹{subTotal.toFixed(2)}</span>
-              </div>
-              {includePrevBalance && (
-                 <div className="flex justify-between py-2 border-b border-slate-200 text-amber-700">
-                    <span className="font-bold">Previous Balance (Udhaar)</span>
-                    <span className="font-bold">₹{selectedCustomerPrevBalance.toFixed(2)}</span>
-                 </div>
-              )}
-              <div className="flex justify-between py-3 text-xl font-black text-slate-900 border-b-2 border-slate-800">
-                <span>Grand Total</span>
-                <span>₹{grandTotal.toFixed(2)}</span>
-              </div>
-              <div className="mt-4 pt-4 border-t border-slate-200 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Payment Mode</span>
-                  <span className="font-bold">{paymentMode}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500 font-medium">Amount Paid</span>
-                  <span className="font-bold text-emerald-600">₹{amountPaid.toFixed(2)}</span>
-                </div>
-                {outstanding > 0 && (
-                  <div className="flex justify-between text-base border-t border-slate-100 pt-2 mt-2">
-                    <span className="text-slate-600 font-bold">Outstanding Balance</span>
-                    <span className="font-black text-red-600">₹{outstanding.toFixed(2)}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            <h2 className="text-4xl font-black text-white tracking-tight mb-2">BILL SAVED!</h2>
+            <p className="text-indigo-100 font-bold uppercase tracking-widest">Inventory & Ledger Updated</p>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

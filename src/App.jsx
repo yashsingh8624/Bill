@@ -33,10 +33,14 @@ const AppRoutes = () => {
   );
 };
 
+import { ToastProvider } from './context/ToastContext';
+
 function App() {
   return (
     <AppProvider>
-      <AppRoutes />
+      <ToastProvider>
+        <AppRoutes />
+      </ToastProvider>
     </AppProvider>
   );
 }

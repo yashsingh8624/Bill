@@ -1,18 +1,73 @@
 import React, { useState } from 'react';
 import { useBills } from '../context/BillContext';
 import { useCustomers } from '../context/CustomerContext';
-import { FileText, Search, Eye, X, ArrowUpRight } from 'lucide-react';
+import { FileText, Search, Eye, X, ArrowUpRight, Filter, FileSpreadsheet, Calendar, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { useToast } from '../context/ToastContext';
+import { useSettings } from '../context/SettingsContext';
+import { generateInvoicePDF } from '../utils/pdfGenerator';
 
 export default function BillHistory() {
-  const { bills } = useBills();
+  const { bills, deleteBill } = useBills();
   const { customers } = useCustomers();
+  const { userSettings } = useSettings();
+  const { showToast } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBill, setSelectedBill] = useState(null);
+  const [dateFilter, setDateFilter] = useState('ALL'); // ALL, TODAY, YESTERDAY, MONTH
 
-  const filteredBills = bills.filter(b => 
-    !b.isDeleted && 
-    b.customerName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const getFilteredBills = () => {
+    let filtered = bills.filter(b => !b.isDeleted);
+    
+    // Name Search
+    if (searchTerm) {
+      filtered = filtered.filter(b => 
+        b.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (b.invoiceNo && b.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+
+    // Date Filter
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    
+    const yesterday = new Date();
+    yesterday.setDate(now.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+    
+    const thisMonthStr = todayStr.slice(0, 7); // YYYY-MM
+
+    if (dateFilter === 'TODAY') {
+      filtered = filtered.filter(b => b.date && b.date.startsWith(todayStr));
+    } else if (dateFilter === 'YESTERDAY') {
+      filtered = filtered.filter(b => b.date && b.date.startsWith(yesterdayStr));
+    } else if (dateFilter === 'MONTH') {
+      filtered = filtered.filter(b => b.date && b.date.startsWith(thisMonthStr));
+    }
+
+    return filtered;
+  };
+
+  const filteredBills = getFilteredBills();
+
+  const handleExportExcel = () => {
+    const data = filteredBills.map(b => ({
+      'Invoice No': b.invoiceNo,
+      'Date': b.readableDate || new Date(b.date).toLocaleDateString(),
+      'Customer': b.customerName,
+      'Total Amount': b.grandTotal || b.total || 0,
+      'Paid': b.amountPaid || 0,
+      'Outstanding': b.outstanding || 0,
+      'Mode': b.paymentMode,
+      'Month': b.month || (new Date(b.date).getMonth() + 1),
+      'Year': b.year || new Date(b.date).getFullYear()
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Bills");
+    XLSX.writeFile(wb, `Bills_Export_${dateFilter}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  };
 
   return (
     <div className="space-y-6 flex flex-col h-[calc(100vh-8rem)] relative">
@@ -21,17 +76,43 @@ export default function BillHistory() {
           <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Bill History</h2>
           <p className="text-slate-500 text-sm mt-1 font-medium">View and manage past invoices.</p>
         </div>
+        <button 
+          onClick={handleExportExcel}
+          disabled={filteredBills.length === 0}
+          className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20 disabled:opacity-50"
+        >
+          <FileSpreadsheet size={18} /> Export Excel
+        </button>
       </div>
 
-      <div className="bg-white p-2.5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-3 px-4 flex-shrink-0">
-        <Search size={20} className="text-slate-400" />
-        <input 
-          type="text" 
-          placeholder="Search by customer name..." 
-          className="flex-1 py-2 focus:outline-none text-slate-700 placeholder:text-slate-400 font-medium"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-shrink-0">
+        <div className="md:col-span-2 bg-white p-2.5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-3 px-4">
+          <Search size={20} className="text-slate-400" />
+          <input 
+            type="text" 
+            placeholder="Search by customer or invoice..." 
+            className="flex-1 py-1 focus:outline-none text-slate-700 placeholder:text-slate-400 font-medium"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="md:col-span-2 flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+          {[
+            { id: 'ALL', label: 'All Time', icon: Calendar },
+            { id: 'TODAY', label: 'Today', icon: Filter },
+            { id: 'YESTERDAY', label: 'Yesterday', icon: Filter },
+            { id: 'MONTH', label: 'This Month', icon: Filter }
+          ].map(f => (
+            <button
+              key={f.id}
+              onClick={() => setDateFilter(f.id)}
+              className={`flex-1 py-1.5 px-2 text-xs font-bold rounded-lg transition-all flex items-center justify-center gap-1.5 ${dateFilter === f.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              <f.icon size={14} />
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex-1 overflow-hidden flex flex-col min-h-0">
@@ -46,7 +127,7 @@ export default function BillHistory() {
             </div>
           ) : filteredBills.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-500 p-12">
-              <p className="font-bold">No bills match your search.</p>
+              <p className="font-bold">No bills match your filters.</p>
             </div>
           ) : (
             <table className="w-full text-left border-collapse min-w-[800px]">
@@ -73,7 +154,7 @@ export default function BillHistory() {
                         )}
                      </td>
                      <td className="py-4 px-6 text-slate-500 text-sm font-medium">
-                       {new Date(bill.date).toLocaleDateString()}
+                       {bill.readableDate || new Date(bill.date).toLocaleDateString()}
                      </td>
                      <td className="py-4 px-6">
                         <span className={`px-2.5 py-1 rounded-lg text-xs font-black shadow-sm border ${bill.outstanding > 0 ? 'bg-red-50 text-red-600 border-red-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
@@ -120,7 +201,7 @@ export default function BillHistory() {
                 <div className="text-right">
                   <p className="text-[10px] text-slate-400 font-black mb-1 tracking-widest uppercase">Invoice Info</p>
                   <p className="font-bold text-slate-800">#{selectedBill.invoiceNo}</p>
-                  <p className="text-sm font-medium text-slate-500 mt-1">{new Date(selectedBill.date).toLocaleDateString()}</p>
+                  <p className="text-sm font-medium text-slate-500 mt-1">{selectedBill.readableDate || new Date(selectedBill.date).toLocaleDateString()}</p>
                 </div>
               </div>
 
@@ -179,13 +260,33 @@ export default function BillHistory() {
               </div>
             </div>
             
-            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end flex-shrink-0 gap-3">
-               <button onClick={() => window.print()} className="px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl transition-all shadow-sm">
-                 Print Invoice
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-between flex-shrink-0 gap-3">
+               <button 
+                 onClick={() => {
+                   if(window.confirm('Are you sure you want to delete this bill? This will reverse stock and customer balance.')) {
+                     deleteBill(selectedBill.id);
+                     showToast(`Bill #${selectedBill.invoiceNo} Deleted`, 'success');
+                     setSelectedBill(null);
+                   }
+                 }} 
+                 className="px-6 py-2.5 text-red-600 hover:bg-red-50 font-bold rounded-xl transition-all"
+               >
+                 Delete Bill
                </button>
-               <button onClick={() => setSelectedBill(null)} className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all shadow-lg shadow-slate-800/20">
-                 Close View
-               </button>
+               <div className="flex gap-3">
+                 <button 
+                   onClick={() => {
+                     generateInvoicePDF(selectedBill, userSettings);
+                     showToast('Invoice PDF Generated', 'success');
+                   }} 
+                   className="px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-indigo-600 font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
+                 >
+                   <Download size={18} /> Download
+                 </button>
+                 <button onClick={() => setSelectedBill(null)} className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all shadow-lg shadow-slate-800/20">
+                   Close
+                 </button>
+               </div>
             </div>
           </div>
         </div>
