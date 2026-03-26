@@ -80,17 +80,10 @@ export default function CustomerLedger() {
   const getCustomerTotals = (customer) => {
     if (!customer) return { totalBilled: 0, totalPaid: 0, outstanding: 0 };
     
-    const cBills = bills.filter(b => b.customerId === customer.id && !b.isDeleted);
-    const cTxns = getTransactionsByEntityId(customer.id);
-    
-    const totalBilled = cBills.reduce((sum, b) => sum + ((b.total || b.grandTotal || 0) - (b.prevBalanceIncluded || 0)), 0);
-    const totalPaid = cBills.reduce((sum, b) => sum + (b.amountPaid || 0), 0) + 
-                      cTxns.reduce((sum, t) => sum + (t.amount || 0), 0);
-    
     return {
-      totalBilled,
-      totalPaid,
-      outstanding: totalBilled - totalPaid
+      totalBilled: customer.totalPurchases || 0,
+      totalPaid: customer.totalPaid || 0,
+      outstanding: customer.outstandingBalance || 0
     };
   };
 

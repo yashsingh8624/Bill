@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { safeGet, safeSet, generateId } from '../utils/storage';
 import { useTransactions } from './TransactionContext';
+import { syncCustomerTotals } from '../utils/ledger';
 
 const CustomerContext = createContext();
 
@@ -16,9 +17,9 @@ export const CustomerProvider = ({ children }) => {
     setCustomers(prev => [...prev, { 
       ...customer, 
       id: customer.id || generateId(), 
-      balance: 0, 
-      previousBalance: customer.previousBalance || 0,
-      includePrevBalance: customer.includePrevBalance || false 
+      totalPurchases: 0, 
+      totalPaid: 0,
+      outstandingBalance: customer.previousBalance || 0
     }]);
   };
 
@@ -34,44 +35,17 @@ export const CustomerProvider = ({ children }) => {
     const cust = customers.find(c => c.id === customerId);
     if (!cust) return;
 
-    const amountNum = parseFloat(amount);
-    let remainingAmount = amountNum;
-    let newPrevBalance = cust.previousBalance || 0;
-    let newBalance = cust.balance || 0;
-
-    // First clear previousBalance
-    if (newPrevBalance > 0) {
-      const deduction = Math.min(newPrevBalance, remainingAmount);
-      newPrevBalance -= deduction;
-      remainingAmount -= deduction;
-      
-      if (deduction > 0) {
-        addTransaction({
-          type: 'previous_balance_adjustment',
-          entityId: customerId,
-          amount: deduction,
-          date,
-          notes: `Udhaar Clearance: ${notes}`
-        });
-      }
-    }
-
-    // Then clear current balance
-    if (remainingAmount > 0) {
-      newBalance -= remainingAmount;
-      addTransaction({
-        type: 'PAYMENT_RECEIVED',
-        entityId: customerId,
-        amount: remainingAmount,
-        date,
-        notes
-      });
-    }
-
-    updateCustomer(customerId, { 
-      previousBalance: newPrevBalance,
-      balance: newBalance
+    addTransaction({
+      type: 'PAYMENT_RECEIVED',
+      entityId: customerId,
+      amount: parseFloat(amount),
+      date,
+      notes
     });
+
+    // We must manually refresh the customer lists in React state since storage updated
+    const newTotals = syncCustomerTotals(customerId);
+    updateCustomer(customerId, newTotals);
   };
 
   return (

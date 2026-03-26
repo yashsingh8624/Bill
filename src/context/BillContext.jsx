@@ -3,6 +3,7 @@ import { safeGet, safeSet, generateId } from '../utils/storage';
 import { useInventory } from './InventoryContext';
 import { useCustomers } from './CustomerContext';
 import { useAudit } from './AuditContext';
+import { syncCustomerTotals } from '../utils/ledger';
 
 const BillContext = createContext();
 
@@ -59,76 +60,35 @@ export const BillProvider = ({ children }) => {
       return p;
     }));
 
-    // 3. Update customer balance — read FRESH from localStorage to avoid stale state
+    // 3. Recalculate and update the customer ledger sync
     if (bill.customerId) {
-      const freshCustomers = safeGet('smartbill_customers', []);
-      const cust = freshCustomers.find(c => c.id === bill.customerId);
-      
-      if (cust) {
-        const currentBalance = cust.balance || 0;
-        const billOutstanding = bill.outstanding || 0;
-        
-        // If previous balance was included in this bill, reset it and add the new outstanding
-        let newBalance = currentBalance;
-        let newPreviousBalance = cust.previousBalance || 0;
-        
-        if (bill.prevBalanceIncluded > 0) {
-          // Previous balance is now accounted for in this bill's outstanding
-          newPreviousBalance = 0;
-          newBalance = 0; // Reset current balance since it's folded into the bill
-          newBalance += billOutstanding; // Add the new outstanding (which includes prev balance)
-        } else {
-          newBalance = currentBalance + billOutstanding;
-        }
-        
-        // Update in fresh array and persist immediately
-        const updatedCustomers = freshCustomers.map(c => 
-          c.id === bill.customerId 
-            ? { ...c, balance: newBalance, previousBalance: newPreviousBalance }
-            : c
-        );
-        safeSet('smartbill_customers', updatedCustomers);
-        
-        // Also update React state so UI re-renders
-        updateCustomer(bill.customerId, { 
-          balance: newBalance, 
-          previousBalance: newPreviousBalance 
-        });
-      }
+      const newTotals = syncCustomerTotals(bill.customerId);
+      updateCustomer(bill.customerId, newTotals);
     }
     
     return newBill;
   };
   
   const deleteBill = (id, reason = 'Deleted by user') => {
-    setBills(prev => prev.map(b => {
-      if (b.id === id && !b.isDeleted) {
-        // Reverse customer balance if outstanding
-        if (b.customerId && b.outstanding > 0) {
-           const freshCustomers = safeGet('smartbill_customers', []);
-           const cust = freshCustomers.find(c => c.id === b.customerId);
-           if (cust) {
-              const newBalance = Math.max(0, (cust.balance || 0) - b.outstanding);
-              const updatedCustomers = freshCustomers.map(c =>
-                c.id === b.customerId ? { ...c, balance: newBalance } : c
-              );
-              safeSet('smartbill_customers', updatedCustomers);
-              updateCustomer(b.customerId, { balance: newBalance });
-           }
-        }
-        
-        // Audit Log
-        addLog('DELETE', 'BILL', id, { reason, invoiceNo: b.invoiceNo, amount: b.total });
+    const currentBills = safeGet('smartbill_bills', []);
+    const targetBill = currentBills.find(b => b.id === id);
+    if (!targetBill || targetBill.isDeleted) return;
 
-        return { 
-          ...b, 
-          isDeleted: true, 
-          deletedAt: new Date().toISOString(),
-          deleteReason: reason 
-        };
-      }
-      return b;
-    }));
+    const newBills = currentBills.map(b => {
+       if (b.id === id) {
+          addLog('DELETE', 'BILL', id, { reason, invoiceNo: b.invoiceNo, amount: b.total });
+          return { ...b, isDeleted: true, deletedAt: new Date().toISOString(), deleteReason: reason };
+       }
+       return b;
+    });
+
+    safeSet('smartbill_bills', newBills);
+    setBills(newBills);
+
+    if (targetBill.customerId) {
+      const newTotals = syncCustomerTotals(targetBill.customerId);
+      updateCustomer(targetBill.customerId, newTotals);
+    }
   };
 
   return (

@@ -136,8 +136,9 @@ export default function BillHistory() {
                   <th className="py-4 px-6">Bill No.</th>
                   <th className="py-4 px-6">Customer</th>
                   <th className="py-4 px-6">Date</th>
-                  <th className="py-4 px-6">Payment</th>
-                  <th className="py-4 px-6 text-right">Total Amount</th>
+                  <th className="py-4 px-6 text-right">Subtotal</th>
+                  <th className="py-4 px-6 text-right">Paid</th>
+                  <th className="py-4 px-6 text-right">Remaining</th>
                   <th className="py-4 px-6 text-center w-24">Action</th>
                 </tr>
               </thead>
@@ -156,12 +157,9 @@ export default function BillHistory() {
                      <td className="py-4 px-6 text-slate-500 text-sm font-medium">
                        {bill.readableDate || new Date(bill.date).toLocaleDateString()}
                      </td>
-                     <td className="py-4 px-6">
-                        <span className={`px-2.5 py-1 rounded-lg text-xs font-black shadow-sm border ${bill.outstanding > 0 ? 'bg-red-50 text-red-600 border-red-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
-                           {bill.paymentMode} {bill.outstanding > 0 ? `(Pending)` : `(Paid)`}
-                        </span>
-                     </td>
-                     <td className="py-4 px-6 text-slate-800 font-black text-right">₹{(bill.grandTotal || bill.total || 0).toFixed(2)}</td>
+                     <td className="py-4 px-6 text-slate-800 font-black text-right">₹{((bill.subTotal || bill.total || 0) + (bill.cgst || 0) + (bill.sgst || 0)).toFixed(2)}</td>
+                     <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{(bill.amountPaid || 0).toFixed(2)}</td>
+                     <td className="py-4 px-6 text-red-500 font-black text-right">₹{(bill.outstanding || 0).toFixed(2)}</td>
                      <td className="py-4 px-6 text-center">
                         <button onClick={() => setSelectedBill(bill)} className="p-2 text-slate-400 group-hover:text-indigo-600 hover:bg-white rounded-lg transition-all border border-transparent group-hover:border-indigo-100 group-hover:shadow-sm">
                           <Eye size={18} />

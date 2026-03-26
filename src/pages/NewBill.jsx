@@ -59,19 +59,17 @@ export default function NewBill() {
   // BUG 3 FIX: Fetch clear previous balance automatically
   useEffect(() => {
     if (selectedCustomerId) {
-      // 1. Fetch FRESH data straight from localStorage to avoid stale closures
-      const freshBills = safeGet('smartbill_bills', []);
+      // 1. Fetch FRESH customer data straight from localStorage to avoid stale closures
+      const freshCustomers = safeGet('smartbill_customers', []);
+      const cust = freshCustomers.find(c => c.id === selectedCustomerId);
       
-      // 2. Customer's non-deleted bills
-      const customerBills = freshBills.filter(b => b.customerId === selectedCustomerId && !b.isDeleted);
+      // 2. Safely read cleanly synced outstanding balance
+      const outstanding = cust ? (cust.outstandingBalance || 0) : 0;
       
-      // 3. Sum of all outstanding is the truest form of previousBalance
-      const sumOutstanding = customerBills.reduce((sum, b) => sum + (b.finalOutstanding || b.outstanding || 0), 0);
-      
-      // 4. Update UI state instantly
-      setSelectedCustomerPrevBalance(sumOutstanding);
+      // 3. Update UI state instantly
+      setSelectedCustomerPrevBalance(outstanding);
       // Auto-fill and auto-toggle the previous balance inclusion
-      setIncludePrevBalance(sumOutstanding > 0);
+      setIncludePrevBalance(outstanding > 0);
     } else {
       setSelectedCustomerPrevBalance(0);
       setIncludePrevBalance(false);
