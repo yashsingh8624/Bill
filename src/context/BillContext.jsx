@@ -3,7 +3,7 @@ import { safeGet, safeSet, generateId } from '../utils/storage';
 import { useInventory } from './InventoryContext';
 import { useCustomers } from './CustomerContext';
 import { useAudit } from './AuditContext';
-import { syncCustomerTotals } from '../utils/ledger';
+import { migrateLegacyToLedger, getCustomerBalance, addLedgerEntry } from '../utils/ledger';
 
 const BillContext = createContext();
 
@@ -14,6 +14,7 @@ export const BillProvider = ({ children }) => {
   const { addLog } = useAudit();
 
   useEffect(() => {
+    migrateLegacyToLedger();
     safeSet('smartbill_bills', bills);
   }, [bills]);
 
@@ -41,7 +42,7 @@ export const BillProvider = ({ children }) => {
     safeSet('smartbill_bills', updatedBills);
     setBills(updatedBills);
     
-    // 2. Deduct stock
+    // 2. Deduct stock (kept as secondary logic, but not source of balance)
     setProducts(prevProducts => prevProducts.map(p => {
       const itemInBill = bill.items?.find(i => i.productId === p.id);
       if (itemInBill) {
@@ -60,10 +61,12 @@ export const BillProvider = ({ children }) => {
       return p;
     }));
 
-    // 3. Recalculate and update the customer ledger sync
+    // 3. LEDGER IS NOW SINGLE SOURCE OF TRUTH
+    // Logic for Rollover and Sale Entry is handled in NewBill.jsx before submit
+    // But we trigger a balance check here if needed for UI sync.
     if (bill.customerId) {
-      const newTotals = syncCustomerTotals(bill.customerId);
-      updateCustomer(bill.customerId, newTotals);
+      // In this new architecture, we don't 'sync' back to customer object.
+      // Pages will read directly from getCustomerBalance().
     }
     
     return newBill;
@@ -86,8 +89,15 @@ export const BillProvider = ({ children }) => {
     setBills(newBills);
 
     if (targetBill.customerId) {
-      const newTotals = syncCustomerTotals(targetBill.customerId);
-      updateCustomer(targetBill.customerId, newTotals);
+       // On delete, we should ideally VOID the ledger entry.
+       const ledger = safeGet('smartbill_ledger', []);
+       const updatedLedger = ledger.map(e => {
+          if ((e.type === 'SALE' || e.type === 'PAYMENT' || e.type === 'ROLLOVER') && e.invoiceId === targetBill.invoiceNo) {
+             return { ...e, isVoid: true, amount: 0 }; 
+          }
+          return e;
+       });
+       safeSet('smartbill_ledger', updatedLedger);
     }
   };
 

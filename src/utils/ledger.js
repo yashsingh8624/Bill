@@ -1,42 +1,165 @@
-import { safeGet, safeSet } from './storage';
+import { safeGet, safeSet, generateId } from './storage';
 
 /**
- * Recalculates exact totals for a specific customer based on ALL bills and transactions.
- * Returns { totalPurchases, totalPaid, outstandingBalance }
- * Updates the 'smartbill_customers' in localStorage directly to prevent stale state.
+ * Single Source of Truth: Ledger Entries
+ * Entry Types:
+ * - 'SALE': Full invoice total (subtotal + previousDue)
+ * - 'PAYMENT': Direct payments from customers
+ * - 'ROLLOVER': Virtual payment to "clear" old debt before a new SALE entry includes it.
+ * - 'OPENING': Initial balance from customer creation
  */
-export const syncCustomerTotals = (customerId) => {
-  const bills = safeGet('smartbill_bills', []);
-  const transactions = safeGet('smartbill_transactions', []);
-  const customers = safeGet('smartbill_customers', []);
 
-  const cBills = bills.filter(b => b.customerId === customerId && !b.isDeleted);
-  const cTxns = transactions.filter(t => t.entityId === customerId);
-
-  // Total Billed for all items in the bills (ignoring previous balance to prevent infinite duplication)
-  const totalPurchases = cBills.reduce((sum, b) => {
-    // Rely on totalAmount which evaluates just the base item + GST cost
-    const itemsTotal = typeof b.totalAmount === 'number' ? b.totalAmount 
-      : ((b.total || b.grandTotal || 0) - (b.prevBalanceIncluded || 0));
-    return sum + Math.max(0, itemsTotal);
-  }, 0);
-
-  // Total Paid includes direct payments in Bill and standalone Transactions
-  const totalPaid = cBills.reduce((sum, b) => sum + (b.amountPaid || 0), 0) + 
-                    cTxns.reduce((sum, t) => sum + (t.amount || 0), 0);
-                    
-  const outstandingBalance = Math.max(0, totalPurchases - totalPaid);
-
-  const newTotals = { 
-    totalPurchases, 
-    totalPaid, 
-    outstandingBalance 
+/**
+ * Adds a new entry to the unified ledger.
+ */
+export const addLedgerEntry = (entry) => {
+  const ledger = safeGet('smartbill_ledger', []);
+  const newEntry = {
+    id: generateId(),
+    date: new Date().toISOString(),
+    ...entry,
+    amount: parseFloat(entry.amount || 0)
   };
+  safeSet('smartbill_ledger', [...ledger, newEntry]);
+  return newEntry;
+};
 
-  const updatedCustomers = customers.map(c => 
-    c.id === customerId ? { ...c, ...newTotals } : c
-  );
+/**
+ * Calculates current balance for a customer.
+ * Logic: balance = SUM(SALE) - SUM(PAYMENT) - SUM(ROLLOVER)
+ */
+export const getCustomerBalance = (customerId) => {
+  const ledger = safeGet('smartbill_ledger', []);
+  const entries = ledger.filter(e => e.customerId === customerId);
   
-  safeSet('smartbill_customers', updatedCustomers);
-  return newTotals;
+  return entries.reduce((sum, e) => {
+    if (e.type === 'SALE' || e.type === 'OPENING') return sum + e.amount;
+    if (e.type === 'PAYMENT' || e.type === 'ROLLOVER') return sum - e.amount;
+    return sum;
+  }, 0);
+};
+
+/**
+ * Calculates current balance for a supplier.
+ * Logic: balance = SUM(INVOICE) - SUM(PAYMENT)
+ */
+export const getSupplierBalance = (supplierId) => {
+  const ledger = safeGet('smartbill_ledger', []);
+  const entries = ledger.filter(e => e.supplierId === supplierId);
+  
+  return entries.reduce((sum, e) => {
+    if (e.type === 'PURCHASE' || e.type === 'SUPPLIER_OPENING') return sum + e.amount;
+    if (e.type === 'PAYMENT_MADE') return sum - e.amount;
+    return sum;
+  }, 0);
+};
+
+/**
+ * Fetches all ledger entries for a customer (chronologically).
+ */
+export const getCustomerLedger = (customerId) => {
+  const ledger = safeGet('smartbill_ledger', []);
+  return ledger
+    .filter(e => e.customerId === customerId)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+};
+
+/**
+ * Fetches all ledger entries for a supplier (chronologically).
+ */
+export const getSupplierLedger = (supplierId) => {
+  const ledger = safeGet('smartbill_ledger', []);
+  return ledger
+    .filter(e => e.supplierId === supplierId)
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+};
+
+/**
+ * Migration helper: Build initial ledger from legacy data.
+ */
+export const migrateLegacyToLedger = () => {
+  const ledger = safeGet('smartbill_ledger', []);
+  if (ledger.length > 0) return;
+
+  const customers = safeGet('smartbill_customers', []);
+  const suppliers = safeGet('smartbill_suppliers', []);
+  const bills = safeGet('smartbill_bills', []);
+  const txns = safeGet('smartbill_transactions', []);
+
+  const newLedger = [];
+
+  // --- Customers ---
+  customers.forEach(c => {
+    if (parseFloat(c.previousBalance || 0) > 0) {
+      newLedger.push({
+        id: `mig-op-c-${c.id}`,
+        customerId: c.id,
+        date: c.createdAt || new Date().toISOString(),
+        type: 'OPENING',
+        amount: parseFloat(c.previousBalance),
+        desc: 'Opening Balance'
+      });
+    }
+  });
+
+  bills.filter(b => !b.isDeleted).forEach(b => {
+    newLedger.push({
+      id: `mig-sale-${b.id}`,
+      customerId: b.customerId,
+      date: b.date,
+      type: 'SALE',
+      invoiceId: b.invoiceNo,
+      amount: parseFloat(b.totalAmount || b.total || 0),
+      desc: `Bill #${b.invoiceNo}`
+    });
+    if (parseFloat(b.amountPaid || 0) > 0) {
+      newLedger.push({
+        id: `mig-pay-${b.id}`,
+        customerId: b.customerId,
+        date: new Date(new Date(b.date).getTime() + 1000).toISOString(),
+        type: 'PAYMENT',
+        amount: parseFloat(b.amountPaid),
+        desc: `Paid for Bill #${b.invoiceNo}`
+      });
+    }
+  });
+
+  // --- Suppliers ---
+  suppliers.forEach(s => {
+    if (parseFloat(s.previousBalance || 0) > 0) {
+      newLedger.push({
+        id: `mig-op-s-${s.id}`,
+        supplierId: s.id,
+        date: s.createdAt || new Date().toISOString(),
+        type: 'SUPPLIER_OPENING',
+        amount: parseFloat(s.previousBalance),
+        desc: 'Opening Balance'
+      });
+    }
+  });
+
+  // --- Generic Transactions ---
+  txns.forEach(t => {
+    if (t.type === 'PAYMENT_RECEIVED' || !t.type) {
+      newLedger.push({
+        id: `mig-txn-c-${t.id}`,
+        customerId: t.entityId,
+        date: t.date,
+        type: 'PAYMENT',
+        amount: parseFloat(t.amount),
+        desc: t.notes || 'Payment Received'
+      });
+    } else if (t.type === 'PAYMENT_MADE' || t.type === 'INVOICE_RECEIVED') {
+      newLedger.push({
+        id: `mig-txn-s-${t.id}`,
+        supplierId: t.entityId,
+        date: t.date,
+        type: t.type === 'INVOICE_RECEIVED' ? 'PURCHASE' : 'PAYMENT_MADE',
+        amount: parseFloat(t.amount),
+        desc: t.notes || (t.type === 'INVOICE_RECEIVED' ? 'Stock Bill' : 'Payment Made')
+      });
+    }
+  });
+
+  safeSet('smartbill_ledger', newLedger.sort((a, b) => new Date(a.date) - new Date(b.date)));
 };

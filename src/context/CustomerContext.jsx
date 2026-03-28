@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { safeGet, safeSet, generateId } from '../utils/storage';
 import { useTransactions } from './TransactionContext';
-import { syncCustomerTotals } from '../utils/ledger';
+import { addLedgerEntry } from '../utils/ledger';
 
 const CustomerContext = createContext();
 
@@ -14,13 +14,21 @@ export const CustomerProvider = ({ children }) => {
   }, [customers]);
 
   const addCustomer = (customer) => {
+    const newCustId = customer.id || generateId();
     setCustomers(prev => [...prev, { 
       ...customer, 
-      id: customer.id || generateId(), 
-      totalPurchases: 0, 
-      totalPaid: 0,
-      outstandingBalance: customer.previousBalance || 0
+      id: newCustId,
+      createdAt: customer.createdAt || new Date().toISOString()
     }]);
+
+    if (customer.previousBalance > 0) {
+      addLedgerEntry({
+        customerId: newCustId,
+        type: 'OPENING',
+        amount: parseFloat(customer.previousBalance),
+        desc: 'Opening Balance'
+      });
+    }
   };
 
   const updateCustomer = (id, data) => {
@@ -35,17 +43,16 @@ export const CustomerProvider = ({ children }) => {
     const cust = customers.find(c => c.id === customerId);
     if (!cust) return;
 
-    addTransaction({
-      type: 'PAYMENT_RECEIVED',
-      entityId: customerId,
+    addLedgerEntry({
+      customerId,
+      type: 'PAYMENT',
       amount: parseFloat(amount),
       date,
-      notes
+      desc: notes || 'Direct Payment'
     });
 
-    // We must manually refresh the customer lists in React state since storage updated
-    const newTotals = syncCustomerTotals(customerId);
-    updateCustomer(customerId, newTotals);
+    // In the new architecture, we don't 'updateCustomer' with totals.
+    // UI will calculate live balance using getCustomerBalance().
   };
 
   return (

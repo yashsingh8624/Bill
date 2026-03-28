@@ -9,6 +9,7 @@ import { safeGet } from '../utils/storage';
 import jsPDF from 'jspdf';
 import { useToast } from '../context/ToastContext';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
+import { getCustomerBalance, addLedgerEntry } from '../utils/ledger';
 
 export default function NewBill() {
   const { addBill, generateBillNumber } = useBills();
@@ -41,9 +42,9 @@ export default function NewBill() {
   const [paymentMode, setPaymentMode] = useState('Cash'); // Cash, UPI, Credit
   const [amountPaidInput, setAmountPaidInput] = useState('');
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Udhaar System
-  const [includePrevBalance, setIncludePrevBalance] = useState(false);
   const [selectedCustomerPrevBalance, setSelectedCustomerPrevBalance] = useState(0);
 
   // Auto-select existing customer by name
@@ -56,23 +57,13 @@ export default function NewBill() {
     }
   }, [customerName, customers, selectedCustomerId]);
 
-  // BUG 3 FIX: Fetch clear previous balance automatically
+  // CORE FIX: Always fetch latest ledger balance as Source of Truth
   useEffect(() => {
     if (selectedCustomerId) {
-      // 1. Fetch FRESH customer data straight from localStorage to avoid stale closures
-      const freshCustomers = safeGet('smartbill_customers', []);
-      const cust = freshCustomers.find(c => c.id === selectedCustomerId);
-      
-      // 2. Safely read cleanly synced outstanding balance
-      const outstanding = cust ? (cust.outstandingBalance || 0) : 0;
-      
-      // 3. Update UI state instantly
+      const outstanding = getCustomerBalance(selectedCustomerId);
       setSelectedCustomerPrevBalance(outstanding);
-      // Auto-fill and auto-toggle the previous balance inclusion
-      setIncludePrevBalance(outstanding > 0);
     } else {
       setSelectedCustomerPrevBalance(0);
-      setIncludePrevBalance(false);
     }
   }, [selectedCustomerId]);
 
@@ -134,9 +125,9 @@ export default function NewBill() {
   const cgst = gstAmount / 2;
   const sgst = gstAmount / 2;
   
-  // Grand Total considering Udhaar
+  // Grand Total considering Udhaar - Ledger is the Source
   const itemsTotal = subTotal + gstAmount;
-  const grandTotal = itemsTotal + (includePrevBalance ? selectedCustomerPrevBalance : 0);
+  const grandTotal = itemsTotal + selectedCustomerPrevBalance;
   
   // Amount paid logic
   const amountPaid = amountPaidInput === '' 
@@ -144,32 +135,46 @@ export default function NewBill() {
     : parseFloat(amountPaidInput) || 0;
   
   // CORE LOGIC: finalOutstanding = (totalAmount + previousBalance) - paidAmount
-  const outstanding = Math.max(0, grandTotal - amountPaid);
+  const outstanding = grandTotal - amountPaid;
 
   const handleSaveBill = (isNew = false) => {
-    if (!customerName || items.length === 0) return;
+    if (!customerName || items.length === 0 || isSubmitting) return;
+    setIsSubmitting(true);
     
-    let custId = selectedCustomerId;
-    if (!custId) {
-      const existing = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase());
-      if (existing) {
-        custId = existing.id;
-      } else {
-        custId = Date.now().toString() + '-cust';
-        addCustomer({ id: custId, name: customerName, phone: customerPhone, createdAt: new Date().toISOString() });
-      }
+    // 1. Record Rollover of previous balance (to avoid double counting in SUM(SALE))
+    if (selectedCustomerPrevBalance > 0) {
+      addLedgerEntry({
+        customerId: custId,
+        type: 'ROLLOVER',
+        amount: selectedCustomerPrevBalance,
+        invoiceId: invoiceNo,
+        desc: `Carried Forward to Bill #${invoiceNo}`
+      });
     }
 
-    const prevBalanceAmount = includePrevBalance ? selectedCustomerPrevBalance : 0;
+    // 2. Record this high-level SALE (Items + Prev Due)
+    const ledgerSale = addLedgerEntry({
+      customerId: custId,
+      type: 'SALE',
+      amount: grandTotal,
+      invoiceId: invoiceNo,
+      desc: `Bill #${invoiceNo}`
+    });
 
-    // BUG 4 FIX: Ensure save never fails and properly includes paid and outstanding.
-    // Ensure all critical data is accurately mapped mathematically.
-    // CORE LOGIC: finalOutstanding = (totalAmount + previousBalance) - paidAmount 
-    const finalOut = Math.max(0, (itemsTotal + prevBalanceAmount) - amountPaid);
+    // 3. Record Payment if any
+    if (amountPaid > 0) {
+      addLedgerEntry({
+        customerId: custId,
+        type: 'PAYMENT',
+        amount: amountPaid,
+        invoiceId: invoiceNo,
+        desc: `Payment for Bill #${invoiceNo} (${paymentMode})`
+      });
+    }
 
     const billData = {
       invoiceNo,
-      date,
+      date: new Date().toISOString(),
       customerId: custId,
       customerName,
       customerPhone,
@@ -180,32 +185,29 @@ export default function NewBill() {
       gstRate,
       cgst,
       sgst,
-      total: itemsTotal, // Base item logic
+      total: itemsTotal,
       grandTotal,
-      totalAmount: itemsTotal,
-      previousBalance: prevBalanceAmount,
-      prevBalanceIncluded: prevBalanceAmount,
+      previousBalance: selectedCustomerPrevBalance,
       paymentMode,
-      paidAmount: amountPaid,
-      amountPaid, // Kept for legacy compatibility
-      outstanding: finalOut, // Kept for legacy compatibility
-      finalOutstanding: finalOut
+      amountPaid,
+      outstanding,
     };
 
     addBill(billData);
     showToast(`Bill ${invoiceNo} Saved!`, 'success');
     setShowSuccessOverlay(true);
-    setTimeout(() => setShowSuccessOverlay(false), 1500);
+    setTimeout(() => {
+      setShowSuccessOverlay(false);
+      setIsSubmitting(false);
+    }, 1500);
     
     if (isNew) {
-       // Generate fresh bill number from localStorage
        setInvoiceNo(generateBillNumber());
        setItems([]);
        setCustomerName('');
        setCustomerPhone('');
        setSelectedCustomerId('');
        setAmountPaidInput('');
-       setIncludePrevBalance(false);
        setSelectedCustomerPrevBalance(0);
     } else {
        navigate('/bills');
@@ -226,7 +228,7 @@ export default function NewBill() {
       cgst,
       sgst,
       grandTotal,
-      prevBalanceIncluded: includePrevBalance ? selectedCustomerPrevBalance : 0,
+      prevBalanceIncluded: selectedCustomerPrevBalance,
       paymentMode,
       amountPaid,
       outstanding
@@ -299,21 +301,14 @@ export default function NewBill() {
             </div>
 
             {selectedCustomerId && selectedCustomerPrevBalance > 0 && (
-              <div className="mt-4 p-4 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-between">
+              <div className="mt-4 p-4 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-top-2">
                 <div>
-                  <p className="text-amber-800 font-bold text-sm">Previous Balance (Udhaar)</p>
-                  <p className="text-amber-600 text-xs font-medium">Customer has a pending balance of ₹{selectedCustomerPrevBalance.toFixed(2)}</p>
+                  <p className="text-amber-800 font-bold text-sm">Previous Due Balance</p>
+                  <p className="text-amber-600 text-xs font-medium">Automatic carried forward from ledger: ₹{selectedCustomerPrevBalance.toFixed(2)}</p>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    className="sr-only peer" 
-                    checked={includePrevBalance}
-                    onChange={(e) => setIncludePrevBalance(e.target.checked)}
-                  />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                  <span className="ml-3 text-sm font-bold text-slate-700">{includePrevBalance ? 'Included' : 'Add to Bill'}</span>
-                </label>
+                <div className="bg-amber-100 px-3 py-1 rounded-lg text-amber-700 text-xs font-bold uppercase tracking-wider shadow-inner">
+                  Added to Bill
+                </div>
               </div>
             )}
           </div>
@@ -478,9 +473,9 @@ export default function NewBill() {
                   <span>₹{gstAmount.toFixed(2)}</span>
                 </div>
               )}
-              {includePrevBalance && (
+              {selectedCustomerPrevBalance > 0 && (
                  <div className="flex justify-between text-amber-400 text-sm font-bold">
-                    <span>Previous Udhaar</span>
+                    <span>Previous Due</span>
                     <span>₹{selectedCustomerPrevBalance.toFixed(2)}</span>
                  </div>
               )}
@@ -505,7 +500,7 @@ export default function NewBill() {
             <div className="space-y-3 relative z-10">
               <button 
                 onClick={() => handleSaveBill(false)}
-                disabled={!customerName || items.length === 0}
+                disabled={!customerName || items.length === 0 || isSubmitting}
                 className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Save size={20} /> Save Bill
@@ -513,7 +508,7 @@ export default function NewBill() {
               
               <button 
                 onClick={() => handleSaveBill(true)}
-                disabled={!customerName || items.length === 0}
+                disabled={!customerName || items.length === 0 || isSubmitting}
                 className="w-full py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <RefreshCw size={18} /> Save & New Bill

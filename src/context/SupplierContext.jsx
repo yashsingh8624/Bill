@@ -1,60 +1,50 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { safeGet, safeSet, generateId } from '../utils/storage';
-import { useTransactions } from './TransactionContext';
+import { addLedgerEntry } from '../utils/ledger';
 
 const SupplierContext = createContext();
 
 export const SupplierProvider = ({ children }) => {
   const [suppliers, setSuppliers] = useState(() => safeGet('smartbill_suppliers', []));
-  const { addTransaction } = useTransactions();
 
   useEffect(() => {
     safeSet('smartbill_suppliers', suppliers);
   }, [suppliers]);
 
-  const addSupplier = (supplier) => setSuppliers(prev => [...prev, { ...supplier, id: generateId(), balance: 0 }]);
+  const addSupplier = (supplier) => {
+    const id = generateId();
+    setSuppliers(prev => [...prev, { ...supplier, id }]);
+    
+    if (parseFloat(supplier.previousBalance || 0) > 0) {
+      addLedgerEntry({
+        supplierId: id,
+        type: 'SUPPLIER_OPENING',
+        amount: parseFloat(supplier.previousBalance),
+        desc: 'Opening Balance'
+      });
+    }
+  };
   
   const updateSupplier = (id, data) => setSuppliers(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
   
   const deleteSupplier = (id) => setSuppliers(prev => prev.filter(s => s.id !== id));
   
   const addSupplierInvoice = (supplierId, amount, date, notes, invoiceNo) => {
-    setSuppliers(prev => prev.map(s => {
-      if(s.id === supplierId) {
-        return {
-          ...s, 
-          balance: (s.balance || 0) + parseFloat(amount)
-        };
-      }
-      return s;
-    }));
-
-    addTransaction({
-       type: 'INVOICE_RECEIVED',
-       entityId: supplierId,
-       amount: parseFloat(amount),
-       date,
-       notes: `Inv: ${invoiceNo}${notes ? ' - ' + notes : ''}`
+    addLedgerEntry({
+      supplierId,
+      type: 'PURCHASE',
+      amount: parseFloat(amount),
+      date,
+      desc: `Inv: ${invoiceNo}${notes ? ' - ' + notes : ''}`,
+      invoiceId: invoiceNo
     });
   };
 
   const addSupplierPayment = (supplierId, amount, date, notes) => {
-    setSuppliers(prev => prev.map(s => {
-      if(s.id === supplierId) {
-        return {
-          ...s, 
-          balance: (s.balance || 0) - parseFloat(amount)
-        };
-      }
-      return s;
-    }));
-
-    addTransaction({
-       type: 'PAYMENT_MADE',
-       entityId: supplierId,
-       amount: parseFloat(amount),
-       date,
-       notes
+    addLedgerEntry({
+      supplierId,
+      type: 'PAYMENT_MADE',
+      amount: parseFloat(amount),
+      date,
+      desc: notes || 'Payment Made'
     });
   };
 

@@ -1,12 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSuppliers } from '../context/SupplierContext';
-import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
 import { Truck, Search, IndianRupee, MessageCircle, ChevronRight, Plus, X, PackageOpen, LayoutList, Edit2, Trash2 } from 'lucide-react';
+import { getSupplierLedger, getSupplierBalance } from '../utils/ledger';
 
 export default function SupplierLedger() {
   const { suppliers, addSupplier, updateSupplier, deleteSupplier, addSupplierPayment, addSupplierInvoice } = useSuppliers();
-  const { getTransactionsByEntityId } = useTransactions();
   const { userSettings } = useSettings();
   
   const [searchTerm, setSearchTerm] = useState('');
@@ -28,7 +27,14 @@ export default function SupplierLedger() {
     (s.businessName && s.businessName.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleOpenSupplier = (supplier) => setSelectedSupplier(supplier);
+  const currentSupplier = selectedSupplier ? suppliers.find(s => s.id === selectedSupplier.id) : null;
+  const supplierTxns = currentSupplier ? getSupplierLedger(currentSupplier.id) : [];
+  const currentSupplierBalance = currentSupplier ? getSupplierBalance(currentSupplier.id) : 0;
+
+  const handleOpenSupplier = (supplier) => {
+    setSelectedSupplier(supplier);
+    setEditForm({ name: supplier.name, phone: supplier.phone || '', businessName: supplier.businessName || '' });
+  };
 
   const handleAddSupplierSubmit = (e) => {
     e.preventDefault();
@@ -63,6 +69,7 @@ export default function SupplierLedger() {
     if (!selectedSupplier || !paymentForm.amount) return;
     addSupplierPayment(selectedSupplier.id, paymentForm.amount, paymentForm.date, paymentForm.note);
     setIsPaymentModalOpen(false);
+    setPaymentForm({ amount: '', date: new Date().toISOString().split('T')[0], note: 'Payment Made' });
   };
 
   const handleInvoiceSubmit = (e) => {
@@ -70,14 +77,12 @@ export default function SupplierLedger() {
     if (!selectedSupplier || !invoiceForm.amount) return;
     addSupplierInvoice(selectedSupplier.id, invoiceForm.amount, invoiceForm.date, invoiceForm.note, invoiceForm.invoiceNo);
     setIsInvoiceModalOpen(false);
+    setInvoiceForm({ invoiceNo: '', amount: '', date: new Date().toISOString().split('T')[0], note: '' });
   };
-
-  const currentSupplier = selectedSupplier ? suppliers.find(s => s.id === selectedSupplier.id) : null;
-  const supplierTxns = currentSupplier ? getTransactionsByEntityId(currentSupplier.id) : [];
 
   const handleSendWhatsApp = () => {
     if (!currentSupplier || !currentSupplier.phone) return;
-    const amount = currentSupplier.balance || 0;
+    const amount = currentSupplierBalance;
     const phone = currentSupplier.phone.startsWith('+91') ? currentSupplier.phone : `+91${currentSupplier.phone}`;
     
     let message = '';
@@ -156,11 +161,11 @@ export default function SupplierLedger() {
                            </div>
                          </td>
                          <td className="py-4 px-6 text-slate-600 font-medium">{supplier.phone || '-'}</td>
-                         <td className="py-4 px-6 text-right">
-                            <span className={`font-black ${supplier.balance > 0 ? 'text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100' : 'text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200'}`}>
-                              ₹{(supplier.balance || 0).toFixed(2)}
-                            </span>
-                         </td>
+                          <td className="py-4 px-6 text-right">
+                             <span className={`font-black ${getSupplierBalance(supplier.id) > 0 ? 'text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100' : 'text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200'}`}>
+                               ₹{getSupplierBalance(supplier.id).toFixed(2)}
+                             </span>
+                          </td>
                          <td className="py-4 px-6 text-center">
                             <div className="flex justify-center text-slate-400 group-hover:text-indigo-600 transition-colors bg-white border border-slate-200 group-hover:border-indigo-200 rounded-lg p-1.5 shadow-sm">
                                <ChevronRight size={20} />
@@ -233,13 +238,13 @@ export default function SupplierLedger() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 flex-shrink-0">
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Amount To Pay</p>
-                <h3 className={`text-3xl font-black ${(currentSupplier.balance || 0) > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
-                  ₹{(currentSupplier.balance || 0).toFixed(2)}
+                <h3 className={`text-3xl font-black ${currentSupplierBalance > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                  ₹{currentSupplierBalance.toFixed(2)}
                 </h3>
               </div>
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Invoices</p>
-                <h3 className="text-3xl font-black text-slate-800">{supplierTxns.filter(t => t.type === 'INVOICE_RECEIVED').length}</h3>
+                <h3 className="text-3xl font-black text-slate-800">{supplierTxns.filter(t => t.type === 'PURCHASE').length}</h3>
               </div>
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Payments</p>
@@ -266,17 +271,27 @@ export default function SupplierLedger() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {[...supplierTxns].sort((a, b) => new Date(b.date) - new Date(a.date)).map((txn, idx) => (
-                          <tr key={`${txn.id}-${idx}`} className="hover:bg-slate-50/80 transition-colors">
-                             <td className="py-4 px-6 text-slate-500 font-medium text-sm whitespace-nowrap">{new Date(txn.date).toLocaleDateString()}</td>
-                             <td className="py-4 px-6 text-slate-800 font-bold text-sm">
-                               {txn.type === 'INVOICE_RECEIVED' ? <span className="text-amber-600 mr-2 border border-amber-200 bg-white px-2 py-0.5 rounded shadow-sm text-[10px] tracking-wider font-black">BILL</span> : <span className="text-indigo-600 mr-2 border border-indigo-200 bg-white px-2 py-0.5 rounded shadow-sm text-[10px] tracking-wider font-black">PAID</span>}
-                               {txn.notes || 'Note missing'}
-                             </td>
-                             <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 bg-emerald-50/10">{txn.type === 'PAYMENT_MADE' ? `₹${txn.amount.toFixed(2)}` : '-'}</td>
-                             <td className="py-4 px-6 text-right text-sm font-black text-amber-600 bg-amber-50/10">{txn.type === 'INVOICE_RECEIVED' ? `₹${txn.amount.toFixed(2)}` : '-'}</td>
-                          </tr>
-                        ))}
+                        {supplierTxns.reduce((acc, txn) => {
+                          const debit = (txn.type === 'PURCHASE' || txn.type === 'SUPPLIER_OPENING') ? txn.amount : 0;
+                          const credit = (txn.type === 'PAYMENT_MADE') ? txn.amount : 0;
+                          acc.balance = acc.balance + debit - credit;
+                          
+                          acc.rows.push(
+                            <tr key={`${txn.id}`} className="hover:bg-slate-50/80 transition-colors">
+                               <td className="py-4 px-6 text-slate-500 font-medium text-sm whitespace-nowrap">{new Date(txn.date).toLocaleDateString()}</td>
+                               <td className="py-4 px-6 text-slate-800 font-bold text-sm">
+                                 {txn.type === 'PURCHASE' && <span className="text-amber-600 mr-2 border border-amber-200 bg-white px-2 py-0.5 rounded shadow-sm text-[10px] tracking-wider font-black">BILL</span>}
+                                 {txn.type === 'PAYMENT_MADE' && <span className="text-indigo-600 mr-2 border border-indigo-200 bg-white px-2 py-0.5 rounded shadow-sm text-[10px] tracking-wider font-black">PAID</span>}
+                                 {txn.type === 'SUPPLIER_OPENING' && <span className="text-slate-500 mr-2 border border-slate-200 bg-slate-50 px-2 py-0.5 rounded text-xs font-bold">OPENING</span>}
+                                 {txn.desc || (txn.type === 'PURCHASE' ? 'Stock Purchase' : 'Payment')}
+                               </td>
+                               <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 bg-emerald-50/10">{credit > 0 ? `₹${credit.toFixed(2)}` : '-'}</td>
+                               <td className="py-4 px-6 text-right text-sm font-black text-amber-600 bg-amber-50/10">{debit > 0 ? `₹${debit.toFixed(2)}` : '-'}</td>
+                               <td className="py-4 px-6 text-right text-sm font-black text-slate-800 bg-slate-50/10">₹{acc.balance.toFixed(2)}</td>
+                            </tr>
+                          );
+                          return acc;
+                        }, { rows: [], balance: 0 }).rows.reverse()}
                       </tbody>
                     </table>
                  )}
@@ -396,7 +411,7 @@ export default function SupplierLedger() {
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">To Supplier</p>
                 <p className="font-black text-slate-800 text-xl">{currentSupplier?.name}</p>
                 <div className="mt-2 text-sm bg-white border border-slate-100 inline-block px-3 py-1 rounded-lg">
-                   Pending: <span className="font-black text-amber-500">₹{(currentSupplier?.balance || 0).toFixed(2)}</span>
+                   Pending: <span className="font-black text-amber-500">₹{currentSupplierBalance.toFixed(2)}</span>
                 </div>
               </div>
               <div>

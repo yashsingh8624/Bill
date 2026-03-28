@@ -4,6 +4,7 @@ import { useBills } from '../context/BillContext';
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
 import { Users, Search, IndianRupee, MessageCircle, ChevronRight, Plus, X, Receipt, Edit2, Trash2 } from 'lucide-react';
+import { getCustomerLedger, getCustomerBalance } from '../utils/ledger';
 
 export default function CustomerLedger() {
   const { customers, addCustomerPayment, updateCustomer, deleteCustomer } = useCustomers();
@@ -16,6 +17,7 @@ export default function CustomerLedger() {
   
   // Payment Modal
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [paymentForm, setPaymentForm] = useState({ amount: '', date: new Date().toISOString().split('T')[0], note: '' });
 
   // Edit/Add Modal
@@ -36,18 +38,22 @@ export default function CustomerLedger() {
     setIsPaymentModalOpen(true);
   };
 
-  const handlePaymentSubmit = (e) => {
+  const handlePaymentSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedCustomer || !paymentForm.amount) return;
+    if (!selectedCustomer || !paymentForm.amount || isSubmitting) return;
     
-    addCustomerPayment(
-      selectedCustomer.id, 
-      paymentForm.amount, 
-      paymentForm.date, 
-      paymentForm.note
-    );
-    
-    setIsPaymentModalOpen(false);
+    setIsSubmitting(true);
+    try {
+      addCustomerPayment(
+        selectedCustomer.id, 
+        paymentForm.amount, 
+        paymentForm.date, 
+        paymentForm.note
+      );
+      setIsPaymentModalOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const openEditModal = (customer) => {
@@ -74,17 +80,21 @@ export default function CustomerLedger() {
     ? customers.find(c => c.id === selectedCustomer.id) 
     : null;
 
-  const customerBills = currentCustomer ? bills.filter(b => b.customerId === currentCustomer.id) : [];
-  const customerTxns = currentCustomer ? getTransactionsByEntityId(currentCustomer.id) : [];
+  const ledgerEntries = currentCustomer 
+    ? getCustomerLedger(currentCustomer.id) 
+    : [];
+    
+  const currentBalance = currentCustomer ? getCustomerBalance(currentCustomer.id) : 0;
 
   const getCustomerTotals = (customer) => {
     if (!customer) return { totalBilled: 0, totalPaid: 0, outstanding: 0 };
     
-    return {
-      totalBilled: customer.totalPurchases || 0,
-      totalPaid: customer.totalPaid || 0,
-      outstanding: customer.outstandingBalance || 0
-    };
+    const entries = getCustomerLedger(customer.id);
+    const totalBilled = entries.filter(e => e.type === 'SALE' || e.type === 'OPENING').reduce((s, e) => s + e.amount, 0);
+    const totalPaid = entries.filter(e => e.type === 'PAYMENT' || e.type === 'ROLLOVER').reduce((s, e) => s + e.amount, 0);
+    const outstanding = totalBilled - totalPaid;
+
+    return { totalBilled, totalPaid, outstanding };
   };
 
   const handleSendWhatsApp = () => {
@@ -152,11 +162,11 @@ export default function CustomerLedger() {
                             {customer.name}
                          </td>
                          <td className="py-4 px-6 text-slate-600 font-medium">{customer.phone || '-'}</td>
-                         <td className="py-4 px-6 text-right">
-                            <span className={`font-black ${getCustomerTotals(customer).outstanding > 0 ? 'text-red-500 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100' : 'text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100'}`}>
-                              ₹{getCustomerTotals(customer).outstanding.toFixed(2)}
-                            </span>
-                         </td>
+                          <td className="py-4 px-6 text-right">
+                             <span className={`font-black ${getCustomerBalance(customer.id) > 0 ? 'text-red-500 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100' : 'text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100'}`}>
+                               ₹{getCustomerBalance(customer.id).toFixed(2)}
+                             </span>
+                          </td>
                          <td className="py-4 px-6 text-center">
                             <div className="flex justify-center text-slate-400 group-hover:text-indigo-600 transition-colors bg-white border border-slate-200 group-hover:border-indigo-200 rounded-lg p-1.5 shadow-sm">
                                <ChevronRight size={20} />
@@ -234,7 +244,7 @@ export default function CustomerLedger() {
               </div>
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Bills</p>
-                <h3 className="text-3xl font-black text-slate-800">{customerBills.length}</h3>
+                <h3 className="text-3xl font-black text-slate-800">{ledgerEntries.filter(e => e.type === 'SALE').length}</h3>
               </div>
             </div>
 
@@ -246,7 +256,7 @@ export default function CustomerLedger() {
                  </div>
                </div>
                <div className="overflow-y-auto flex-1 p-0">
-                 {customerBills.length === 0 && customerTxns.length === 0 ? (
+                 {ledgerEntries.length === 0 ? (
                     <div className="p-12 text-center text-slate-400 font-medium text-lg">No ledger entries found.</div>
                  ) : (
                     <table className="w-full text-left border-collapse min-w-[600px]">
@@ -256,37 +266,32 @@ export default function CustomerLedger() {
                           <th className="py-3 px-6">Description</th>
                           <th className="py-3 px-6 text-right text-red-500 bg-red-50/30">Debit (Billed)</th>
                           <th className="py-3 px-6 text-right text-emerald-600 bg-emerald-50/30">Credit (Paid)</th>
+                          <th className="py-3 px-6 text-right text-indigo-600 bg-indigo-50/30">Balance</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {[
-                          ...customerBills.map(b => ({
-                            id: b.id,
-                            date: b.date,
-                            desc: `Bill #${b.invoiceNo}`,
-                            debit: (b.total || b.grandTotal || 0) - (b.prevBalanceIncluded || 0), 
-                            credit: b.amountPaid || 0,
-                            type: 'BILL'
-                          })),
-                          ...customerTxns.map(t => ({
-                            id: t.id,
-                            date: t.date,
-                            desc: `${t.notes || 'Payment'}`,
-                            debit: 0,
-                            credit: t.amount,
-                            type: 'PAYMENT'
-                          }))
-                        ].sort((a, b) => new Date(b.date) - new Date(a.date)).map((txn, idx) => (
-                          <tr key={`${txn.type}-${txn.id}-${idx}`} className="hover:bg-slate-50/80 transition-colors">
-                             <td className="py-4 px-6 text-slate-500 font-medium text-sm whitespace-nowrap">{new Date(txn.date).toLocaleDateString()}</td>
-                             <td className="py-4 px-6 text-slate-800 font-bold text-sm">
-                               {txn.type === 'BILL' ? <span className="text-slate-500 mr-2 border border-slate-200 bg-white px-2 py-0.5 rounded text-xs">INV</span> : <span className="text-emerald-600 mr-2 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded text-xs shadow-sm">PAY</span>}
-                               {txn.desc}
-                             </td>
-                             <td className="py-4 px-6 text-right text-sm font-black text-slate-800 bg-red-50/10">{txn.debit > 0 ? `₹${txn.debit.toFixed(2)}` : '-'}</td>
-                             <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 bg-emerald-50/10">{txn.credit > 0 ? `₹${txn.credit.toFixed(2)}` : '-'}</td>
-                          </tr>
-                        ))}
+                        {ledgerEntries.reduce((acc, txn) => {
+                          const debit = (txn.type === 'SALE' || txn.type === 'OPENING') ? txn.amount : 0;
+                          const credit = (txn.type === 'PAYMENT' || txn.type === 'ROLLOVER') ? txn.amount : 0;
+                          acc.balance = acc.balance + debit - credit;
+                          
+                          acc.rows.push(
+                            <tr key={`${txn.type}-${txn.id}`} className="hover:bg-slate-50/80 transition-colors">
+                               <td className="py-4 px-6 text-slate-500 font-medium text-sm whitespace-nowrap">{new Date(txn.date).toLocaleDateString()}</td>
+                               <td className="py-4 px-6 text-slate-800 font-bold text-sm">
+                                 {txn.type === 'SALE' && <span className="text-slate-500 mr-2 border border-slate-200 bg-white px-2 py-0.5 rounded text-xs">INV</span>}
+                                 {txn.type === 'PAYMENT' && <span className="text-emerald-600 mr-2 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded text-xs shadow-sm">PAY</span>}
+                                 {txn.type === 'OPENING' && <span className="text-amber-500 mr-2 border border-amber-200 bg-amber-50 px-2 py-0.5 rounded text-xs shadow-sm">OPEN</span>}
+                                 {txn.type === 'ROLLOVER' && <span className="text-indigo-400 mr-2 border border-indigo-200 bg-indigo-50 px-2 py-0.5 rounded text-xs">ROLL</span>}
+                                 {txn.desc}
+                               </td>
+                               <td className="py-4 px-6 text-right text-sm font-black text-slate-800 bg-red-50/10">{debit > 0 ? `₹${debit.toFixed(2)}` : '-'}</td>
+                               <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 bg-emerald-50/10">{credit > 0 ? `₹${credit.toFixed(2)}` : '-'}</td>
+                               <td className="py-4 px-6 text-right text-sm font-black text-indigo-600 bg-indigo-50/10">₹{acc.balance.toFixed(2)}</td>
+                            </tr>
+                          );
+                          return acc;
+                        }, { rows: [], balance: 0 }).rows}
                       </tbody>
                     </table>
                  )}
