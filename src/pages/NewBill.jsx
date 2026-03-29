@@ -9,6 +9,7 @@ import { safeGet } from '../utils/storage';
 import jsPDF from 'jspdf';
 import { useToast } from '../context/ToastContext';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
+import { getCustomerBalance } from '../utils/ledger';
 
 export default function NewBill() {
   const { addBill, generateBillNumber } = useBills();
@@ -56,22 +57,19 @@ export default function NewBill() {
     }
   }, [customerName, customers, selectedCustomerId]);
 
-  // BUG 3 FIX: Fetch clear previous balance automatically
+  // BUG 3 FIX: Fetch explicit precise ledger balance securely.
   useEffect(() => {
     if (selectedCustomerId) {
-      // 1. Fetch FRESH data straight from localStorage to avoid stale closures
-      const freshBills = safeGet('smartbill_bills', []);
+      // 1. Get true active running balance directly from the ledger
+      const realtimeBalance = parseFloat(getCustomerBalance(selectedCustomerId) || 0);
       
-      // 2. Customer's non-deleted bills
-      const customerBills = freshBills.filter(b => b.customerId === selectedCustomerId && !b.isDeleted);
+      // 2. Safely prevent sub-zero balances breaking the UI
+      const safeBalance = Math.max(0, realtimeBalance);
       
-      // 3. Sum of all outstanding is the truest form of previousBalance
-      const sumOutstanding = customerBills.reduce((sum, b) => sum + (b.finalOutstanding || b.outstanding || 0), 0);
-      
-      // 4. Update UI state instantly
-      setSelectedCustomerPrevBalance(sumOutstanding);
+      // 3. Update UI state instantly
+      setSelectedCustomerPrevBalance(safeBalance);
       // Auto-fill and auto-toggle the previous balance inclusion
-      setIncludePrevBalance(sumOutstanding > 0);
+      setIncludePrevBalance(safeBalance > 0);
     } else {
       setSelectedCustomerPrevBalance(0);
       setIncludePrevBalance(false);
