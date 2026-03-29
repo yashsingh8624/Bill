@@ -14,11 +14,16 @@ import { safeGet, safeSet, generateId } from './storage';
  */
 export const addLedgerEntry = (entry) => {
   const ledger = safeGet('smartbill_ledger', []);
+  if (!Array.isArray(ledger)) {
+    console.error('Ledger is not an array, resetting to empty.');
+    safeSet('smartbill_ledger', []);
+    return null;
+  }
   const newEntry = {
     id: generateId(),
     date: new Date().toISOString(),
     ...entry,
-    amount: parseFloat(entry.amount || 0)
+    amount: parseFloat(entry?.amount || 0)
   };
   safeSet('smartbill_ledger', [...ledger, newEntry]);
   return newEntry;
@@ -30,11 +35,14 @@ export const addLedgerEntry = (entry) => {
  */
 export const getCustomerBalance = (customerId) => {
   const ledger = safeGet('smartbill_ledger', []);
-  const entries = ledger.filter(e => e.customerId === customerId);
+  if (!Array.isArray(ledger)) return 0;
+  
+  const entries = ledger.filter(e => e && e.customerId === customerId);
   
   return entries.reduce((sum, e) => {
-    if (e.type === 'SALE' || e.type === 'OPENING') return sum + e.amount;
-    if (e.type === 'PAYMENT' || e.type === 'ROLLOVER') return sum - e.amount;
+    const amt = parseFloat(e?.amount || 0);
+    if (e.type === 'SALE' || e.type === 'OPENING') return sum + amt;
+    if (e.type === 'PAYMENT' || e.type === 'ROLLOVER') return sum - amt;
     return sum;
   }, 0);
 };
@@ -45,11 +53,14 @@ export const getCustomerBalance = (customerId) => {
  */
 export const getSupplierBalance = (supplierId) => {
   const ledger = safeGet('smartbill_ledger', []);
-  const entries = ledger.filter(e => e.supplierId === supplierId);
+  if (!Array.isArray(ledger)) return 0;
+  
+  const entries = ledger.filter(e => e && e.supplierId === supplierId);
   
   return entries.reduce((sum, e) => {
-    if (e.type === 'PURCHASE' || e.type === 'SUPPLIER_OPENING') return sum + e.amount;
-    if (e.type === 'PAYMENT_MADE') return sum - e.amount;
+    const amt = parseFloat(e?.amount || 0);
+    if (e.type === 'PURCHASE' || e.type === 'SUPPLIER_OPENING') return sum + amt;
+    if (e.type === 'PAYMENT_MADE') return sum - amt;
     return sum;
   }, 0);
 };
@@ -59,8 +70,10 @@ export const getSupplierBalance = (supplierId) => {
  */
 export const getCustomerLedger = (customerId) => {
   const ledger = safeGet('smartbill_ledger', []);
+  if (!Array.isArray(ledger)) return [];
+  
   return ledger
-    .filter(e => e.customerId === customerId)
+    .filter(e => e && e.customerId === customerId)
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 };
 
@@ -69,8 +82,10 @@ export const getCustomerLedger = (customerId) => {
  */
 export const getSupplierLedger = (supplierId) => {
   const ledger = safeGet('smartbill_ledger', []);
+  if (!Array.isArray(ledger)) return [];
+  
   return ledger
-    .filter(e => e.supplierId === supplierId)
+    .filter(e => e && e.supplierId === supplierId)
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 };
 
@@ -102,24 +117,35 @@ export const migrateLegacyToLedger = () => {
     }
   });
 
-  bills.filter(b => !b.isDeleted).forEach(b => {
+  const safeDate = (dateStr) => {
+    const d = new Date(dateStr);
+    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+  };
+
+  bills.filter(b => !b?.isDeleted && b?.date).forEach(b => {
     newLedger.push({
       id: `mig-sale-${b.id}`,
       customerId: b.customerId,
-      date: b.date,
+      date: safeDate(b.date),
       type: 'SALE',
       invoiceId: b.invoiceNo,
       amount: parseFloat(b.totalAmount || b.total || 0),
-      desc: `Bill #${b.invoiceNo}`
+      desc: `Bill #${b.invoiceNo || 'Unknown'}`
     });
+    
     if (parseFloat(b.amountPaid || 0) > 0) {
+      const bDate = new Date(b.date);
+      const paidDate = isNaN(bDate.getTime()) 
+        ? new Date().toISOString() 
+        : new Date(bDate.getTime() + 1000).toISOString();
+        
       newLedger.push({
         id: `mig-pay-${b.id}`,
         customerId: b.customerId,
-        date: new Date(new Date(b.date).getTime() + 1000).toISOString(),
+        date: paidDate,
         type: 'PAYMENT',
         amount: parseFloat(b.amountPaid),
-        desc: `Paid for Bill #${b.invoiceNo}`
+        desc: `Paid for Bill #${b.invoiceNo || 'Unknown'}`
       });
     }
   });

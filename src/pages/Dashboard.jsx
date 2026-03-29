@@ -8,10 +8,17 @@ import { Link } from 'react-router-dom';
 import { getCustomerBalance } from '../utils/ledger';
 
 export default function Dashboard() {
-  const { bills } = useBills();
-  const { products } = useInventory();
-  const { customers } = useCustomers();
-  const { suppliers } = useSuppliers();
+  const billsRes = useBills() || {};
+  const bills = Array.isArray(billsRes.bills) ? billsRes.bills : [];
+
+  const inventoryRes = useInventory() || {};
+  const products = Array.isArray(inventoryRes.products) ? inventoryRes.products : [];
+
+  const customersRes = useCustomers() || {};
+  const customers = Array.isArray(customersRes.customers) ? customersRes.customers : [];
+
+  const suppliersRes = useSuppliers() || {};
+  const suppliers = Array.isArray(suppliersRes.suppliers) ? suppliersRes.suppliers : [];
 
   const stats = useMemo(() => {
     const now = new Date();
@@ -26,26 +33,26 @@ export default function Dashboard() {
     lastMonth.setMonth(now.getMonth() - 1);
     const lastMonthStr = lastMonth.toISOString().slice(0, 7);
 
-    const activeBills = bills.filter(b => !b.isDeleted);
+    const activeBills = bills.filter(b => b && !b.isDeleted);
 
-    const todaysBills = activeBills.filter(b => b.date && b.date.startsWith(todayStr));
-    const yesterdaysBills = activeBills.filter(b => b.date && b.date.startsWith(yesterdayStr));
-    const thisMonthBills = activeBills.filter(b => b.date && b.date.startsWith(thisMonthStr));
-    const lastMonthBills = activeBills.filter(b => b.date && b.date.startsWith(lastMonthStr));
+    const todaysBills = activeBills.filter(b => b?.date && String(b.date).startsWith(todayStr));
+    const yesterdaysBills = activeBills.filter(b => b?.date && String(b.date).startsWith(yesterdayStr));
+    const thisMonthBills = activeBills.filter(b => b?.date && String(b.date).startsWith(thisMonthStr));
+    const lastMonthBills = activeBills.filter(b => b?.date && String(b.date).startsWith(lastMonthStr));
 
-    const todaysSales = todaysBills.reduce((sum, b) => sum + (b.grandTotal || b.total || 0), 0);
-    const yesterdaysSales = yesterdaysBills.reduce((sum, b) => sum + (b.grandTotal || b.total || 0), 0);
-    const thisMonthSales = thisMonthBills.reduce((sum, b) => sum + (b.grandTotal || b.total || 0), 0);
-    const lastMonthSales = lastMonthBills.reduce((sum, b) => sum + (b.grandTotal || b.total || 0), 0);
+    const todaysSales = todaysBills.reduce((sum, b) => sum + parseFloat(b?.grandTotal || b?.total || 0), 0);
+    const yesterdaysSales = yesterdaysBills.reduce((sum, b) => sum + parseFloat(b?.grandTotal || b?.total || 0), 0);
+    const thisMonthSales = thisMonthBills.reduce((sum, b) => sum + parseFloat(b?.grandTotal || b?.total || 0), 0);
+    const lastMonthSales = lastMonthBills.reduce((sum, b) => sum + parseFloat(b?.grandTotal || b?.total || 0), 0);
 
-    const salesTrend = yesterdaysSales === 0 ? 100 : ((todaysSales - yesterdaysSales) / yesterdaysSales) * 100;
-    const monthTrend = lastMonthSales === 0 ? 100 : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
+    const salesTrend = yesterdaysSales === 0 ? 0 : ((todaysSales - yesterdaysSales) / yesterdaysSales) * 100;
+    const monthTrend = lastMonthSales === 0 ? 0 : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;
 
     const totalProfit = activeBills.reduce((acc, b) => {
-      b.items.forEach(item => {
-        const product = products.find(p => p.name === item.name);
+      (b?.items || []).forEach(item => {
+        const product = products.find(p => p && p.name === item?.name);
         if (product && product.costPrice) {
-          acc += (item.rate - product.costPrice) * item.quantity;
+          acc += (parseFloat(item?.rate || 0) - parseFloat(product.costPrice)) * parseFloat(item?.quantity || 0);
         }
       });
       return acc;
@@ -63,10 +70,10 @@ export default function Dashboard() {
 
   // Dues - Ledger is the Source of Truth
   const totalCustomerDue = useMemo(() => 
-    customers.reduce((sum, c) => sum + getCustomerBalance(c.id), 0)
+    customers.reduce((sum, c) => sum + parseFloat(getCustomerBalance(c?.id) || 0), 0)
   , [customers]);
   
-  const totalSupplierDue = suppliers.reduce((sum, s) => sum + (s.balance || 0), 0);
+  const totalSupplierDue = suppliers.reduce((sum, s) => sum + parseFloat(s?.balance || 0), 0);
 
   // Low Stock
   const lowStockProducts = products.filter(p => p.quantity <= (p.lowStockThreshold || 5));
@@ -108,10 +115,10 @@ export default function Dashboard() {
             </div>
             <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Today's Sales</p>
           </div>
-          <h3 className="text-3xl font-black text-slate-800 relative z-10 tracking-tighter">₹{stats.todaysSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
-          <div className={`mt-3 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${stats.salesTrend >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
-            {stats.salesTrend >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-            {Math.abs(stats.salesTrend).toFixed(1)}% from yesterday
+          <h3 className="text-3xl font-black text-slate-800 relative z-10 tracking-tighter">₹{parseFloat(stats.todaysSales || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+          <div className={`mt-3 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${parseFloat(stats.salesTrend || 0) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
+            {parseFloat(stats.salesTrend || 0) >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+            {Math.abs(parseFloat(stats.salesTrend || 0)).toFixed(1)}% from yesterday
           </div>
         </div>
 
@@ -225,7 +232,7 @@ export default function Dashboard() {
                   </div>
                   <div className="text-right">
                     <p className="font-black text-slate-800 tracking-tighter">₹{(bill.grandTotal || bill.total || 0).toFixed(2)}</p>
-                    <p className="text-[10px] text-slate-400 font-medium">{(bill.readableDate || new Date(bill.date).toLocaleDateString())}</p>
+                    <p className="text-[10px] text-slate-400 font-medium">{(bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A'))}</p>
                   </div>
                 </div>
               ))

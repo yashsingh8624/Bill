@@ -5,8 +5,11 @@ import { Truck, Search, IndianRupee, MessageCircle, ChevronRight, Plus, X, Packa
 import { getSupplierLedger, getSupplierBalance } from '../utils/ledger';
 
 export default function SupplierLedger() {
-  const { suppliers, addSupplier, updateSupplier, deleteSupplier, addSupplierPayment, addSupplierInvoice } = useSuppliers();
-  const { userSettings } = useSettings();
+  const suppliersRes = useSuppliers() || {};
+  const suppliers = Array.isArray(suppliersRes.suppliers) ? suppliersRes.suppliers : [];
+  const { addSupplier, updateSupplier, deleteSupplier, addSupplierPayment, addSupplierInvoice } = suppliersRes;
+  
+  const { userSettings = {} } = useSettings() || {};
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSupplier, setSelectedSupplier] = useState(null);
@@ -23,13 +26,15 @@ export default function SupplierLedger() {
   const [invoiceForm, setInvoiceForm] = useState({ invoiceNo: '', amount: '', date: new Date().toISOString().split('T')[0], note: '' });
 
   const filteredSuppliers = suppliers.filter(s => 
-    s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (s.businessName && s.businessName.toLowerCase().includes(searchTerm.toLowerCase()))
+    s && (
+      (s.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (s.businessName && s.businessName.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
   );
 
-  const currentSupplier = selectedSupplier ? suppliers.find(s => s.id === selectedSupplier.id) : null;
-  const supplierTxns = currentSupplier ? getSupplierLedger(currentSupplier.id) : [];
-  const currentSupplierBalance = currentSupplier ? getSupplierBalance(currentSupplier.id) : 0;
+  const currentSupplier = selectedSupplier ? suppliers.find(s => s && s.id === selectedSupplier.id) : null;
+  const supplierTxns = currentSupplier ? (getSupplierLedger(currentSupplier.id) || []) : [];
+  const currentSupplierBalance = currentSupplier ? parseFloat(getSupplierBalance(currentSupplier.id) || 0) : 0;
 
   const handleOpenSupplier = (supplier) => {
     setSelectedSupplier(supplier);
@@ -153,17 +158,17 @@ export default function SupplierLedger() {
                       >
                          <td className="py-4 px-6 flex items-center gap-3">
                            <div className="w-10 h-10 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs uppercase shadow-inner">
-                              {supplier.name.substring(0,2)}
+                              {(supplier.name || '??').substring(0,2)}
                            </div>
                            <div>
-                             <div className="font-bold text-slate-800">{supplier.name}</div>
+                             <div className="font-bold text-slate-800">{supplier.name || 'Unnamed Supplier'}</div>
                              <div className="text-xs font-medium text-slate-500">{supplier.businessName || 'No business specified'}</div>
                            </div>
                          </td>
                          <td className="py-4 px-6 text-slate-600 font-medium">{supplier.phone || '-'}</td>
                           <td className="py-4 px-6 text-right">
-                             <span className={`font-black ${getSupplierBalance(supplier.id) > 0 ? 'text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100' : 'text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200'}`}>
-                               ₹{getSupplierBalance(supplier.id).toFixed(2)}
+                             <span className={`font-black ${parseFloat(getSupplierBalance(supplier.id) || 0) > 0 ? 'text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100' : 'text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200'}`}>
+                               ₹{parseFloat(getSupplierBalance(supplier.id) || 0).toFixed(2)}
                              </span>
                           </td>
                          <td className="py-4 px-6 text-center">
@@ -272,8 +277,9 @@ export default function SupplierLedger() {
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {supplierTxns.reduce((acc, txn) => {
-                          const debit = (txn.type === 'PURCHASE' || txn.type === 'SUPPLIER_OPENING') ? txn.amount : 0;
-                          const credit = (txn.type === 'PAYMENT_MADE') ? txn.amount : 0;
+                          if (!txn) return acc;
+                          const debit = (txn.type === 'PURCHASE' || txn.type === 'SUPPLIER_OPENING') ? parseFloat(txn.amount || 0) : 0;
+                          const credit = (txn.type === 'PAYMENT_MADE') ? parseFloat(txn.amount || 0) : 0;
                           acc.balance = acc.balance + debit - credit;
                           
                           acc.rows.push(

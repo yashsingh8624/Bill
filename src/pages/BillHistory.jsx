@@ -8,21 +8,26 @@ import { useSettings } from '../context/SettingsContext';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
 
 export default function BillHistory() {
-  const { bills, deleteBill } = useBills();
-  const { customers } = useCustomers();
-  const { userSettings } = useSettings();
-  const { showToast } = useToast();
+  const billsRes = useBills() || {};
+  const bills = Array.isArray(billsRes.bills) ? billsRes.bills : [];
+  const { deleteBill } = billsRes;
+
+  const customersRes = useCustomers() || {};
+  const customers = Array.isArray(customersRes.customers) ? customersRes.customers : [];
+
+  const { userSettings = {} } = useSettings() || {};
+  const { showToast } = useToast() || { showToast: () => {} };
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedBill, setSelectedBill] = useState(null);
   const [dateFilter, setDateFilter] = useState('ALL'); // ALL, TODAY, YESTERDAY, MONTH
 
   const getFilteredBills = () => {
-    let filtered = bills.filter(b => !b.isDeleted);
+    let filtered = bills.filter(b => b && !b.isDeleted);
     
     // Name Search
     if (searchTerm) {
       filtered = filtered.filter(b => 
-        b.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (b.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (b.invoiceNo && b.invoiceNo.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
@@ -144,10 +149,10 @@ export default function BillHistory() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredBills.map((bill) => (
-                  <tr key={bill.id} className="hover:bg-indigo-50/30 transition-colors group">
-                     <td className="py-4 px-6 font-bold text-slate-700">#{bill.invoiceNo || bill.id.slice(-4)}</td>
+                   <tr key={bill?.id || Math.random()} className="hover:bg-indigo-50/30 transition-colors group">
+                     <td className="py-4 px-6 font-bold text-slate-700">#{bill?.invoiceNo || (bill?.id && String(bill.id).slice(-4)) || '????'}</td>
                      <td className="py-4 px-6">
-                        <p className="text-slate-800 font-bold">{bill.customerName}</p>
+                        <p className="text-slate-800 font-bold">{bill.customerName || 'Unnamed Customer'}</p>
                         {bill.prevBalanceIncluded > 0 && (
                            <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter shadow-sm flex items-center w-fit mt-1">
                               <ArrowUpRight size={10} className="mr-0.5"/> Udhaar Incl.
@@ -155,11 +160,11 @@ export default function BillHistory() {
                         )}
                      </td>
                      <td className="py-4 px-6 text-slate-500 text-sm font-medium">
-                       {bill.readableDate || new Date(bill.date).toLocaleDateString()}
+                       {bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}
                      </td>
-                     <td className="py-4 px-6 text-slate-800 font-black text-right">₹{((bill.subTotal || bill.total || 0) + (bill.cgst || 0) + (bill.sgst || 0)).toFixed(2)}</td>
-                     <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{(bill.amountPaid || 0).toFixed(2)}</td>
-                     <td className="py-4 px-6 text-red-500 font-black text-right">₹{(bill.outstanding || 0).toFixed(2)}</td>
+                     <td className="py-4 px-6 text-slate-800 font-black text-right">₹{((parseFloat(bill?.subTotal || 0) || parseFloat(bill?.total || 0) || 0) + parseFloat(bill?.cgst || 0) + parseFloat(bill?.sgst || 0)).toFixed(2)}</td>
+                     <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{parseFloat(bill?.amountPaid || 0).toFixed(2)}</td>
+                     <td className="py-4 px-6 text-red-500 font-black text-right">₹{parseFloat(bill?.outstanding || 0).toFixed(2)}</td>
                      <td className="py-4 px-6 text-center">
                         <button onClick={() => setSelectedBill(bill)} className="p-2 text-slate-400 group-hover:text-indigo-600 hover:bg-white rounded-lg transition-all border border-transparent group-hover:border-indigo-100 group-hover:shadow-sm">
                           <Eye size={18} />
@@ -213,11 +218,11 @@ export default function BillHistory() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
-                    {selectedBill.items.map((item, idx) => (
+                    {(selectedBill?.items || []).map((item, idx) => (
                       <tr key={idx}>
-                        <td className="py-3.5 px-2 text-slate-800 text-sm font-bold uppercase tracking-tight">{item.name}</td>
-                        <td className="py-3.5 px-2 text-slate-600 text-sm text-center font-bold">{item.quantity}</td>
-                        <td className="py-3.5 px-2 text-slate-800 text-sm font-black text-right">₹{item.amount.toFixed(2)}</td>
+                        <td className="py-3.5 px-2 text-slate-800 text-sm font-bold uppercase tracking-tight">{item?.name || 'Unknown Item'}</td>
+                        <td className="py-3.5 px-2 text-slate-600 text-sm text-center font-bold">{item?.quantity || 0}</td>
+                        <td className="py-3.5 px-2 text-slate-800 text-sm font-black text-right">₹{parseFloat(item?.amount || 0).toFixed(2)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -243,16 +248,16 @@ export default function BillHistory() {
                 )}
                 <div className="flex justify-between items-center pt-3 mt-1 border-t border-slate-200">
                   <span className="font-black text-slate-700 uppercase tracking-wider text-xs">Final Net Total</span>
-                  <span className="text-3xl font-black text-indigo-700 tracking-tighter">₹{(selectedBill.grandTotal || selectedBill.total || 0).toFixed(2)}</span>
+                  <span className="text-3xl font-black text-indigo-700 tracking-tighter">₹{parseFloat(selectedBill.grandTotal || selectedBill.total || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between items-center pt-3 mt-1 border-t border-slate-200">
                   <span className="font-bold text-slate-600 text-sm">Amount Paid</span>
-                  <span className="font-black text-emerald-600 text-lg">₹{(selectedBill.amountPaid || 0).toFixed(2)}</span>
+                  <span className="font-black text-emerald-600 text-lg">₹{parseFloat(selectedBill.amountPaid || 0).toFixed(2)}</span>
                 </div>
                 {(selectedBill.outstanding || 0) > 0 && (
                   <div className="flex justify-between items-center pt-3 mt-1 border-t border-slate-200">
                     <span className="font-bold text-slate-600 text-sm">Outstanding Balance</span>
-                    <span className="font-black text-red-600 text-lg">₹{(selectedBill.outstanding || 0).toFixed(2)}</span>
+                    <span className="font-black text-red-600 text-lg">₹{parseFloat(selectedBill.outstanding || 0).toFixed(2)}</span>
                   </div>
                 )}
               </div>

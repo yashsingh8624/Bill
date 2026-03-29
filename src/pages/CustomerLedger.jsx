@@ -7,10 +7,13 @@ import { Users, Search, IndianRupee, MessageCircle, ChevronRight, Plus, X, Recei
 import { getCustomerLedger, getCustomerBalance } from '../utils/ledger';
 
 export default function CustomerLedger() {
-  const { customers, addCustomerPayment, updateCustomer, deleteCustomer } = useCustomers();
-  const { bills } = useBills();
-  const { getTransactionsByEntityId } = useTransactions();
-  const { userSettings } = useSettings();
+  const customersRes = useCustomers() || {};
+  const customers = Array.isArray(customersRes.customers) ? customersRes.customers : [];
+  const { addCustomerPayment, updateCustomer, deleteCustomer } = customersRes;
+
+  const { bills = [] } = useBills() || {};
+  const { getTransactionsByEntityId } = useTransactions() || {};
+  const { userSettings = {} } = useSettings() || {};
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -25,8 +28,10 @@ export default function CustomerLedger() {
   const [editForm, setEditForm] = useState({ name: '', phone: '' });
 
   const filteredCustomers = customers.filter(c => 
-    c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    (c.phone && c.phone.includes(searchTerm))
+    c && (
+      (c.name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (c.phone && String(c.phone).includes(searchTerm))
+    )
   );
 
   const handleOpenCustomer = (customer) => {
@@ -87,11 +92,11 @@ export default function CustomerLedger() {
   const currentBalance = currentCustomer ? getCustomerBalance(currentCustomer.id) : 0;
 
   const getCustomerTotals = (customer) => {
-    if (!customer) return { totalBilled: 0, totalPaid: 0, outstanding: 0 };
+    if (!customer || !customer.id) return { totalBilled: 0, totalPaid: 0, outstanding: 0 };
     
-    const entries = getCustomerLedger(customer.id);
-    const totalBilled = entries.filter(e => e.type === 'SALE' || e.type === 'OPENING').reduce((s, e) => s + e.amount, 0);
-    const totalPaid = entries.filter(e => e.type === 'PAYMENT' || e.type === 'ROLLOVER').reduce((s, e) => s + e.amount, 0);
+    const entries = getCustomerLedger(customer.id) || [];
+    const totalBilled = entries.filter(e => e && (e.type === 'SALE' || e.type === 'OPENING')).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+    const totalPaid = entries.filter(e => e && (e.type === 'PAYMENT' || e.type === 'ROLLOVER')).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
     const outstanding = totalBilled - totalPaid;
 
     return { totalBilled, totalPaid, outstanding };
@@ -100,8 +105,8 @@ export default function CustomerLedger() {
   const handleSendWhatsApp = () => {
     if (!currentCustomer || !currentCustomer.phone) return;
     const { outstanding } = getCustomerTotals(currentCustomer);
-    const phone = currentCustomer.phone.startsWith('+91') ? currentCustomer.phone : `+91${currentCustomer.phone}`;
-    const message = `Dear ${currentCustomer.name}, aapka pending balance ₹${outstanding.toFixed(2)} hai. Kripya jald clear karein. Dhanyawad.\n- ${userSettings.ownerName} | ${userSettings.businessName}`;
+    const phone = currentCustomer.phone?.startsWith('+91') ? currentCustomer.phone : `+91${currentCustomer.phone || ''}`;
+    const message = `Dear ${currentCustomer.name || 'Customer'}, aapka pending balance ₹${outstanding.toFixed(2)} hai. Kripya jald clear karein. Dhanyawad.\n- ${userSettings.ownerName || ''} | ${userSettings.businessName || ''}`;
     const url = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
@@ -157,14 +162,14 @@ export default function CustomerLedger() {
                       >
                          <td className="py-4 px-6 text-slate-800 font-bold flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs uppercase">
-                               {customer.name.substring(0,2)}
+                               {(customer.name || '??').substring(0,2)}
                             </div>
-                            {customer.name}
+                            {customer.name || 'Unnamed Customer'}
                          </td>
                          <td className="py-4 px-6 text-slate-600 font-medium">{customer.phone || '-'}</td>
-                          <td className="py-4 px-6 text-right">
-                             <span className={`font-black ${getCustomerBalance(customer.id) > 0 ? 'text-red-500 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100' : 'text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100'}`}>
-                               ₹{getCustomerBalance(customer.id).toFixed(2)}
+                           <td className="py-4 px-6 text-right">
+                             <span className={`font-black ${parseFloat(getCustomerBalance(customer.id) || 0) > 0 ? 'text-red-500 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100' : 'text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100'}`}>
+                               ₹{parseFloat(getCustomerBalance(customer.id) || 0).toFixed(2)}
                              </span>
                           </td>
                          <td className="py-4 px-6 text-center">
@@ -239,7 +244,7 @@ export default function CustomerLedger() {
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
                 <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Outstanding</p>
                 <h3 className={`text-3xl font-black ${getCustomerTotals(currentCustomer).outstanding > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                  ₹{getCustomerTotals(currentCustomer).outstanding.toFixed(2)}
+                  ₹{parseFloat(getCustomerTotals(currentCustomer).outstanding || 0).toFixed(2)}
                 </h3>
               </div>
               <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
