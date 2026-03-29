@@ -62,11 +62,27 @@ export const BillProvider = ({ children }) => {
     }));
 
     // 3. LEDGER IS NOW SINGLE SOURCE OF TRUTH
-    // Logic for Rollover and Sale Entry is handled in NewBill.jsx before submit
-    // But we trigger a balance check here if needed for UI sync.
     if (bill.customerId) {
-      // In this new architecture, we don't 'sync' back to customer object.
-      // Pages will read directly from getCustomerBalance().
+      // Create SALE entry for the items total
+      addLedgerEntry({
+        customerId: bill.customerId,
+        date: newBill.date,
+        type: 'SALE',
+        invoiceId: newBill.invoiceNo,
+        amount: parseFloat(newBill.totalAmount || newBill.total || 0),
+        desc: `Bill #${newBill.invoiceNo || 'Unknown'}`
+      });
+      
+      // Create PAYMENT entry if some amount was paid
+      if (parseFloat(newBill.amountPaid || 0) > 0) {
+        addLedgerEntry({
+          customerId: bill.customerId,
+          date: new Date(new Date(newBill.date).getTime() + 1000).toISOString(),
+          type: 'PAYMENT',
+          amount: parseFloat(newBill.amountPaid),
+          desc: `Paid for Bill #${newBill.invoiceNo || 'Unknown'}`
+        });
+      }
     }
     
     return newBill;

@@ -153,10 +153,16 @@ export default function BillHistory() {
                      <td className="py-4 px-6 font-bold text-slate-700">#{bill?.invoiceNo || (bill?.id && String(bill.id).slice(-4)) || '????'}</td>
                      <td className="py-4 px-6">
                         <p className="text-slate-800 font-bold">{bill.customerName || 'Unnamed Customer'}</p>
-                        {bill.prevBalanceIncluded > 0 && (
-                           <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter shadow-sm flex items-center w-fit mt-1">
-                              <ArrowUpRight size={10} className="mr-0.5"/> Udhaar Incl.
-                           </span>
+                        {bill.previousBalance > 0 ? (
+                           <p className="text-[11px] text-amber-600 font-bold mt-1 bg-amber-50 px-2 py-0.5 rounded-md inline-block border border-amber-100">
+                             Prev. Balance: ₹{parseFloat(bill.previousBalance).toFixed(2)}
+                           </p>
+                        ) : (
+                           bill.prevBalanceIncluded > 0 && (
+                             <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-black uppercase tracking-tighter shadow-sm flex items-center w-fit mt-1">
+                                <ArrowUpRight size={10} className="mr-0.5"/> Udhaar Incl.
+                             </span>
+                           )
                         )}
                      </td>
                      <td className="py-4 px-6 text-slate-500 text-sm font-medium">
