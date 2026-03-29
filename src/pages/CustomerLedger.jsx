@@ -112,7 +112,7 @@ export default function CustomerLedger() {
   };
 
   return (
-    <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col relative w-full overflow-hidden">
+    <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col relative w-full overflow-y-auto sm:overflow-hidden">
       {!selectedCustomer ? (
         <>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -187,7 +187,7 @@ export default function CustomerLedger() {
         </>
       ) : (
         currentCustomer && (
-          <div className="flex flex-col h-full space-y-6 animate-in slide-in-from-right-4 duration-300 w-full overflow-hidden">
+          <div className="flex flex-col space-y-6 animate-in slide-in-from-right-4 duration-300 w-full overflow-y-auto pb-20 sm:overflow-hidden sm:h-full sm:pb-0">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <button 
@@ -253,14 +253,14 @@ export default function CustomerLedger() {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex-1 overflow-hidden flex flex-col min-h-0">
-               <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col w-full sm:flex-1 sm:overflow-hidden sm:min-h-0">
+               <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shadow-sm z-10 sticky top-0">
                  <div className="flex items-center gap-2">
                     <Receipt size={18} className="text-slate-500" />
                     <h3 className="font-bold text-slate-800">Ledger Details</h3>
                  </div>
                </div>
-               <div className="overflow-y-auto flex-1 p-0 max-h-[60vh] sm:max-h-none">
+               <div className="max-h-[60vh] overflow-y-auto w-full pb-12 sm:pb-0 sm:max-h-none sm:flex-1">
                  {ledgerEntries.length === 0 ? (
                     <div className="p-12 text-center text-slate-400 font-medium text-lg">No ledger entries found.</div>
                  ) : (
