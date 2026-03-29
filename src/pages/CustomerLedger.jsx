@@ -260,7 +260,7 @@ export default function CustomerLedger() {
                     <h3 className="font-bold text-slate-800">Ledger Details</h3>
                  </div>
                </div>
-               <div className="overflow-y-auto flex-1 p-0">
+               <div className="overflow-y-auto flex-1 p-0 max-h-[60vh] sm:max-h-none">
                  {ledgerEntries.length === 0 ? (
                     <div className="p-12 text-center text-slate-400 font-medium text-lg">No ledger entries found.</div>
                  ) : (

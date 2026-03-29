@@ -40,10 +40,14 @@ export default function Dashboard() {
     const thisMonthBills = activeBills.filter(b => b?.date && String(b.date).startsWith(thisMonthStr));
     const lastMonthBills = activeBills.filter(b => b?.date && String(b.date).startsWith(lastMonthStr));
 
-    const todaysSales = todaysBills.reduce((sum, b) => sum + parseFloat(b?.grandTotal || b?.total || 0), 0);
-    const yesterdaysSales = yesterdaysBills.reduce((sum, b) => sum + parseFloat(b?.grandTotal || b?.total || 0), 0);
-    const thisMonthSales = thisMonthBills.reduce((sum, b) => sum + parseFloat(b?.grandTotal || b?.total || 0), 0);
-    const lastMonthSales = lastMonthBills.reduce((sum, b) => sum + parseFloat(b?.grandTotal || b?.total || 0), 0);
+    const getBillSaleAmount = (b) => {
+      return (parseFloat(b?.subTotal || 0) || parseFloat(b?.totalAmount || 0) || parseFloat(b?.total || 0) || 0) + parseFloat(b?.cgst || 0) + parseFloat(b?.sgst || 0);
+    };
+
+    const todaysSales = todaysBills.reduce((sum, b) => sum + getBillSaleAmount(b), 0);
+    const yesterdaysSales = yesterdaysBills.reduce((sum, b) => sum + getBillSaleAmount(b), 0);
+    const thisMonthSales = thisMonthBills.reduce((sum, b) => sum + getBillSaleAmount(b), 0);
+    const lastMonthSales = lastMonthBills.reduce((sum, b) => sum + getBillSaleAmount(b), 0);
 
     const salesTrend = yesterdaysSales === 0 ? 0 : ((todaysSales - yesterdaysSales) / yesterdaysSales) * 100;
     const monthTrend = lastMonthSales === 0 ? 0 : ((thisMonthSales - lastMonthSales) / lastMonthSales) * 100;

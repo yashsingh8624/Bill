@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export const generateInvoicePDF = (bill, settings) => {
   const doc = new jsPDF();
@@ -71,7 +71,7 @@ export const generateInvoicePDF = (bill, settings) => {
   
   doc.setFontSize(12);
   doc.setTextColor(...colText);
-  doc.text(bill.customerName.toUpperCase(), 24, 71);
+  doc.text((bill.customerName || 'UNKNOWN CUSTOMER').toUpperCase(), 24, 71);
   
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
@@ -79,15 +79,15 @@ export const generateInvoicePDF = (bill, settings) => {
   doc.text(`Phone: ${bill.customerPhone || 'N/A'}`, 24, 78);
 
   // -- Table Section --
-  const tableData = bill.items.map((item, index) => [
+  const tableData = (bill.items || []).map((item, index) => [
     index + 1,
-    item.name,
-    `Rs ${item.price.toFixed(2)}`,
-    item.quantity,
-    `Rs ${item.amount.toFixed(2)}`
+    item.name || 'Item',
+    `Rs ${parseFloat(item.price || 0).toFixed(2)}`,
+    item.quantity || 1,
+    `Rs ${parseFloat(item.amount || 0).toFixed(2)}`
   ]);
 
-  doc.autoTable({
+  autoTable(doc, {
     startY: 95,
     head: [['#', 'ITEM DESCRIPTION', 'RATE', 'QTY', 'AMOUNT']],
     body: tableData,
@@ -210,5 +210,5 @@ export const generateInvoicePDF = (bill, settings) => {
   doc.setTextColor(...colMuted);
   doc.text('Thank you for your business! This is a computer generated invoice.', pageWidth / 2, footerY, { align: 'center' });
 
-  doc.save(`Invoice_${bill.invoiceNo}_${bill.customerName.replace(/\s+/g, '_')}.pdf`);
+  doc.save(`Invoice_${bill.invoiceNo || 'Draft'}_${(bill.customerName || 'Customer').replace(/\s+/g, '_')}.pdf`);
 };
