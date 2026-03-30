@@ -168,9 +168,18 @@ export default function BillHistory() {
                      <td className="py-4 px-6 text-slate-500 text-sm font-medium">
                        {bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}
                      </td>
-                     <td className="py-4 px-6 text-slate-800 font-black text-right">₹{((parseFloat(bill?.subTotal || 0) || parseFloat(bill?.total || 0) || 0) + parseFloat(bill?.cgst || 0) + parseFloat(bill?.sgst || 0)).toFixed(2)}</td>
-                     <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{parseFloat(bill?.amountPaid || 0).toFixed(2)}</td>
-                     <td className="py-4 px-6 text-red-500 font-black text-right">₹{parseFloat(bill?.outstanding || 0).toFixed(2)}</td>
+                     <td className="py-4 px-6 text-slate-800 font-black text-right">
+                       {(() => {
+                         // Derive subtotal strictly from items to avoid showing prev-balance-inflated totals
+                         const itemsSubtotal = Array.isArray(bill?.items) && bill.items.length > 0
+                           ? bill.items.reduce((sum, item) => sum + (parseFloat(item?.amount) || 0), 0)
+                           : (parseFloat(bill?.subTotal) || 0);
+                         const gst = (parseFloat(bill?.cgst) || 0) + (parseFloat(bill?.sgst) || 0);
+                         return `₹${(itemsSubtotal + gst).toFixed(2)}`;
+                       })()}
+                     </td>
+                     <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{parseFloat(bill?.amountPaid || bill?.paidAmount || 0).toFixed(2)}</td>
+                     <td className="py-4 px-6 text-red-500 font-black text-right">₹{parseFloat(bill?.outstanding || bill?.finalOutstanding || 0).toFixed(2)}</td>
                      <td className="py-4 px-6 text-center">
                         <button onClick={() => setSelectedBill(bill)} className="p-2 text-slate-400 group-hover:text-indigo-600 hover:bg-white rounded-lg transition-all border border-transparent group-hover:border-indigo-100 group-hover:shadow-sm">
                           <Eye size={18} />

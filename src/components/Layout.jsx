@@ -17,10 +17,10 @@ export default function Layout() {
     { path: '/bills', label: 'Sale History', icon: History },
     { path: '/products', label: 'Inventory', icon: Package },
     { path: '/customers', label: 'Customers', icon: Users },
+    { path: '/day-closing', label: 'Day Closing', icon: Sun },
     ...(userSettings?.uiMode === 'advanced' ? [
       { path: '/suppliers', label: 'Suppliers', icon: Truck },
       { path: '/reports', label: 'Reports', icon: FileSpreadsheet },
-      { path: '/day-closing', label: 'Day Closing', icon: Sun }
     ] : []),
     { path: '/settings', label: 'Settings', icon: Settings },
   ];

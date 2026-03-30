@@ -1,21 +1,23 @@
 import { safeGet, safeSet, generateId } from './storage';
 
 /**
- * Single Source of Truth: Ledger Entries
- * Entry Types:
- * - 'SALE': Full invoice total (subtotal + previousDue)
- * - 'PAYMENT': Direct payments from customers
- * - 'ROLLOVER': Virtual payment to "clear" old debt before a new SALE entry includes it.
- * - 'OPENING': Initial balance from customer creation
+ * LEDGER - Single Source of Truth
+ *
+ * Entry types:
+ *   SALE     → amount = items subtotal + GST only (NO previous balance)
+ *   PAYMENT  → amount = cash received from customer
+ *   OPENING  → amount = opening balance when customer was created
+ *   ROLLOVER → legacy clearing entries (handled for backwards compat)
+ *
+ * Balance formula: SUM(SALE + OPENING) - SUM(PAYMENT + ROLLOVER)
  */
 
-/**
- * Adds a new entry to the unified ledger.
- */
+// ─────────────────────────────────────────────
+// ADD ENTRY
+// ─────────────────────────────────────────────
 export const addLedgerEntry = (entry) => {
   const ledger = safeGet('smartbill_ledger', []);
   if (!Array.isArray(ledger)) {
-    console.error('Ledger is not an array, resetting to empty.');
     safeSet('smartbill_ledger', []);
     return null;
   }
@@ -23,169 +25,244 @@ export const addLedgerEntry = (entry) => {
     id: generateId(),
     date: new Date().toISOString(),
     ...entry,
-    amount: parseFloat(entry?.amount || 0)
+    amount: Math.max(0, parseFloat(entry?.amount || 0)),
   };
   safeSet('smartbill_ledger', [...ledger, newEntry]);
   return newEntry;
 };
 
-/**
- * Calculates current balance for a customer.
- * Logic: balance = SUM(SALE) - SUM(PAYMENT) - SUM(ROLLOVER)
- */
+// ─────────────────────────────────────────────
+// GET CUSTOMER BALANCE  (clamped to 0 minimum)
+// ─────────────────────────────────────────────
 export const getCustomerBalance = (customerId) => {
+  if (!customerId) return 0;
   const ledger = safeGet('smartbill_ledger', []);
   if (!Array.isArray(ledger)) return 0;
-  
-  const entries = ledger.filter(e => e && e.customerId === customerId);
-  
-  return entries.reduce((sum, e) => {
-    const amt = parseFloat(e?.amount || 0);
-    if (e.type === 'SALE' || e.type === 'OPENING') return sum + amt;
-    if (e.type === 'PAYMENT' || e.type === 'ROLLOVER') return sum - amt;
-    return sum;
-  }, 0);
+
+  const balance = ledger
+    .filter(e => e && e.customerId === customerId)
+    .reduce((sum, e) => {
+      const amt = parseFloat(e?.amount || 0);
+      if (e.type === 'SALE' || e.type === 'OPENING') return sum + amt;
+      if (e.type === 'PAYMENT' || e.type === 'ROLLOVER') return sum - amt;
+      return sum;
+    }, 0);
+
+  return Math.max(0, balance); // Never return negative — that's an advance
 };
 
-/**
- * Calculates current balance for a supplier.
- * Logic: balance = SUM(INVOICE) - SUM(PAYMENT)
- */
+// ─────────────────────────────────────────────
+// GET CUSTOMER RAW BALANCE  (can be negative = advance)
+// ─────────────────────────────────────────────
+export const getCustomerRawBalance = (customerId) => {
+  if (!customerId) return 0;
+  const ledger = safeGet('smartbill_ledger', []);
+  if (!Array.isArray(ledger)) return 0;
+
+  return ledger
+    .filter(e => e && e.customerId === customerId)
+    .reduce((sum, e) => {
+      const amt = parseFloat(e?.amount || 0);
+      if (e.type === 'SALE' || e.type === 'OPENING') return sum + amt;
+      if (e.type === 'PAYMENT' || e.type === 'ROLLOVER') return sum - amt;
+      return sum;
+    }, 0);
+};
+
+// ─────────────────────────────────────────────
+// GET SUPPLIER BALANCE
+// ─────────────────────────────────────────────
 export const getSupplierBalance = (supplierId) => {
+  if (!supplierId) return 0;
   const ledger = safeGet('smartbill_ledger', []);
   if (!Array.isArray(ledger)) return 0;
-  
-  const entries = ledger.filter(e => e && e.supplierId === supplierId);
-  
-  return entries.reduce((sum, e) => {
-    const amt = parseFloat(e?.amount || 0);
-    if (e.type === 'PURCHASE' || e.type === 'SUPPLIER_OPENING') return sum + amt;
-    if (e.type === 'PAYMENT_MADE') return sum - amt;
-    return sum;
-  }, 0);
+
+  return ledger
+    .filter(e => e && e.supplierId === supplierId)
+    .reduce((sum, e) => {
+      const amt = parseFloat(e?.amount || 0);
+      if (e.type === 'PURCHASE' || e.type === 'SUPPLIER_OPENING') return sum + amt;
+      if (e.type === 'PAYMENT_MADE') return sum - amt;
+      return sum;
+    }, 0);
 };
 
-/**
- * Fetches all ledger entries for a customer (chronologically).
- */
+// ─────────────────────────────────────────────
+// GET CUSTOMER LEDGER ENTRIES (chronological)
+// ─────────────────────────────────────────────
 export const getCustomerLedger = (customerId) => {
+  if (!customerId) return [];
   const ledger = safeGet('smartbill_ledger', []);
   if (!Array.isArray(ledger)) return [];
-  
+
   return ledger
     .filter(e => e && e.customerId === customerId)
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 };
 
-/**
- * Fetches all ledger entries for a supplier (chronologically).
- */
+// ─────────────────────────────────────────────
+// GET SUPPLIER LEDGER ENTRIES (chronological)
+// ─────────────────────────────────────────────
 export const getSupplierLedger = (supplierId) => {
+  if (!supplierId) return [];
   const ledger = safeGet('smartbill_ledger', []);
   if (!Array.isArray(ledger)) return [];
-  
+
   return ledger
     .filter(e => e && e.supplierId === supplierId)
     .sort((a, b) => new Date(a.date) - new Date(b.date));
 };
 
-/**
- * Migration helper: Build initial ledger from legacy data.
- */
+// ─────────────────────────────────────────────
+// MIGRATE legacy data → ledger (runs once)
+// ─────────────────────────────────────────────
 export const migrateLegacyToLedger = () => {
   const ledger = safeGet('smartbill_ledger', []);
-  if (ledger.length > 0) return;
+  if (ledger.length > 0) return; // Already migrated
 
   const customers = safeGet('smartbill_customers', []);
-  const suppliers = safeGet('smartbill_suppliers', []);
-  const bills = safeGet('smartbill_bills', []);
-  const txns = safeGet('smartbill_transactions', []);
+  const suppliers  = safeGet('smartbill_suppliers', []);
+  const bills      = safeGet('smartbill_bills', []);
+  const txns       = safeGet('smartbill_transactions', []);
+  const newLedger  = [];
 
-  const newLedger = [];
+  const safeDate = (d) => {
+    const dt = new Date(d);
+    return isNaN(dt.getTime()) ? new Date().toISOString() : dt.toISOString();
+  };
 
-  // --- Customers ---
+  // Opening balances for customers
   customers.forEach(c => {
     if (parseFloat(c.previousBalance || 0) > 0) {
       newLedger.push({
         id: `mig-op-c-${c.id}`,
         customerId: c.id,
-        date: c.createdAt || new Date().toISOString(),
+        date: safeDate(c.createdAt),
         type: 'OPENING',
         amount: parseFloat(c.previousBalance),
-        desc: 'Opening Balance'
+        desc: 'Opening Balance',
       });
     }
   });
 
-  const safeDate = (dateStr) => {
-    const d = new Date(dateStr);
-    return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
-  };
-
+  // Bills → SALE + optional PAYMENT
   bills.filter(b => !b?.isDeleted && b?.date).forEach(b => {
+    // Derive the true items subtotal to avoid including prev balance in SALE amount
+    const itemsSubtotal = Array.isArray(b.items) && b.items.length > 0
+      ? b.items.reduce((s, i) => s + (parseFloat(i?.amount) || 0), 0)
+      : (parseFloat(b.subTotal) || parseFloat(b.totalAmount) || parseFloat(b.total) || 0);
+    const gst = (parseFloat(b.cgst) || 0) + (parseFloat(b.sgst) || 0);
+    const saleAmount = itemsSubtotal + gst;
+
     newLedger.push({
       id: `mig-sale-${b.id}`,
       customerId: b.customerId,
       date: safeDate(b.date),
       type: 'SALE',
       invoiceId: b.invoiceNo,
-      amount: parseFloat(b.totalAmount || b.total || 0),
-      desc: `Bill #${b.invoiceNo || 'Unknown'}`
+      amount: saleAmount,
+      desc: `Bill #${b.invoiceNo || 'Unknown'}`,
     });
-    
-    if (parseFloat(b.amountPaid || 0) > 0) {
+
+    const paid = parseFloat(b.amountPaid || b.paidAmount || 0);
+    if (paid > 0) {
       const bDate = new Date(b.date);
-      const paidDate = isNaN(bDate.getTime()) 
-        ? new Date().toISOString() 
-        : new Date(bDate.getTime() + 1000).toISOString();
-        
       newLedger.push({
         id: `mig-pay-${b.id}`,
         customerId: b.customerId,
-        date: paidDate,
+        date: isNaN(bDate.getTime())
+          ? new Date().toISOString()
+          : new Date(bDate.getTime() + 1000).toISOString(),
         type: 'PAYMENT',
-        amount: parseFloat(b.amountPaid),
-        desc: `Paid for Bill #${b.invoiceNo || 'Unknown'}`
+        invoiceId: b.invoiceNo,
+        amount: paid,
+        desc: `Paid for Bill #${b.invoiceNo || 'Unknown'}`,
       });
     }
   });
 
-  // --- Suppliers ---
+  // Opening balances for suppliers
   suppliers.forEach(s => {
     if (parseFloat(s.previousBalance || 0) > 0) {
       newLedger.push({
         id: `mig-op-s-${s.id}`,
         supplierId: s.id,
-        date: s.createdAt || new Date().toISOString(),
+        date: safeDate(s.createdAt),
         type: 'SUPPLIER_OPENING',
         amount: parseFloat(s.previousBalance),
-        desc: 'Opening Balance'
+        desc: 'Opening Balance',
       });
     }
   });
 
-  // --- Generic Transactions ---
+  // Generic legacy transactions
   txns.forEach(t => {
     if (t.type === 'PAYMENT_RECEIVED' || !t.type) {
       newLedger.push({
         id: `mig-txn-c-${t.id}`,
         customerId: t.entityId,
-        date: t.date,
+        date: safeDate(t.date),
         type: 'PAYMENT',
         amount: parseFloat(t.amount),
-        desc: t.notes || 'Payment Received'
+        desc: t.notes || 'Payment Received',
       });
     } else if (t.type === 'PAYMENT_MADE' || t.type === 'INVOICE_RECEIVED') {
       newLedger.push({
         id: `mig-txn-s-${t.id}`,
         supplierId: t.entityId,
-        date: t.date,
+        date: safeDate(t.date),
         type: t.type === 'INVOICE_RECEIVED' ? 'PURCHASE' : 'PAYMENT_MADE',
         amount: parseFloat(t.amount),
-        desc: t.notes || (t.type === 'INVOICE_RECEIVED' ? 'Stock Bill' : 'Payment Made')
+        desc: t.notes || (t.type === 'INVOICE_RECEIVED' ? 'Stock Bill' : 'Payment Made'),
       });
     }
   });
 
-  safeSet('smartbill_ledger', newLedger.sort((a, b) => new Date(a.date) - new Date(b.date)));
+  safeSet('smartbill_ledger',
+    newLedger.sort((a, b) => new Date(a.date) - new Date(b.date))
+  );
+};
+
+// ─────────────────────────────────────────────
+// REPAIR corrupt ledger data
+// Fixes: SALE amounts that wrongly include previous balance,
+//        orphaned PAYMENT entries missing invoiceId.
+// ─────────────────────────────────────────────
+export const repairLedgerData = () => {
+  const ledger = safeGet('smartbill_ledger', []);
+  const bills  = safeGet('smartbill_bills', []);
+  if (!Array.isArray(ledger) || !Array.isArray(bills) || ledger.length === 0) return;
+
+  let modified = false;
+
+  const repaired = ledger.map(entry => {
+    // Fix SALE amounts: must equal items subtotal + GST only
+    if (entry.type === 'SALE' && entry.invoiceId) {
+      const bill = bills.find(b => b.invoiceNo === entry.invoiceId && !b.isDeleted);
+      if (bill && Array.isArray(bill.items) && bill.items.length > 0) {
+        const itemsSubtotal = bill.items.reduce((s, i) => s + (parseFloat(i?.amount) || 0), 0);
+        const gst = (parseFloat(bill.cgst) || 0) + (parseFloat(bill.sgst) || 0);
+        const trueAmount = itemsSubtotal + gst;
+        if (Math.abs(entry.amount - trueAmount) > 0.01) {
+          modified = true;
+          return { ...entry, amount: trueAmount };
+        }
+      }
+    }
+
+    // Fix orphan PAYMENT entries: link to invoice via desc
+    if (entry.type === 'PAYMENT' && !entry.invoiceId && entry.desc) {
+      const match = entry.desc.match(/^Paid for Bill #(.+)$/);
+      if (match && match[1] && match[1] !== 'Unknown') {
+        modified = true;
+        return { ...entry, invoiceId: match[1] };
+      }
+    }
+
+    return entry;
+  });
+
+  if (modified) {
+    safeSet('smartbill_ledger', repaired);
+  }
 };

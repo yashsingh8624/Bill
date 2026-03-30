@@ -92,27 +92,41 @@ export default function CustomerLedger() {
   const currentBalance = currentCustomer ? getCustomerBalance(currentCustomer.id) : 0;
 
   const getCustomerTotals = (customer) => {
-    if (!customer || !customer.id) return { totalBilled: 0, totalPaid: 0, outstanding: 0 };
+    if (!customer || !customer.id) return { totalBilled: 0, totalPaid: 0, outstanding: 0, advance: 0, totalBills: 0 };
     
     const entries = getCustomerLedger(customer.id) || [];
-    const totalBilled = entries.filter(e => e && (e.type === 'SALE' || e.type === 'OPENING')).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
-    const totalPaid = entries.filter(e => e && (e.type === 'PAYMENT' || e.type === 'ROLLOVER')).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
-    const outstanding = totalBilled - totalPaid;
+    // Lifetime billed = sum of all SALE + OPENING entries
+    const totalBilled = entries
+      .filter(e => e && (e.type === 'SALE' || e.type === 'OPENING'))
+      .reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+    // Lifetime paid = sum of all PAYMENT + ROLLOVER entries
+    const totalPaid = entries
+      .filter(e => e && (e.type === 'PAYMENT' || e.type === 'ROLLOVER'))
+      .reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+    
+    const rawBalance = totalBilled - totalPaid;
+    // Clamp: outstanding >= 0, if negative = advance (overpaid)
+    const outstanding = Math.max(0, rawBalance);
+    const advance = rawBalance < 0 ? Math.abs(rawBalance) : 0;
+    const totalBills = entries.filter(e => e && e.type === 'SALE').length;
 
-    return { totalBilled, totalPaid, outstanding };
+    return { totalBilled, totalPaid, outstanding, advance, totalBills };
   };
 
   const handleSendWhatsApp = () => {
     if (!currentCustomer || !currentCustomer.phone) return;
     const { outstanding } = getCustomerTotals(currentCustomer);
-    const phone = currentCustomer.phone?.startsWith('+91') ? currentCustomer.phone : `+91${currentCustomer.phone || ''}`;
-    const message = `Dear ${currentCustomer.name || 'Customer'}, aapka pending balance ₹${outstanding.toFixed(2)} hai. Kripya jald clear karein. Dhanyawad.\n- ${userSettings.ownerName || ''} | ${userSettings.businessName || ''}`;
-    const url = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-    window.open(url, '_blank');
+    // Clean phone to digits only, add country code 91 if not present
+    const rawPhone = String(currentCustomer.phone).replace(/[^0-9]/g, '');
+    const phone = rawPhone.startsWith('91') ? rawPhone : `91${rawPhone}`;
+    const bizName = userSettings.businessName || userSettings.ownerName || 'SmartBill Pro';
+    const message = `Hello ${currentCustomer.name || 'Customer'}, your outstanding amount is ₹${outstanding.toFixed(2)}. Please clear your dues. Thank you.\n- ${bizName}`;
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col relative w-full overflow-y-auto sm:overflow-hidden">
+    <div className="space-y-6 flex flex-col min-h-screen sm:h-[calc(100vh-8rem)] relative w-full">
       {!selectedCustomer ? (
         <>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -187,7 +201,7 @@ export default function CustomerLedger() {
         </>
       ) : (
         currentCustomer && (
-          <div className="flex flex-col space-y-6 animate-in slide-in-from-right-4 duration-300 w-full overflow-y-auto pb-20 sm:overflow-hidden sm:h-full sm:pb-0">
+          <div className="flex flex-col space-y-6 animate-in slide-in-from-right-4 duration-300 w-full pb-24">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <button 
@@ -212,7 +226,7 @@ export default function CustomerLedger() {
               <div className="flex gap-2">
                 <button 
                   onClick={handleSendWhatsApp}
-                  disabled={!currentCustomer.phone || (currentCustomer.balance || 0) <= 0}
+                  disabled={!currentCustomer.phone || currentBalance <= 0}
                   className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 px-4 py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <MessageCircle size={18} />
@@ -228,30 +242,43 @@ export default function CustomerLedger() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Billed</p>
-                <h3 className="text-3xl font-black text-slate-800">
-                  ₹{getCustomerTotals(currentCustomer).totalBilled.toFixed(2)}
-                </h3>
-              </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Paid</p>
-                <h3 className="text-3xl font-black text-indigo-600">
-                  ₹{getCustomerTotals(currentCustomer).totalPaid.toFixed(2)}
-                </h3>
-              </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Outstanding</p>
-                <h3 className={`text-3xl font-black ${getCustomerTotals(currentCustomer).outstanding > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
-                  ₹{parseFloat(getCustomerTotals(currentCustomer).outstanding || 0).toFixed(2)}
-                </h3>
-              </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Bills</p>
-                <h3 className="text-3xl font-black text-slate-800">{ledgerEntries.filter(e => e.type === 'SALE').length}</h3>
-              </div>
-            </div>
+            {/* Summary cards - derived entirely from ledger */}
+            {(() => {
+              const { totalBilled, totalPaid, outstanding, advance, totalBills } = getCustomerTotals(currentCustomer);
+              return (
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
+                    <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Billed</p>
+                    <h3 className="text-2xl font-black text-slate-800">₹{totalBilled.toFixed(2)}</h3>
+                    <p className="text-slate-400 text-[10px] mt-1 font-semibold uppercase">Lifetime</p>
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
+                    <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Paid</p>
+                    <h3 className="text-2xl font-black text-indigo-600">₹{totalPaid.toFixed(2)}</h3>
+                    <p className="text-slate-400 text-[10px] mt-1 font-semibold uppercase">Lifetime</p>
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
+                    <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Outstanding</p>
+                    {advance > 0 ? (
+                      <>
+                        <h3 className="text-2xl font-black text-emerald-500">₹0.00</h3>
+                        <p className="text-emerald-500 text-[10px] mt-1 font-black uppercase">Advance: ₹{advance.toFixed(2)}</p>
+                      </>
+                    ) : (
+                      <>
+                        <h3 className={`text-2xl font-black ${outstanding > 0 ? 'text-red-500' : 'text-emerald-500'}`}>₹{outstanding.toFixed(2)}</h3>
+                        <p className={`text-[10px] mt-1 font-semibold uppercase ${outstanding > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{outstanding > 0 ? 'Due' : 'Fully Cleared'}</p>
+                      </>
+                    )}
+                  </div>
+                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
+                    <p className="text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Total Bills</p>
+                    <h3 className="text-2xl font-black text-slate-800">{totalBills}</h3>
+                    <p className="text-slate-400 text-[10px] mt-1 font-semibold uppercase">Invoices</p>
+                  </div>
+                </div>
+              );
+            })()}
 
             <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col w-full sm:flex-1 sm:overflow-hidden sm:min-h-0">
                <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shadow-sm z-10 sticky top-0">
@@ -260,7 +287,7 @@ export default function CustomerLedger() {
                     <h3 className="font-bold text-slate-800">Ledger Details</h3>
                  </div>
                </div>
-               <div className="max-h-[60vh] overflow-y-auto w-full pb-12 sm:pb-0 sm:max-h-none sm:flex-1">
+               <div className="overflow-y-auto w-full pb-12" style={{ maxHeight: '55vh' }}>
                  {ledgerEntries.length === 0 ? (
                     <div className="p-12 text-center text-slate-400 font-medium text-lg">No ledger entries found.</div>
                  ) : (

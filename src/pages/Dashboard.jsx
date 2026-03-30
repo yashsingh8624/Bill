@@ -40,8 +40,15 @@ export default function Dashboard() {
     const thisMonthBills = activeBills.filter(b => b?.date && String(b.date).startsWith(thisMonthStr));
     const lastMonthBills = activeBills.filter(b => b?.date && String(b.date).startsWith(lastMonthStr));
 
+    // Strictly derive sale amount from items to prevent old corrupted totals
+    // (which may have included previous balances) from inflating stats
     const getBillSaleAmount = (b) => {
-      return (parseFloat(b?.subTotal || 0) || parseFloat(b?.totalAmount || 0) || parseFloat(b?.total || 0) || 0) + parseFloat(b?.cgst || 0) + parseFloat(b?.sgst || 0);
+      if (Array.isArray(b?.items) && b.items.length > 0) {
+        const itemsSubtotal = b.items.reduce((sum, item) => sum + (parseFloat(item?.amount) || 0), 0);
+        return itemsSubtotal + (parseFloat(b?.cgst) || 0) + (parseFloat(b?.sgst) || 0);
+      }
+      // Fallback for legacy bills without items array: use subTotal only (not grandTotal which may have prev balance)
+      return (parseFloat(b?.subTotal) || 0) + (parseFloat(b?.cgst) || 0) + (parseFloat(b?.sgst) || 0);
     };
 
     const todaysSales = todaysBills.reduce((sum, b) => sum + getBillSaleAmount(b), 0);
