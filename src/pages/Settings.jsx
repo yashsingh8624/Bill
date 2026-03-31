@@ -21,11 +21,16 @@ export default function Settings() {
     businessName: userSettings?.businessName || '',
     ownerName: userSettings?.ownerName || '',
     ownerPhone: userSettings?.ownerPhone || '',
+    businessAddress: userSettings?.businessAddress || '',
     gstNumber: userSettings?.gstNumber || '',
     currency: userSettings?.currency || '₹',
     invoicePrefix: userSettings?.invoicePrefix || 'INV-',
     logo: userSettings?.logo || '',
-    uiMode: userSettings?.uiMode || 'advanced'
+    uiMode: userSettings?.uiMode || 'advanced',
+    bankName: userSettings?.bankName || '',
+    bankAccount: userSettings?.bankAccount || '',
+    bankIFSC: userSettings?.bankIFSC || '',
+    termsAndConditions: userSettings?.termsAndConditions || 'Goods once sold will not be taken back. Subject to local jurisdiction.'
   });
   
   const [savedStatus, setSavedStatus] = useState(false);
@@ -170,8 +175,34 @@ export default function Settings() {
                     <label className="block text-sm font-bold text-slate-700 mb-1.5">GST Number / Tax ID</label>
                     <input type="text" value={formData.gstNumber} onChange={e => setFormData({...formData, gstNumber: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-bold uppercase transition-all" placeholder="22AAAAA0000A1Z5" />
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-bold text-slate-700 mb-1.5">Business Address (shown on invoice)</label>
+                    <textarea rows={2} value={formData.businessAddress} onChange={e => setFormData({...formData, businessAddress: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium transition-all resize-none" placeholder="Shop No. 12, Market Road, City - 400001" />
+                  </div>
                </div>
             </div>
+          </div>
+
+          <div className="space-y-4">
+             <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Bank Details <span className="text-xs font-medium text-slate-400">(shown on PDF invoice footer)</span></h3>
+             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Bank Name</label>
+                  <input type="text" value={formData.bankName} onChange={e => setFormData({...formData, bankName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium transition-all" placeholder="State Bank of India" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Account Number</label>
+                  <input type="text" value={formData.bankAccount} onChange={e => setFormData({...formData, bankAccount: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium transition-all" placeholder="1234567890" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">IFSC Code</label>
+                  <input type="text" value={formData.bankIFSC} onChange={e => setFormData({...formData, bankIFSC: e.target.value.toUpperCase()})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-bold uppercase transition-all" placeholder="SBIN0000123" />
+                </div>
+                <div className="md:col-span-3">
+                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Terms &amp; Conditions</label>
+                  <textarea rows={2} value={formData.termsAndConditions} onChange={e => setFormData({...formData, termsAndConditions: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium transition-all resize-none" placeholder="Goods once sold will not be returned..." />
+                </div>
+             </div>
           </div>
 
           <div className="space-y-4">

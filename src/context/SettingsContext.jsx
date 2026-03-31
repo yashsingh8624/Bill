@@ -9,12 +9,17 @@ export const SettingsProvider = ({ children }) => {
       ownerName: 'SmartBill Owner',
       ownerPhone: '91xxxxxxxxxx',
       businessName: 'SmartBill Pro Store',
+      businessAddress: '',
       gstNumber: '',
       currency: '₹',
       invoicePrefix: 'INV',
       theme: 'light',
       logo: '',
-      uiMode: 'advanced' // 'simple' | 'advanced'
+      uiMode: 'advanced', // 'simple' | 'advanced'
+      bankName: '',
+      bankAccount: '',
+      bankIFSC: '',
+      termsAndConditions: 'Goods once sold will not be taken back. Subject to local jurisdiction.'
     });
   });
 
