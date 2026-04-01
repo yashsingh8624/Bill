@@ -15,8 +15,10 @@ const SIZES = ['N/A', 'Free Size', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 const emptyItemForm = { name: '', hsn: '', size: 'N/A', rate: '', qty: 1, gstRate: 18, discount: 0 };
 
 export default function NewBill() {
-  const { billsRes = useBills() || {} } = {};
-  const { addBill, generateBillNumber, ledger = [] } = billsRes.addBill ? billsRes : useBills();
+  const billsRes = useBills() || {};
+  const addBill = billsRes.addBill || (() => {});
+  const generateBillNumber = billsRes.generateBillNumber || (() => 'INV-Temp');
+  const ledger = Array.isArray(billsRes.ledger) ? billsRes.ledger : [];
   const { products } = useInventory();
   const { customers, addCustomer } = useCustomers();
   const { userSettings } = useSettings();

@@ -11,17 +11,17 @@ export const AppProvider = ({ children }) => {
   return (
     <AuditProvider>
       <SettingsProvider>
-        <TransactionProvider>
-          <CustomerProvider>
-            <SupplierProvider>
-              <InventoryProvider>
-                <BillProvider>
+        <CustomerProvider>
+          <SupplierProvider>
+            <InventoryProvider>
+              <BillProvider>
+                <TransactionProvider>
                   {children}
-                </BillProvider>
-              </InventoryProvider>
-            </SupplierProvider>
-          </CustomerProvider>
-        </TransactionProvider>
+                </TransactionProvider>
+              </BillProvider>
+            </InventoryProvider>
+          </SupplierProvider>
+        </CustomerProvider>
       </SettingsProvider>
     </AuditProvider>
   );

@@ -4,7 +4,8 @@ import { useBills } from './BillContext';
 const TransactionContext = createContext();
 
 export const TransactionProvider = ({ children }) => {
-  const { ledger = [] } = useBills();
+  const billsRes = useBills() || {};
+  const ledger = Array.isArray(billsRes.ledger) ? billsRes.ledger : [];
 
   // Transactions are now unified within the ledger table.
   // We keep this context solely for backward compatibility where needed.
