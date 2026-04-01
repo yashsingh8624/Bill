@@ -2,10 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { useSuppliers } from '../context/SupplierContext';
 import { useSettings } from '../context/SettingsContext';
 import { Truck, Search, IndianRupee, MessageCircle, ChevronRight, Plus, X, PackageOpen, LayoutList, Edit2, Trash2 } from 'lucide-react';
-import { getSupplierLedger, getSupplierBalance } from '../utils/ledger';
+import { useBills } from '../context/BillContext';
+import { getFilteredLedger, calculateSupplierBalance } from '../utils/ledger';
 
 export default function SupplierLedger() {
   const suppliersRes = useSuppliers() || {};
+  const { ledger = [] } = useBills() || {};
   const suppliers = Array.isArray(suppliersRes.suppliers) ? suppliersRes.suppliers : [];
   const { addSupplier, updateSupplier, deleteSupplier, addSupplierPayment, addSupplierInvoice } = suppliersRes;
   
@@ -33,8 +35,8 @@ export default function SupplierLedger() {
   );
 
   const currentSupplier = selectedSupplier ? suppliers.find(s => s && s.id === selectedSupplier.id) : null;
-  const supplierTxns = currentSupplier ? (getSupplierLedger(currentSupplier.id) || []) : [];
-  const currentSupplierBalance = currentSupplier ? parseFloat(getSupplierBalance(currentSupplier.id) || 0) : 0;
+  const supplierTxns = currentSupplier ? (getFilteredLedger(ledger, currentSupplier.id, 'supplier') || []) : [];
+  const currentSupplierBalance = currentSupplier ? parseFloat(calculateSupplierBalance(ledger, currentSupplier.id) || 0) : 0;
 
   const handleOpenSupplier = (supplier) => {
     setSelectedSupplier(supplier);
@@ -166,11 +168,11 @@ export default function SupplierLedger() {
                            </div>
                          </td>
                          <td className="py-4 px-6 text-slate-600 font-medium">{supplier.phone || '-'}</td>
-                          <td className="py-4 px-6 text-right">
-                             <span className={`font-black ${parseFloat(getSupplierBalance(supplier.id) || 0) > 0 ? 'text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100' : 'text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200'}`}>
-                               ₹{parseFloat(getSupplierBalance(supplier.id) || 0).toFixed(2)}
+                           <td className="py-4 px-6 text-right">
+                             <span className={`font-black ${parseFloat(calculateSupplierBalance(ledger, supplier.id) || 0) > 0 ? 'text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100' : 'text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200'}`}>
+                               ₹{parseFloat(calculateSupplierBalance(ledger, supplier.id) || 0).toFixed(2)}
                              </span>
-                          </td>
+                           </td>
                          <td className="py-4 px-6 text-center">
                             <div className="flex justify-center text-slate-400 group-hover:text-indigo-600 transition-colors bg-white border border-slate-200 group-hover:border-indigo-200 rounded-lg p-1.5 shadow-sm">
                                <ChevronRight size={20} />

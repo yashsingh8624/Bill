@@ -1,142 +1,216 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { safeGet, safeSet, generateId } from '../utils/storage';
+import { supabase } from '../utils/supabase';
 import { useInventory } from './InventoryContext';
 import { useCustomers } from './CustomerContext';
 import { useAudit } from './AuditContext';
-import { migrateLegacyToLedger, addLedgerEntry, repairLedgerData } from '../utils/ledger';
+import { useToast } from './ToastContext';
 
 const BillContext = createContext();
 
 export const BillProvider = ({ children }) => {
-  const [bills, setBills] = useState(() => safeGet('smartbill_bills', []));
-  const { products, setProducts } = useInventory();
-  const { customers, updateCustomer } = useCustomers();
+  const [bills, setBills] = useState([]);
+  const [ledger, setLedger] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { setProducts, products } = useInventory();
+  const { customers = [] } = useCustomers() || {};
   const { addLog } = useAudit();
+  const { showToast } = useToast();
 
-  // Run migration & repair ONCE on first mount only
+  const mapDbBillToApp = (b) => {
+      const cust = customers.find(c => c.id === b.customer_id) || {};
+      return {
+          ...b,
+          customerId: b.customer_id,
+          customerName: cust.name || 'Unknown',
+          customerPhone: cust.phone || '',
+          invoiceNo: b.invoice_no,
+          subTotal: parseFloat(b.sub_total || 0),
+          cgst: parseFloat(b.cgst || 0),
+          sgst: parseFloat(b.sgst || 0),
+          total: parseFloat(b.total || 0),
+          amountPaid: parseFloat(b.amount_paid || 0),
+          isDeleted: b.is_deleted,
+          deleteReason: b.delete_reason,
+          outstanding: Math.max(0, parseFloat(b.total || 0) - parseFloat(b.amount_paid || 0)),
+          readableDate: new Date(b.date).toLocaleDateString()
+      };
+  };
+
+  const fetchData = async () => {
+    try {
+      // Fetch Bills
+      const { data: billsData, error: billsError } = await supabase
+        .from('bills')
+        .select('*')
+        .order('date', { ascending: false });
+      
+      if (billsError) throw billsError;
+      setBills((billsData || []).map(mapDbBillToApp));
+
+      // Fetch Ledger
+      const { data: ledgerData, error: ledgerError } = await supabase
+        .from('ledger')
+        .select('*')
+        .order('date', { ascending: true });
+      
+      if (ledgerError) throw ledgerError;
+      setLedger(ledgerData || []);
+
+    } catch (err) {
+      console.error('Error fetching billing data:', err.message);
+      showToast('Error loading bills/ledger', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    migrateLegacyToLedger();
-    repairLedgerData();
+    fetchData();
+
+    // Realtime for Bills
+    const billsChannel = supabase
+      .channel('bills-changes')
+      .on('postgres_changes', { event: '*', table: 'bills', schema: 'public' }, (payload) => {
+        if (payload.eventType === 'INSERT') setBills(prev => [mapDbBillToApp(payload.new), ...prev]);
+        if (payload.eventType === 'UPDATE') setBills(prev => prev.map(b => b.id === payload.new.id ? mapDbBillToApp(payload.new) : b));
+        if (payload.eventType === 'DELETE') setBills(prev => prev.filter(b => b.id !== payload.old.id));
+      })
+      .subscribe();
+
+    // Realtime for Ledger
+    const ledgerChannel = supabase
+      .channel('ledger-changes')
+      .on('postgres_changes', { event: '*', table: 'ledger', schema: 'public' }, (payload) => {
+        if (payload.eventType === 'INSERT') setLedger(prev => [...prev, payload.new]);
+        if (payload.eventType === 'UPDATE') setLedger(prev => prev.map(l => l.id === payload.new.id ? payload.new : l));
+        if (payload.eventType === 'DELETE') setLedger(prev => prev.filter(l => l.id !== payload.old.id));
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(billsChannel);
+      supabase.removeChannel(ledgerChannel);
+    };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Sync bills state to localStorage whenever it changes
-  useEffect(() => {
-    safeSet('smartbill_bills', bills);
-  }, [bills]);
-
   const generateBillNumber = () => {
-    const settings = safeGet('smartbill_settings', { invoicePrefix: 'INV' });
-    const currentBills = safeGet('smartbill_bills', []);
-    return `${settings.invoicePrefix}-${new Date().getFullYear()}-${String(currentBills.length + 1).padStart(4, '0')}`;
+    // Note: In a true multi-user app, this should be handled by a DB sequence or trigger
+    // For now, we derive from local count + prefix
+    const prefix = 'INV'; // Should ideally come from settings context or fetch settings here
+    return `${prefix}-${new Date().getFullYear()}-${String(bills.length + 1).padStart(4, '0')}`;
   };
 
-  const addBill = (bill) => {
-    const billDate = bill.date || new Date().toISOString();
-    const dateObj = new Date(billDate);
-    const newBill = {
-      ...bill,
-      id: generateId(),
-      date: billDate,
-      readableDate: dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
-      month: dateObj.getMonth() + 1,
-      year: dateObj.getFullYear(),
-    };
+  const addBill = async (bill) => {
+    try {
+      const billDate = bill.date || new Date().toISOString();
+      
+      // 1. Insert Bill
+      const { data: newBillData, error: billError } = await supabase
+        .from('bills')
+        .insert([{
+          customer_id: bill.customerId || bill.customer_id,
+          invoice_no: bill.invoiceNo || bill.invoice_no,
+          date: billDate,
+          items: bill.items,
+          sub_total: parseFloat(bill.subTotal || 0),
+          cgst: parseFloat(bill.cgst || 0),
+          sgst: parseFloat(bill.sgst || 0),
+          total: parseFloat(bill.total || 0),
+          amount_paid: parseFloat(bill.amountPaid || bill.paidAmount || 0),
+          is_deleted: false
+        }])
+        .select();
 
-    // 1. Write to storage and state immediately
-    const currentBills = safeGet('smartbill_bills', []);
-    const updatedBills = [newBill, ...currentBills];
-    safeSet('smartbill_bills', updatedBills);
-    setBills(updatedBills);
+      if (billError) throw billError;
+      const newBill = newBillData[0];
 
-    // 2. Deduct inventory stock
-    setProducts(prev => prev.map(p => {
-      const billItem = bill.items?.find(i => i.productId === p.id);
-      if (!billItem) return p;
-      return {
-        ...p,
-        quantity: Math.max(0, (p.quantity || 0) - billItem.quantity),
-        stockHistory: [...(p.stockHistory || []), {
-          id: generateId(),
-          date: new Date().toISOString(),
-          change: -billItem.quantity,
-          note: `Bill: ${newBill.invoiceNo || 'Sale'}`,
-          type: 'OUT',
-        }],
-      };
-    }));
-
-    // 3. Write to ledger — LEDGER IS SOLE SOURCE OF TRUTH
-    if (bill.customerId) {
-      // SALE entry: strictly items subtotal + GST only (never includes previous balance)
-      const itemsSubtotal = Array.isArray(bill.items) && bill.items.length > 0
-        ? bill.items.reduce((s, i) => s + (parseFloat(i?.amount) || 0), 0)
-        : (parseFloat(bill.subTotal) || 0);
-      const gst = (parseFloat(bill.cgst) || 0) + (parseFloat(bill.sgst) || 0);
-      const saleAmount = itemsSubtotal + gst;
-
-      addLedgerEntry({
-        customerId: bill.customerId,
-        date: newBill.date,
+      // 2. Add Ledger Entries
+      const ledgerEntries = [];
+      
+      // SALE entry
+      ledgerEntries.push({
+        customer_id: newBill.customer_id,
+        date: billDate,
         type: 'SALE',
-        invoiceId: newBill.invoiceNo,
-        amount: saleAmount,
-        desc: `Bill #${newBill.invoiceNo || 'Unknown'}`,
+        invoice_id: newBill.invoice_no,
+        amount: newBill.total,
+        description: `Bill #${newBill.invoice_no}`
       });
 
-      // PAYMENT entry: only if customer paid something right now
-      const amtPaid = parseFloat(newBill.amountPaid || newBill.paidAmount || 0);
-      if (amtPaid > 0) {
-        addLedgerEntry({
-          customerId: bill.customerId,
-          date: new Date(dateObj.getTime() + 1000).toISOString(),
+      // PAYMENT entry (if paid something)
+      if (newBill.amount_paid > 0) {
+        ledgerEntries.push({
+          customer_id: newBill.customer_id,
+          date: new Date(new Date(billDate).getTime() + 1000).toISOString(), // Slight offset
           type: 'PAYMENT',
-          invoiceId: newBill.invoiceNo,
-          amount: amtPaid,
-          desc: `Paid for Bill #${newBill.invoiceNo || 'Unknown'}`,
+          invoice_id: newBill.invoice_no,
+          amount: newBill.amount_paid,
+          description: `Paid for Bill #${newBill.invoice_no}`
         });
       }
-    }
 
-    return newBill;
+      await supabase.from('ledger').insert(ledgerEntries);
+
+      // 3. Update Inventory Stock (Local update followed by DB update in InventoryContext is handled there, 
+      // but here we trigger the stock deduct via the hook if needed, or better, do it here directly for atomicity)
+      for (const item of bill.items) {
+        if (item.productId) {
+           const product = products.find(p => p.id === item.productId);
+           if (product) {
+              const newQty = Math.max(0, (product.quantity || 0) - item.quantity);
+              await supabase.from('products').update({ 
+                quantity: newQty,
+                stock_history: [...(product.stock_history || []), {
+                   id: Date.now().toString(),
+                   date: new Date().toISOString(),
+                   change: -item.quantity,
+                   note: `Bill: ${newBill.invoice_no}`,
+                   type: 'OUT'
+                }]
+              }).eq('id', item.productId);
+           }
+        }
+      }
+
+      return mapDbBillToApp(newBill);
+    } catch (err) {
+      console.error('Error adding bill:', err.message);
+      showToast('Failed to save bill', 'error');
+      return null;
+    }
   };
 
-  const deleteBill = (id, reason = 'Deleted by user') => {
-    const currentBills = safeGet('smartbill_bills', []);
-    const targetBill = currentBills.find(b => b.id === id);
-    if (!targetBill || targetBill.isDeleted) return;
+  const deleteBill = async (id, reason = 'Deleted by user') => {
+    try {
+      const targetBill = bills.find(b => b.id === id);
+      if (!targetBill) return;
 
-    const newBills = currentBills.map(b => {
-      if (b.id === id) {
-        addLog('DELETE', 'BILL', id, { reason, invoiceNo: b.invoiceNo, amount: b.total });
-        return { ...b, isDeleted: true, deletedAt: new Date().toISOString(), deleteReason: reason };
-      }
-      return b;
-    });
+      // 1. Mark bill as deleted
+      const { error: billError } = await supabase
+        .from('bills')
+        .update({ is_deleted: true, delete_reason: reason })
+        .eq('id', id);
+      
+      if (billError) throw billError;
 
-    safeSet('smartbill_bills', newBills);
-    setBills(newBills);
+      // 2. Void ledger entries
+      const { error: ledgerError } = await supabase
+        .from('ledger')
+        .update({ is_void: true, amount: 0 })
+        .eq('invoice_id', targetBill.invoice_no);
+      
+      if (ledgerError) throw ledgerError;
 
-    // Void all ledger entries for this invoice (by invoiceId or description fallback)
-    if (targetBill.customerId) {
-      const invoiceNo = targetBill.invoiceNo;
-      const ledger = safeGet('smartbill_ledger', []);
-      const updatedLedger = ledger.map(e => {
-        const byId   = e.invoiceId && e.invoiceId === invoiceNo;
-        const byDesc = !e.invoiceId && e.desc && (
-          e.desc === `Bill #${invoiceNo}` ||
-          e.desc === `Paid for Bill #${invoiceNo}`
-        );
-        if ((byId || byDesc) && ['SALE', 'PAYMENT', 'ROLLOVER'].includes(e.type)) {
-          return { ...e, isVoid: true, amount: 0 };
-        }
-        return e;
-      });
-      safeSet('smartbill_ledger', updatedLedger);
+      addLog('DELETE', 'BILL', id, { reason, invoiceNo: targetBill.invoice_no });
+      showToast('Bill deleted and ledger updated', 'success');
+    } catch (err) {
+       console.error('Error deleting bill:', err.message);
+       showToast('Failed to delete bill', 'error');
     }
   };
 
   return (
-    <BillContext.Provider value={{ bills, addBill, deleteBill, generateBillNumber }}>
+    <BillContext.Provider value={{ bills, ledger, loading, addBill, deleteBill, generateBillNumber }}>
       {children}
     </BillContext.Provider>
   );

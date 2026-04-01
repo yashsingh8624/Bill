@@ -37,11 +37,11 @@ import { ToastProvider } from './context/ToastContext';
 
 function App() {
   return (
-    <AppProvider>
-      <ToastProvider>
+    <ToastProvider>
+      <AppProvider>
         <AppRoutes />
-      </ToastProvider>
-    </AppProvider>
+      </AppProvider>
+    </ToastProvider>
   );
 }
 

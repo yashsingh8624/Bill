@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { Plus, Trash2, Save, Download, RefreshCw, Tag } from 'lucide-react';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
 import { useToast } from '../context/ToastContext';
-import { getCustomerBalance } from '../utils/ledger';
+import { calculateCustomerBalance } from '../utils/ledger';
 
 const GST_RATES = [0, 5, 12, 18, 28];
 const SIZES = ['N/A', 'Free Size', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
@@ -15,7 +15,8 @@ const SIZES = ['N/A', 'Free Size', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
 const emptyItemForm = { name: '', hsn: '', size: 'N/A', rate: '', qty: 1, gstRate: 18, discount: 0 };
 
 export default function NewBill() {
-  const { addBill, generateBillNumber } = useBills();
+  const { billsRes = useBills() || {} } = {};
+  const { addBill, generateBillNumber, ledger = [] } = billsRes.addBill ? billsRes : useBills();
   const { products } = useInventory();
   const { customers, addCustomer } = useCustomers();
   const { userSettings } = useSettings();
@@ -59,7 +60,7 @@ export default function NewBill() {
   // Load prev balance
   useEffect(() => {
     if (selectedCustomerId) {
-      const bal = Math.max(0, parseFloat(getCustomerBalance(selectedCustomerId) || 0));
+      const bal = Math.max(0, parseFloat(calculateCustomerBalance(ledger, selectedCustomerId) || 0));
       setPrevBalance(bal);
       setIncludePrevBalance(bal > 0);
     } else {

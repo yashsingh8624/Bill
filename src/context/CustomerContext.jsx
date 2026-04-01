@@ -1,63 +1,137 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { safeGet, safeSet, generateId } from '../utils/storage';
-import { useTransactions } from './TransactionContext';
-import { addLedgerEntry } from '../utils/ledger';
+import { supabase } from '../utils/supabase';
+import { useToast } from './ToastContext';
 
 const CustomerContext = createContext();
 
 export const CustomerProvider = ({ children }) => {
-  const [customers, setCustomers] = useState(() => safeGet('smartbill_customers', []));
-  const { addTransaction } = useTransactions();
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
 
-  useEffect(() => {
-    safeSet('smartbill_customers', customers);
-  }, [customers]);
-
-  const addCustomer = (customer) => {
-    const newCustId = customer.id || generateId();
-    setCustomers(prev => [...prev, { 
-      ...customer, 
-      id: newCustId,
-      createdAt: customer.createdAt || new Date().toISOString()
-    }]);
-
-    if (customer.previousBalance > 0) {
-      addLedgerEntry({
-        customerId: newCustId,
-        type: 'OPENING',
-        amount: parseFloat(customer.previousBalance),
-        desc: 'Opening Balance'
-      });
+  // 1. Fetch data from Supabase on mount
+  const fetchCustomers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      setCustomers(data || []);
+    } catch (err) {
+      console.error('Error fetching customers:', err.message);
+      showToast('Error loading customers', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const updateCustomer = (id, data) => {
-    setCustomers(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
+  useEffect(() => {
+    fetchCustomers();
+
+    // 2. Set up realtime subscription
+    const channel = supabase
+      .channel('customers-changes')
+      .on('postgres_changes', 
+        { event: '*', table: 'customers', schema: 'public' }, 
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setCustomers(prev => [...prev, payload.new].sort((a,b) => a.name.localeCompare(b.name)));
+          } else if (payload.eventType === 'UPDATE') {
+            setCustomers(prev => prev.map(c => c.id === payload.new.id ? payload.new : c));
+          } else if (payload.eventType === 'DELETE') {
+            setCustomers(prev => prev.filter(c => c.id !== payload.old.id));
+          }
+        })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // 3. Database Operations
+  const addCustomer = async (customerData) => {
+    try {
+      const { data, error } = await supabase
+        .from('customers')
+        .insert([customerData])
+        .select();
+      
+      if (error) throw error;
+      
+      // If there was an opening balance, record it in the ledger separately
+      if (parseFloat(customerData.previousBalance || 0) > 0) {
+        await supabase.from('ledger').insert([{
+           customer_id: data[0].id,
+           type: 'OPENING',
+           amount: parseFloat(customerData.previousBalance),
+           description: 'Opening Balance',
+           date: new Date().toISOString()
+        }]);
+      }
+      
+      return data[0];
+    } catch (err) {
+      console.error('Error adding customer:', err.message);
+      showToast('Failed to add customer', 'error');
+      return null;
+    }
+  };
+
+  const updateCustomer = async (id, data) => {
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update(data)
+        .eq('id', id);
+      
+      if (error) throw error;
+    } catch (err) {
+      console.error('Error updating customer:', err.message);
+      showToast('Failed to update customer', 'error');
+    }
   };
   
-  const deleteCustomer = (id) => {
-    setCustomers(prev => prev.filter(c => c.id !== id));
+  const deleteCustomer = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    } catch (err) {
+      console.error('Error deleting customer:', err.message);
+      showToast('Failed to delete customer', 'error');
+    }
   };
 
-  const addCustomerPayment = (customerId, amount, date, notes) => {
-    const cust = customers.find(c => c.id === customerId);
-    if (!cust) return;
-
-    addLedgerEntry({
-      customerId,
-      type: 'PAYMENT',
-      amount: parseFloat(amount),
-      date,
-      desc: notes || 'Direct Payment'
-    });
-
-    // In the new architecture, we don't 'updateCustomer' with totals.
-    // UI will calculate live balance using getCustomerBalance().
+  const addCustomerPayment = async (customerId, amount, date, notes) => {
+    try {
+      const { error } = await supabase
+        .from('ledger')
+        .insert([{
+          customer_id: customerId,
+          type: 'PAYMENT',
+          amount: parseFloat(amount),
+          date: date || new Date().toISOString(),
+          description: notes || 'Direct Payment'
+        }]);
+      
+      if (error) throw error;
+      showToast('Payment recorded successfully', 'success');
+    } catch (err) {
+       console.error('Error recording payment:', err.message);
+       showToast('Failed to record payment', 'error');
+    }
   };
 
   return (
     <CustomerContext.Provider value={{ 
       customers, 
+      loading,
       addCustomer, 
       updateCustomer, 
       deleteCustomer,

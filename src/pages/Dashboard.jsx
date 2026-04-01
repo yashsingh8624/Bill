@@ -5,11 +5,12 @@ import { useCustomers } from '../context/CustomerContext';
 import { useSuppliers } from '../context/SupplierContext';
 import { IndianRupee, TrendingUp, AlertTriangle, FileText, ArrowRight, Target, Users, Package, Calendar, ChevronRight, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getCustomerBalance } from '../utils/ledger';
+import { calculateCustomerBalance } from '../utils/ledger';
 
 export default function Dashboard() {
   const billsRes = useBills() || {};
   const bills = Array.isArray(billsRes.bills) ? billsRes.bills : [];
+  const ledger = Array.isArray(billsRes.ledger) ? billsRes.ledger : [];
 
   const inventoryRes = useInventory() || {};
   const products = Array.isArray(inventoryRes.products) ? inventoryRes.products : [];
@@ -81,8 +82,8 @@ export default function Dashboard() {
 
   // Dues - Ledger is the Source of Truth
   const totalCustomerDue = useMemo(() => 
-    customers.reduce((sum, c) => sum + parseFloat(getCustomerBalance(c?.id) || 0), 0)
-  , [customers]);
+    customers.reduce((sum, c) => sum + parseFloat(calculateCustomerBalance(ledger, c?.id) || 0), 0)
+  , [customers, ledger]);
   
   const totalSupplierDue = suppliers.reduce((sum, s) => sum + parseFloat(s?.balance || 0), 0);
 
@@ -185,7 +186,7 @@ export default function Dashboard() {
                 Receivables <ArrowUpRight size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
               </p>
               <h4 className="text-2xl font-black text-indigo-700 tracking-tight">₹{totalCustomerDue.toLocaleString('en-IN')}</h4>
-              <p className="text-indigo-400 text-[10px] mt-4 font-bold uppercase">From {customers.filter(c => getCustomerBalance(c.id) > 0).length} Customers</p>
+              <p className="text-indigo-400 text-[10px] mt-4 font-bold uppercase">From {customers.filter(c => calculateCustomerBalance(ledger, c.id) > 0).length} Customers</p>
             </div>
             <div className="bg-rose-50/50 p-6 rounded-3xl border border-rose-100 shadow-inner group">
               <p className="text-rose-600 text-[10px] font-black uppercase tracking-widest mb-1.5 flex items-center justify-between">

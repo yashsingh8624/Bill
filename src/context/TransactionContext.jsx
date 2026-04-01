@@ -1,28 +1,31 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { safeGet, safeSet, generateId } from '../utils/storage';
+import React, { createContext, useContext } from 'react';
+import { useBills } from './BillContext';
 
 const TransactionContext = createContext();
 
 export const TransactionProvider = ({ children }) => {
-  // transactions: [{ id, type, entityId, billId, amount, date, notes }]
-  const [transactions, setTransactions] = useState(() => safeGet('smartbill_transactions', []));
+  const { ledger = [] } = useBills();
 
-  useEffect(() => {
-    safeSet('smartbill_transactions', transactions);
-  }, [transactions]);
+  // Transactions are now unified within the ledger table.
+  // We keep this context solely for backward compatibility where needed.
+  
+  // Note: For historical reasons, entities might rely on 'transactions' directly
+  // We bridge 'ledger' entries to look like 'transactions' if needed, or simply return the ledger.
+  const transactions = ledger;
 
-  const addTransaction = (t) => {
-    const newTx = { ...t, id: generateId() };
-    setTransactions(prev => [newTx, ...prev]);
-    return newTx;
+  const addTransaction = () => {
+    console.warn('addTransaction is deprecated. Use addLedgerEntry from Supabase directly or via contexts.');
   };
 
-  const deleteTransaction = (id) => {
-    setTransactions(prev => prev.filter(t => t.id !== id));
+  const deleteTransaction = () => {
+    console.warn('deleteTransaction is deprecated. Soft-delete via ledger is_void flag instead.');
   }
 
-  const getTransactionsByEntityId = (entityId) => transactions.filter(t => t.entityId === entityId);
-  const getTransactionsByBillId = (billId) => transactions.filter(t => t.billId === billId);
+  const getTransactionsByEntityId = (entityId) => 
+    ledger.filter(t => t.customer_id === entityId || t.supplier_id === entityId);
+  
+  const getTransactionsByBillId = (billId) => 
+    ledger.filter(t => t.invoice_id === billId);
 
   return (
     <TransactionContext.Provider value={{ 
