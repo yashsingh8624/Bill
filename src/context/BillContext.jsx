@@ -161,7 +161,7 @@ export const BillProvider = ({ children }) => {
               await supabase.from('products').update({ 
                 quantity: newQty,
                 stock_history: [...(product.stock_history || []), {
-                   id: Date.now().toString(),
+                   id: crypto.randomUUID(),
                    date: new Date().toISOString(),
                    change: -item.quantity,
                    note: `Bill: ${newBill.invoice_no}`,

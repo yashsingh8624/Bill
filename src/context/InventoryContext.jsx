@@ -122,7 +122,7 @@ export const InventoryProvider = ({ children }) => {
       const change = parseInt(qtyChange, 10);
       const newQuantity = (product.quantity || 0) + change;
       const historyEntry = { 
-         id: Date.now().toString(),
+         id: crypto.randomUUID(),
          date: new Date().toISOString(), 
          change, 
          note,

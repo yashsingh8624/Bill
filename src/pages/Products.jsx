@@ -74,7 +74,7 @@ export default function Products() {
       addProduct({
          ...productData,
          stockHistory: [{
-            id: Date.now().toString(),
+            id: crypto.randomUUID(),
             date: new Date().toISOString(),
             change: productData.quantity,
             note: 'Initial Stock',

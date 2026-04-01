@@ -161,7 +161,7 @@ export default function NewBill() {
       if (existing) {
         custId = existing.id;
       } else {
-        custId = Date.now().toString() + '-cust';
+        custId = crypto.randomUUID();
         addCustomer({ id: custId, name: customerName, phone: customerPhone, createdAt: new Date().toISOString() });
       }
     }

@@ -24,7 +24,7 @@ export const safeRemove = (key) => {
   }
 };
 
-export const generateId = () => Date.now().toString() + Math.random().toString(36).substr(2, 5);
+export const generateId = () => crypto.randomUUID();
 
 export const exportBackup = () => {
   const data = {
