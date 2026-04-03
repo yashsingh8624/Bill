@@ -10,8 +10,9 @@ export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [spreadsheetId, setSpreadsheetId] = useState(null);
   const [folderId, setFolderId] = useState(null);
-  const [status, setStatus] = useState('initializing'); // initializing | authenticating | setting_up | ready | error
+  const [status, setStatus] = useState('initializing');
   const [error, setError] = useState(null);
+  const [isOffline, setIsOffline] = useState(false);
   const setupRunning = useRef(false);
 
   // Decode user info from Google's userinfo endpoint
@@ -59,13 +60,13 @@ export const AuthProvider = ({ children }) => {
         setFolderId(result.folderId);
       }
 
+      setIsOffline(false);
       setStatus('ready');
     } catch (err) {
       console.error('Setup failed:', err);
       if (err.message === 'AUTH_EXPIRED') {
-        setStatus('authenticating');
+        setStatus('login_required');
         clearAccessToken();
-        triggerLogin();
       } else {
         setError('Setup failed: ' + (err.message || 'Unknown error'));
         setStatus('error');
@@ -100,21 +101,44 @@ export const AuthProvider = ({ children }) => {
     await runSetup(userInfo, token);
   }, [runSetup]);
 
-  // Google login trigger
+  // Google login trigger - uses popup flow
   const triggerLogin = useGoogleLogin({
     onSuccess: handleLoginSuccess,
     onError: (err) => {
       console.error('Login error:', err);
-      setError('Login failed. Please try again.');
+      const errType = err?.error || err?.type || '';
+      if (errType === 'popup_closed' || errType === 'popup_failed_to_open') {
+        setError('Login popup was blocked or closed. Please allow popups and try again.');
+      } else {
+        setError('Google login failed (Error 403: access_denied). This usually means your Google Cloud Console is not configured correctly. Use "Continue Offline" to use the app with local storage instead.');
+      }
       setStatus('error');
     },
     scope: SCOPES,
     flow: 'implicit'
   });
 
-  // Auto-login on mount
+  // Enter offline mode - skip Google auth entirely
+  const enterOfflineMode = useCallback(() => {
+    setUser({ name: 'Offline User', email: 'offline@local', picture: null, id: 'local' });
+    setSpreadsheetId('LOCAL_MODE');
+    setFolderId(null);
+    setAccessToken(null);
+    setIsOffline(true);
+    setError(null);
+    setStatus('ready');
+    localStorage.setItem('smartbill_offline_mode', 'true');
+  }, []);
+
+  // Auto-login on mount - only if we have a saved token
   useEffect(() => {
     const init = async () => {
+      // Check if user was in offline mode
+      if (localStorage.getItem('smartbill_offline_mode') === 'true') {
+        enterOfflineMode();
+        return;
+      }
+
       // Check for existing token
       const existingToken = getAccessToken();
       const savedUser = localStorage.getItem('smartbill_user');
@@ -124,6 +148,7 @@ export const AuthProvider = ({ children }) => {
           const userInfo = JSON.parse(savedUser);
           setUser(userInfo);
           setAccessToken(existingToken);
+          setStatus('authenticating');
           
           // Load gapi and set token
           await loadGapiClient();
@@ -141,33 +166,36 @@ export const AuthProvider = ({ children }) => {
         }
       }
 
-      // No valid token - trigger auto login
-      setStatus('authenticating');
-      // Small delay to let Google SDK initialize
-      setTimeout(() => {
-        triggerLogin();
-      }, 500);
+      // No valid token - show login screen
+      setStatus('login_required');
     };
 
     init();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const login = () => {
+    setStatus('authenticating');
+    triggerLogin();
+  };
+
   const logout = () => {
-    googleLogout();
+    if (!isOffline) {
+      googleLogout();
+    }
     clearAccessToken();
     localStorage.removeItem('smartbill_user');
+    localStorage.removeItem('smartbill_offline_mode');
     setUser(null);
     setAccessToken(null);
     setSpreadsheetId(null);
     setFolderId(null);
-    setStatus('authenticating');
-    setTimeout(() => triggerLogin(), 500);
+    setIsOffline(false);
+    setStatus('login_required');
   };
 
   const retry = () => {
     setError(null);
-    setStatus('authenticating');
-    setTimeout(() => triggerLogin(), 300);
+    setStatus('login_required');
   };
 
   return (
@@ -178,8 +206,11 @@ export const AuthProvider = ({ children }) => {
       folderId,
       status,
       error,
+      isOffline,
+      login,
       logout,
       retry,
+      enterOfflineMode,
       isReady: status === 'ready'
     }}>
       {children}

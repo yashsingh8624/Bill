@@ -4,6 +4,7 @@ import { useInventory } from './InventoryContext';
 import { useCustomers } from './CustomerContext';
 import { useAudit } from './AuditContext';
 import { useToast } from './ToastContext';
+import { useSettings } from './SettingsContext';
 import { getSheetData, appendRow, objectToRow, findRowIndex, updateRow } from '../utils/sheetsService';
 import { generateId } from '../utils/storage';
 import { generateInvoicePDF } from '../utils/pdfGenerator';

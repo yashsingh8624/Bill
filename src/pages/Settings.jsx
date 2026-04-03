@@ -5,9 +5,10 @@ import { useCustomers } from '../context/CustomerContext';
 import { useSuppliers } from '../context/SupplierContext';
 import { useBills } from '../context/BillContext';
 import { useAudit } from '../context/AuditContext';
-import { Save, CheckCircle, Download, Upload, Database, FileSpreadsheet, Image as ImageIcon, Zap, Settings as SettingsIcon } from 'lucide-react';
+import { Save, CheckCircle, Download, Upload, Database, FileSpreadsheet, Image as ImageIcon, Zap, Settings as SettingsIcon, Send, FileSpreadsheet as TableIcon } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { exportBackup, restoreBackup } from '../utils/storage';
+import { appendTestData } from '../utils/sheetsService';
 
 export default function Settings() {
   const { userSettings, updateSettings } = useSettings();
@@ -36,6 +37,21 @@ export default function Settings() {
   const [savedStatus, setSavedStatus] = useState(false);
   const fileInputRef = useRef(null);
   const logoInputRef = useRef(null);
+
+  const [testData, setTestData] = useState({ name: '', phone: '', address: '', amount: '' });
+  const [testStatus, setTestStatus] = useState({ status: 'idle', message: '' });
+
+  const handleTestSubmit = async (e) => {
+    e.preventDefault();
+    setTestStatus({ status: 'loading', message: 'Appending...' });
+    try {
+      await appendTestData(testData);
+      setTestStatus({ status: 'success', message: 'Row successfully appended to Google Sheets!' });
+      setTestData({ name: '', phone: '', address: '', amount: '' });
+    } catch (err) {
+      setTestStatus({ status: 'error', message: err.message || 'Failed to append data' });
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -267,8 +283,45 @@ export default function Settings() {
         </form>
       </div>
 
+      {/* Google Sheets Test Section */}
+      <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 pt-4 border-t border-slate-100">
+         <TableIcon size={20} className="text-emerald-600" /> Google Sheets Integration Test
+      </h3>
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+        <p className="text-sm text-slate-500 font-medium mb-6">Tests appending customized data (Name, Phone, Address, Amount) into <b>Sheet1</b> using your OAuth connection.</p>
+        <form onSubmit={handleTestSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+               <label className="block text-sm font-bold text-slate-700 mb-1">Name</label>
+               <input type="text" required value={testData.name} onChange={e => setTestData({...testData, name: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/50 bg-slate-50 focus:bg-white text-slate-800" placeholder="John Doe" />
+            </div>
+            <div>
+               <label className="block text-sm font-bold text-slate-700 mb-1">Phone</label>
+               <input type="text" value={testData.phone} onChange={e => setTestData({...testData, phone: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/50 bg-slate-50 focus:bg-white text-slate-800" placeholder="9876543210" />
+            </div>
+            <div className="md:col-span-2">
+               <label className="block text-sm font-bold text-slate-700 mb-1">Address</label>
+               <input type="text" value={testData.address} onChange={e => setTestData({...testData, address: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/50 bg-slate-50 focus:bg-white text-slate-800" placeholder="123 Main St" />
+            </div>
+            <div className="md:col-span-2">
+               <label className="block text-sm font-bold text-slate-700 mb-1">Amount</label>
+               <input type="number" required value={testData.amount} onChange={e => setTestData({...testData, amount: e.target.value})} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/50 bg-slate-50 focus:bg-white text-slate-800" placeholder="5000" />
+            </div>
+          </div>
+          <div className="pt-2 flex items-center justify-between">
+            <div className="flex-1 mr-4">
+              {testStatus.status === 'success' && <p className="text-sm font-bold text-emerald-600 bg-emerald-50 p-2.5 rounded-lg border border-emerald-100">{testStatus.message}</p>}
+              {testStatus.status === 'error' && <p className="text-sm font-bold text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100 break-words">{testStatus.message}</p>}
+            </div>
+            <button type="submit" disabled={testStatus.status === 'loading'} className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-md transition-all flex items-center gap-2">
+               <Send size={16} /> {testStatus.status === 'loading' ? 'Sending...' : 'Send to Sheet'}
+            </button>
+          </div>
+        </form>
+      </div>
+
       {/* Data Management Section */}
-      <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 pt-4">
+      <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 pt-4 border-t border-slate-100">
          <Database size={20} className="text-indigo-600" /> Database Utilities
       </h3>
       

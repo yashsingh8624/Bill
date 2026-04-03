@@ -3,7 +3,7 @@
  * Handles loading gapi, setting tokens, and providing retry logic
  */
 
-const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
 let gapiLoaded = false;
 let gapiLoadPromise = null;
@@ -21,9 +21,8 @@ export const loadGapiClient = () => {
         window.gapi.load('client', async () => {
           try {
             await window.gapi.client.init({});
-            // Load discovery docs for Sheets and Drive
+            // Load discovery docs for Sheets
             await window.gapi.client.load('sheets', 'v4');
-            await window.gapi.client.load('drive', 'v3');
             gapiLoaded = true;
             resolve();
           } catch (err) {

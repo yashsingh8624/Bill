@@ -1,6 +1,6 @@
 /**
  * Google Sheets Service - Database operations via Sheets API v4
- * Each user gets their own spreadsheet: BillingApp_<email>
+ * Falls back to localStorage when Google Sheets is unavailable (offline mode)
  */
 
 import { apiCall } from './googleApi';
@@ -16,6 +16,27 @@ const SHEET_DEFINITIONS = {
   SETTINGS: ['key', 'value'],
   DAY_REPORTS: ['id', 'date', 'total_sales', 'total_collected', 'total_outstanding', 'bills_count', 'created_at']
 };
+
+// ============= LOCAL STORAGE FALLBACK =============
+
+const LOCAL_PREFIX = 'smartbill_local_';
+
+const getLocalData = (sheetName) => {
+  try {
+    const raw = localStorage.getItem(LOCAL_PREFIX + sheetName);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+};
+
+const setLocalData = (sheetName, rows) => {
+  localStorage.setItem(LOCAL_PREFIX + sheetName, JSON.stringify(rows));
+};
+
+const isOffline = (spreadsheetId) => {
+  return spreadsheetId === 'LOCAL_MODE';
+};
+
+// ============= GOOGLE SHEETS FUNCTIONS =============
 
 /**
  * Create a new spreadsheet with all required sheets and headers
@@ -81,6 +102,12 @@ export const storeSpreadsheetId = (email, spreadsheetId) => {
  * Append rows to a sheet
  */
 export const appendRows = async (spreadsheetId, sheetName, rows) => {
+  if (isOffline(spreadsheetId)) {
+    const existing = getLocalData(sheetName);
+    existing.push(...rows);
+    setLocalData(sheetName, existing);
+    return { updates: { updatedRows: rows.length } };
+  }
   return apiCall(async () => {
     const response = await window.gapi.client.sheets.spreadsheets.values.append({
       spreadsheetId,
@@ -101,9 +128,40 @@ export const appendRow = async (spreadsheetId, sheetName, values) => {
 };
 
 /**
+ * Append test data specifically as requested: name, phone, address, amount
+ */
+export const appendTestData = async (data) => {
+  const spreadsheetId = import.meta.env.VITE_GOOGLE_SHEET_ID;
+  const sheetName = 'Sheet1';
+  const row = [data.name || '', data.phone || '', data.address || '', data.amount || ''];
+  
+  try {
+    const response = await window.gapi.client.sheets.spreadsheets.values.append({
+      spreadsheetId,
+      range: `${sheetName}!A:D`,
+      valueInputOption: 'USER_ENTERED',
+      insertDataOption: 'INSERT_ROWS',
+      resource: { values: [row] }
+    });
+    return response.result;
+  } catch (err) {
+    const status = err?.status || err?.result?.error?.code;
+    if (status === 403) {
+      throw new Error('Permission Denied: You do not have edit access to this spreadsheet.');
+    }
+    throw err;
+  }
+};
+
+/**
  * Get all rows from a sheet (excluding header)
  */
 export const getRows = async (spreadsheetId, sheetName) => {
+  if (isOffline(spreadsheetId)) {
+    const headers = SHEET_DEFINITIONS[sheetName] || [];
+    const rows = getLocalData(sheetName);
+    return { headers, rows };
+  }
   return apiCall(async () => {
     const response = await window.gapi.client.sheets.spreadsheets.values.get({
       spreadsheetId,
@@ -151,6 +209,15 @@ export const objectToRow = (sheetName, obj) => {
  * Update a specific row in a sheet (1-indexed, row 1 is header)
  */
 export const updateRow = async (spreadsheetId, sheetName, rowIndex, values) => {
+  if (isOffline(spreadsheetId)) {
+    const rows = getLocalData(sheetName);
+    const dataIndex = rowIndex - 2; // Convert from 1-indexed with header to 0-indexed
+    if (dataIndex >= 0 && dataIndex < rows.length) {
+      rows[dataIndex] = values;
+      setLocalData(sheetName, rows);
+    }
+    return { updatedRows: 1 };
+  }
   return apiCall(async () => {
     const headers = SHEET_DEFINITIONS[sheetName];
     const lastCol = String.fromCharCode(64 + headers.length);
@@ -195,6 +262,10 @@ export const getSheetData = async (spreadsheetId, sheetName) => {
  * Batch update multiple cells/rows
  */
 export const batchUpdate = async (spreadsheetId, updates) => {
+  if (isOffline(spreadsheetId)) {
+    // Offline batch update is a no-op for now
+    return { totalUpdatedRows: 0 };
+  }
   return apiCall(async () => {
     const response = await window.gapi.client.sheets.spreadsheets.values.batchUpdate({
       spreadsheetId,
