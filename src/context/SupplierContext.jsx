@@ -1,138 +1,173 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
-import { safeGet, safeSet, generateId } from '../utils/storage';
+import { getSheetData, appendRow, objectToRow, findRowIndex, updateRow } from '../utils/sheetsService';
+import { generateId } from '../utils/storage';
 
-const STORAGE_KEY = 'smartbill_suppliers';
-const LEDGER_KEY = 'smartbill_ledger';
+const SHEET_NAME = 'SUPPLIERS';
+const LEDGER_SHEET = 'LEDGER';
 
 const SupplierContext = createContext();
 
 export const SupplierProvider = ({ children }) => {
   const [suppliers, setSuppliers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { spreadsheetId, isReady } = useAuth();
   const { showToast } = useToast();
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const saved = safeGet(STORAGE_KEY, []);
-    setSuppliers(saved.sort((a, b) => (a.name || '').localeCompare(b.name || '')));
-    setLoading(false);
-  }, []);
-
-  // Persist to localStorage on change
-  useEffect(() => {
-    if (!loading) {
-      safeSet(STORAGE_KEY, suppliers);
+  const fetchSuppliers = async () => {
+    if (!spreadsheetId) return;
+    try {
+      setLoading(true);
+      const data = await getSheetData(spreadsheetId, SHEET_NAME);
+      setSuppliers(
+        data.filter(s => !s.id.startsWith('DELETED_'))
+            .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+      );
+    } catch (err) {
+      console.error('Error fetching suppliers:', err);
+      showToast('Error loading suppliers', 'error');
+    } finally {
+      setLoading(false);
     }
-  }, [suppliers, loading]);
+  };
 
-  const addSupplier = (supplier) => {
+  useEffect(() => {
+    if (isReady && spreadsheetId) {
+      fetchSuppliers();
+    }
+  }, [isReady, spreadsheetId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const addSupplier = async (supplier) => {
     try {
       const newSupplier = {
         id: generateId(),
-        name: supplier.name,
-        phone: supplier.phone,
-        address: supplier.address,
-        gstin: supplier.gstin,
+        name: supplier.name || '',
+        phone: supplier.phone || '',
+        address: supplier.address || '',
+        gstin: supplier.gstin || '',
+        previous_balance: String(supplier.previousBalance || 0),
         created_at: new Date().toISOString()
       };
-      
-      setSuppliers(prev => [...prev, newSupplier].sort((a, b) => a.name.localeCompare(b.name)));
-      
-      // Handle opening balance
+
+      await appendRow(spreadsheetId, SHEET_NAME, objectToRow(SHEET_NAME, newSupplier));
+
+      // Opening balance
       if (parseFloat(supplier.previousBalance || 0) > 0) {
-        const ledger = safeGet(LEDGER_KEY, []);
-        ledger.push({
+        const ledgerEntry = {
           id: generateId(),
+          date: new Date().toISOString(),
+          customer_id: '',
           supplier_id: newSupplier.id,
           type: 'SUPPLIER_OPENING',
-          amount: parseFloat(supplier.previousBalance),
+          invoice_id: '',
+          amount: String(supplier.previousBalance),
           description: 'Opening Balance',
-          date: new Date().toISOString()
-        });
-        safeSet(LEDGER_KEY, ledger);
+          is_void: 'FALSE',
+          created_at: new Date().toISOString()
+        };
+        await appendRow(spreadsheetId, LEDGER_SHEET, objectToRow(LEDGER_SHEET, ledgerEntry));
         window.dispatchEvent(new Event('ledger-updated'));
       }
-      
+
+      setSuppliers(prev => [...prev, newSupplier].sort((a, b) => a.name.localeCompare(b.name)));
       showToast('Supplier added successfully', 'success');
       return newSupplier;
     } catch (err) {
-      console.error('Error adding supplier:', err.message);
+      console.error('Error adding supplier:', err);
       showToast('Failed to add supplier', 'error');
       return null;
     }
   };
-  
-  const updateSupplier = (id, data) => {
+
+  const updateSupplier = async (id, data) => {
     try {
-      setSuppliers(prev => prev.map(s => s.id === id ? { ...s, ...data } : s));
+      const rowIdx = await findRowIndex(spreadsheetId, SHEET_NAME, 'id', id);
+      if (rowIdx === -1) throw new Error('Supplier not found');
+
+      const existing = suppliers.find(s => s.id === id);
+      const updated = { ...existing, ...data };
+      await updateRow(spreadsheetId, SHEET_NAME, rowIdx, objectToRow(SHEET_NAME, updated));
+
+      setSuppliers(prev => prev.map(s => s.id === id ? updated : s));
       showToast('Supplier updated', 'success');
     } catch (err) {
-      console.error('Error updating supplier:', err.message);
+      console.error('Error updating supplier:', err);
       showToast('Failed to update supplier', 'error');
     }
   };
-  
-  const deleteSupplier = (id) => {
+
+  const deleteSupplier = async (id) => {
     try {
+      const rowIdx = await findRowIndex(spreadsheetId, SHEET_NAME, 'id', id);
+      if (rowIdx !== -1) {
+        const emptyRow = objectToRow(SHEET_NAME, { id: `DELETED_${id}`, name: '[DELETED]', phone: '', address: '', gstin: '', previous_balance: '0', created_at: '' });
+        await updateRow(spreadsheetId, SHEET_NAME, rowIdx, emptyRow);
+      }
       setSuppliers(prev => prev.filter(s => s.id !== id));
       showToast('Supplier removed', 'success');
     } catch (err) {
-      console.error('Error deleting supplier:', err.message);
+      console.error('Error deleting supplier:', err);
       showToast('Failed to remove supplier', 'error');
     }
   };
-  
-  const addSupplierInvoice = (supplierId, amount, date, notes, invoiceNo) => {
+
+  const addSupplierInvoice = async (supplierId, amount, date, notes, invoiceNo) => {
     try {
-      const ledger = safeGet(LEDGER_KEY, []);
-      ledger.push({
+      const ledgerEntry = {
         id: generateId(),
+        date: date || new Date().toISOString(),
+        customer_id: '',
         supplier_id: supplierId,
         type: 'PURCHASE',
-        amount: parseFloat(amount),
-        date: date || new Date().toISOString(),
+        invoice_id: invoiceNo || '',
+        amount: String(parseFloat(amount)),
         description: `Inv: ${invoiceNo}${notes ? ' - ' + notes : ''}`,
-        invoice_id: invoiceNo
-      });
-      safeSet(LEDGER_KEY, ledger);
+        is_void: 'FALSE',
+        created_at: new Date().toISOString()
+      };
+      await appendRow(spreadsheetId, LEDGER_SHEET, objectToRow(LEDGER_SHEET, ledgerEntry));
       window.dispatchEvent(new Event('ledger-updated'));
       showToast('Invoice recorded in ledger', 'success');
     } catch (err) {
-      console.error('Error recording supplier invoice:', err.message);
+      console.error('Error recording supplier invoice:', err);
       showToast('Failed to record invoice', 'error');
     }
   };
 
-  const addSupplierPayment = (supplierId, amount, date, notes) => {
+  const addSupplierPayment = async (supplierId, amount, date, notes) => {
     try {
-      const ledger = safeGet(LEDGER_KEY, []);
-      ledger.push({
+      const ledgerEntry = {
         id: generateId(),
+        date: date || new Date().toISOString(),
+        customer_id: '',
         supplier_id: supplierId,
         type: 'PAYMENT_MADE',
-        amount: parseFloat(amount),
-        date: date || new Date().toISOString(),
-        description: notes || 'Payment Made'
-      });
-      safeSet(LEDGER_KEY, ledger);
+        invoice_id: '',
+        amount: String(parseFloat(amount)),
+        description: notes || 'Payment Made',
+        is_void: 'FALSE',
+        created_at: new Date().toISOString()
+      };
+      await appendRow(spreadsheetId, LEDGER_SHEET, objectToRow(LEDGER_SHEET, ledgerEntry));
       window.dispatchEvent(new Event('ledger-updated'));
       showToast('Payment recorded in ledger', 'success');
     } catch (err) {
-      console.error('Error recording supplier payment:', err.message);
+      console.error('Error recording supplier payment:', err);
       showToast('Failed to record payment', 'error');
     }
   };
 
   return (
-    <SupplierContext.Provider value={{ 
-      suppliers, 
+    <SupplierContext.Provider value={{
+      suppliers,
       loading,
-      addSupplier, 
-      updateSupplier, 
+      addSupplier,
+      updateSupplier,
       deleteSupplier,
-      addSupplierInvoice, 
-      addSupplierPayment 
+      addSupplierInvoice,
+      addSupplierPayment,
+      refreshSuppliers: fetchSuppliers
     }}>
       {children}
     </SupplierContext.Provider>

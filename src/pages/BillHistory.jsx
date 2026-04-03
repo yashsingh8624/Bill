@@ -291,16 +291,32 @@ export default function BillHistory() {
                >
                  Delete Bill
                </button>
-               <div className="flex gap-3">
-                 <button 
-                   onClick={() => {
-                     generateInvoicePDF(selectedBill, userSettings);
-                     showToast('Invoice PDF Generated', 'success');
-                   }} 
-                   className="px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-indigo-600 font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
-                 >
-                   <Download size={18} /> Download
-                 </button>
+                <div className="flex gap-3">
+                  {selectedBill.pdf_link && (
+                    <a
+                      href={selectedBill.pdf_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-6 py-2.5 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
+                    >
+                      <ArrowUpRight size={18} /> View in Drive
+                    </a>
+                  )}
+                  <button 
+                    onClick={() => {
+                      try {
+                        const { doc, fileName } = generateInvoicePDF(selectedBill, userSettings);
+                        doc.save(fileName);
+                        showToast('Invoice PDF Downloaded', 'success');
+                      } catch (err) {
+                        console.error('PDF manual generate failed:', err);
+                        showToast('Failed to generate PDF', 'error');
+                      }
+                    }} 
+                    className="px-6 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-indigo-600 font-bold rounded-xl transition-all shadow-sm flex items-center gap-2"
+                  >
+                    <Download size={18} /> Download
+                  </button>
                  <button onClick={() => setSelectedBill(null)} className="px-6 py-2.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl transition-all shadow-lg shadow-slate-800/20">
                    Close
                  </button>

@@ -1,111 +1,148 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
-import { safeGet, safeSet, generateId } from '../utils/storage';
+import { getSheetData, appendRow, objectToRow, findRowIndex, updateRow } from '../utils/sheetsService';
+import { generateId } from '../utils/storage';
 
-const STORAGE_KEY = 'smartbill_customers';
-const LEDGER_KEY = 'smartbill_ledger';
+const SHEET_NAME = 'CUSTOMERS';
+const LEDGER_SHEET = 'LEDGER';
 
 const CustomerContext = createContext();
 
 export const CustomerProvider = ({ children }) => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { spreadsheetId, isReady } = useAuth();
   const { showToast } = useToast();
 
-  // Load from localStorage on mount
-  useEffect(() => {
-    const saved = safeGet(STORAGE_KEY, []);
-    setCustomers(saved.sort((a, b) => (a.name || '').localeCompare(b.name || '')));
-    setLoading(false);
-  }, []);
-
-  // Persist to localStorage on change
-  useEffect(() => {
-    if (!loading) {
-      safeSet(STORAGE_KEY, customers);
+  // Fetch customers from Google Sheets
+  const fetchCustomers = async () => {
+    if (!spreadsheetId) return;
+    try {
+      setLoading(true);
+      const data = await getSheetData(spreadsheetId, SHEET_NAME);
+      setCustomers(data.sort((a, b) => (a.name || '').localeCompare(b.name || '')));
+    } catch (err) {
+      console.error('Error fetching customers:', err);
+      showToast('Error loading customers', 'error');
+    } finally {
+      setLoading(false);
     }
-  }, [customers, loading]);
+  };
 
-  const addCustomer = (customerData) => {
+  useEffect(() => {
+    if (isReady && spreadsheetId) {
+      fetchCustomers();
+    }
+  }, [isReady, spreadsheetId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const addCustomer = async (customerData) => {
     try {
       const newCustomer = {
-        ...customerData,
         id: generateId(),
+        name: customerData.name || '',
+        phone: customerData.phone || '',
+        address: customerData.address || '',
+        gstin: customerData.gstin || '',
+        previous_balance: String(customerData.previousBalance || 0),
         created_at: new Date().toISOString()
       };
-      
-      setCustomers(prev => [...prev, newCustomer].sort((a, b) => a.name.localeCompare(b.name)));
-      
-      // If there was an opening balance, record it in the ledger
+
+      const row = objectToRow(SHEET_NAME, newCustomer);
+      await appendRow(spreadsheetId, SHEET_NAME, row);
+
+      // Opening balance ledger entry
       if (parseFloat(customerData.previousBalance || 0) > 0) {
-        const ledger = safeGet(LEDGER_KEY, []);
-        ledger.push({
+        const ledgerEntry = {
           id: generateId(),
+          date: new Date().toISOString(),
           customer_id: newCustomer.id,
+          supplier_id: '',
           type: 'OPENING',
-          amount: parseFloat(customerData.previousBalance),
+          invoice_id: '',
+          amount: String(customerData.previousBalance),
           description: 'Opening Balance',
-          date: new Date().toISOString()
-        });
-        safeSet(LEDGER_KEY, ledger);
+          is_void: 'FALSE',
+          created_at: new Date().toISOString()
+        };
+        await appendRow(spreadsheetId, LEDGER_SHEET, objectToRow(LEDGER_SHEET, ledgerEntry));
       }
-      
+
+      setCustomers(prev => [...prev, newCustomer].sort((a, b) => a.name.localeCompare(b.name)));
+      window.dispatchEvent(new Event('ledger-updated'));
       return newCustomer;
     } catch (err) {
-      console.error('Error adding customer:', err.message);
+      console.error('Error adding customer:', err);
       showToast('Failed to add customer', 'error');
       return null;
     }
   };
 
-  const updateCustomer = (id, data) => {
+  const updateCustomer = async (id, data) => {
     try {
-      setCustomers(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
+      const rowIdx = await findRowIndex(spreadsheetId, SHEET_NAME, 'id', id);
+      if (rowIdx === -1) throw new Error('Customer not found');
+
+      const existing = customers.find(c => c.id === id);
+      const updated = { ...existing, ...data };
+      const row = objectToRow(SHEET_NAME, updated);
+      await updateRow(spreadsheetId, SHEET_NAME, rowIdx, row);
+
+      setCustomers(prev => prev.map(c => c.id === id ? updated : c));
     } catch (err) {
-      console.error('Error updating customer:', err.message);
+      console.error('Error updating customer:', err);
       showToast('Failed to update customer', 'error');
     }
   };
-  
-  const deleteCustomer = (id) => {
+
+  const deleteCustomer = async (id) => {
     try {
+      const rowIdx = await findRowIndex(spreadsheetId, SHEET_NAME, 'id', id);
+      if (rowIdx === -1) throw new Error('Customer not found');
+
+      // Clear the row (mark as deleted by blanking it)
+      const emptyRow = objectToRow(SHEET_NAME, { id: `DELETED_${id}`, name: '[DELETED]', phone: '', address: '', gstin: '', previous_balance: '0', created_at: '' });
+      await updateRow(spreadsheetId, SHEET_NAME, rowIdx, emptyRow);
+
       setCustomers(prev => prev.filter(c => c.id !== id));
     } catch (err) {
-      console.error('Error deleting customer:', err.message);
+      console.error('Error deleting customer:', err);
       showToast('Failed to delete customer', 'error');
     }
   };
 
-  const addCustomerPayment = (customerId, amount, date, notes) => {
+  const addCustomerPayment = async (customerId, amount, date, notes) => {
     try {
-      const ledger = safeGet(LEDGER_KEY, []);
-      ledger.push({
+      const ledgerEntry = {
         id: generateId(),
-        customer_id: customerId,
-        type: 'PAYMENT',
-        amount: parseFloat(amount),
         date: date || new Date().toISOString(),
-        description: notes || 'Direct Payment'
-      });
-      safeSet(LEDGER_KEY, ledger);
+        customer_id: customerId,
+        supplier_id: '',
+        type: 'PAYMENT',
+        invoice_id: '',
+        amount: String(parseFloat(amount)),
+        description: notes || 'Direct Payment',
+        is_void: 'FALSE',
+        created_at: new Date().toISOString()
+      };
+      await appendRow(spreadsheetId, LEDGER_SHEET, objectToRow(LEDGER_SHEET, ledgerEntry));
       showToast('Payment recorded successfully', 'success');
-      
-      // Trigger a storage event so BillContext can pick up the ledger change
       window.dispatchEvent(new Event('ledger-updated'));
     } catch (err) {
-       console.error('Error recording payment:', err.message);
-       showToast('Failed to record payment', 'error');
+      console.error('Error recording payment:', err);
+      showToast('Failed to record payment', 'error');
     }
   };
 
   return (
-    <CustomerContext.Provider value={{ 
-      customers, 
+    <CustomerContext.Provider value={{
+      customers,
       loading,
-      addCustomer, 
-      updateCustomer, 
+      addCustomer,
+      updateCustomer,
       deleteCustomer,
-      addCustomerPayment 
+      addCustomerPayment,
+      refreshCustomers: fetchCustomers
     }}>
       {children}
     </CustomerContext.Provider>

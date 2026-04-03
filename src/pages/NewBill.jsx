@@ -212,15 +212,21 @@ export default function NewBill() {
 
   const handleGeneratePDF = () => {
     if (items.length === 0) return;
-    generateInvoicePDF({
-      invoiceNo, date, customerName, customerPhone,
-      items, subTotal, totalDiscount,
-      cgst, sgst, gstEnabled: totalGST > 0, gstAmount: totalGST,
-      grandTotal,
-      prevBalanceIncluded: includePrevBalance ? prevBalance : 0,
-      paymentMode, amountPaid, outstanding,
-    }, userSettings);
-    showToast('Invoice PDF Generated', 'success');
+    try {
+      const { doc, fileName } = generateInvoicePDF({
+        invoiceNo, date, customerName, customerPhone,
+        items, subTotal, totalDiscount,
+        cgst, sgst, gstEnabled: totalGST > 0, gstAmount: totalGST,
+        grandTotal,
+        prevBalanceIncluded: includePrevBalance ? prevBalance : 0,
+        paymentMode, amountPaid, outstanding,
+      }, userSettings);
+      doc.save(fileName);
+      showToast('Invoice PDF Downloaded', 'success');
+    } catch (err) {
+      console.error('PDF manual generate failed:', err);
+      showToast('Failed to generate PDF', 'error');
+    }
   };
 
   const recentCustomers = [...customers]

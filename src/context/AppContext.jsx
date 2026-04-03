@@ -1,4 +1,5 @@
 import React from 'react';
+import { AuthProvider } from './AuthContext';
 import { SettingsProvider, useSettings } from './SettingsContext';
 import { InventoryProvider, useInventory } from './InventoryContext';
 import { CustomerProvider, useCustomers } from './CustomerContext';
@@ -9,25 +10,27 @@ import { AuditProvider, useAudit } from './AuditContext';
 
 export const AppProvider = ({ children }) => {
   return (
-    <AuditProvider>
-      <SettingsProvider>
-        <CustomerProvider>
-          <SupplierProvider>
-            <InventoryProvider>
-              <BillProvider>
-                <TransactionProvider>
-                  {children}
-                </TransactionProvider>
-              </BillProvider>
-            </InventoryProvider>
-          </SupplierProvider>
-        </CustomerProvider>
-      </SettingsProvider>
-    </AuditProvider>
+    <AuthProvider>
+      <AuditProvider>
+        <SettingsProvider>
+          <CustomerProvider>
+            <SupplierProvider>
+              <InventoryProvider>
+                <BillProvider>
+                  <TransactionProvider>
+                    {children}
+                  </TransactionProvider>
+                </BillProvider>
+              </InventoryProvider>
+            </SupplierProvider>
+          </CustomerProvider>
+        </SettingsProvider>
+      </AuditProvider>
+    </AuthProvider>
   );
 };
 
-// Export a combined custom hook for backwards compatibility while pages are refactored
+// Export a combined custom hook for backwards compatibility
 export const useAppContext = () => {
    const settings = useSettings();
    const inventory = useInventory();

@@ -300,10 +300,12 @@ export const generateInvoicePDF = (bill, settings = {}) => {
     doc.rect(0, pageH - 5, pageW, 5, 'F');
 
     const safeName = String(bill.customerName || 'Customer').replace(/\s+/g, '_');
-    doc.save(`TaxInvoice_${bill.invoiceNo || 'Draft'}_${safeName}.pdf`);
+    const fileName = `TaxInvoice_${bill.invoiceNo || 'Draft'}_${safeName}.pdf`;
+    
+    return { doc, fileName };
 
   } catch (err) {
     console.error('[PDF Generator] Error:', err);
-    alert('PDF generation failed: ' + (err?.message || err));
+    throw err;
   }
 };

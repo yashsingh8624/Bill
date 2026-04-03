@@ -9,14 +9,13 @@ export const AuditProvider = ({ children }) => {
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load from localStorage on mount
+  // Audit logs stay in localStorage (not worth API calls for audit trail)
   useEffect(() => {
     const saved = safeGet(STORAGE_KEY, []);
     setLogs(saved);
     setLoading(false);
   }, []);
 
-  // Persist to localStorage on change
   useEffect(() => {
     if (!loading) {
       safeSet(STORAGE_KEY, logs);
@@ -35,7 +34,7 @@ export const AuditProvider = ({ children }) => {
       };
       setLogs(prev => [newLog, ...prev].slice(0, 200));
     } catch (err) {
-       console.error('Error adding audit log:', err.message);
+      console.error('Error adding audit log:', err.message);
     }
   };
 
