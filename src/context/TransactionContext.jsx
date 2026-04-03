@@ -7,15 +7,12 @@ export const TransactionProvider = ({ children }) => {
   const billsRes = useBills() || {};
   const ledger = Array.isArray(billsRes.ledger) ? billsRes.ledger : [];
 
-  // Transactions are now unified within the ledger table.
-  // We keep this context solely for backward compatibility where needed.
-  
-  // Note: For historical reasons, entities might rely on 'transactions' directly
-  // We bridge 'ledger' entries to look like 'transactions' if needed, or simply return the ledger.
+  // Transactions are now unified within the ledger.
+  // This context is kept for backward compatibility.
   const transactions = ledger;
 
   const addTransaction = () => {
-    console.warn('addTransaction is deprecated. Use addLedgerEntry from Supabase directly or via contexts.');
+    console.warn('addTransaction is deprecated. Use context-specific methods instead.');
   };
 
   const deleteTransaction = () => {

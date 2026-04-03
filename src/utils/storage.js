@@ -28,13 +28,15 @@ export const generateId = () => crypto.randomUUID();
 
 export const exportBackup = () => {
   const data = {
-    version: "1.1.0",
+    version: "2.0.0",
     backupDate: new Date().toISOString(),
     settings: safeGet('smartbill_settings', {}),
     products: safeGet('smartbill_products', []),
     bills: safeGet('smartbill_bills', []),
     customers: safeGet('smartbill_customers', []),
     suppliers: safeGet('smartbill_suppliers', []),
+    ledger: safeGet('smartbill_ledger', []),
+    audit_logs: safeGet('smartbill_audit_logs', []),
     transactions: safeGet('smartbill_transactions', [])
   };
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -61,6 +63,8 @@ export const restoreBackup = (jsonData) => {
     if (data.bills) safeSet('smartbill_bills', data.bills);
     if (data.customers) safeSet('smartbill_customers', data.customers);
     if (data.suppliers) safeSet('smartbill_suppliers', data.suppliers);
+    if (data.ledger) safeSet('smartbill_ledger', data.ledger);
+    if (data.audit_logs) safeSet('smartbill_audit_logs', data.audit_logs);
     if (data.transactions) safeSet('smartbill_transactions', data.transactions);
     
     return true;

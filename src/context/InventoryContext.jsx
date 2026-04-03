@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../utils/supabase';
 import { useToast } from './ToastContext';
+import { safeGet, safeSet, generateId } from '../utils/storage';
+
+const STORAGE_KEY = 'smartbill_products';
 
 const InventoryContext = createContext();
 
@@ -9,65 +11,37 @@ export const InventoryProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const { showToast } = useToast();
 
-  const fetchProducts = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('name', { ascending: true });
-      
-      if (error) throw error;
-      setProducts(data || []);
-    } catch (err) {
-      console.error('Error fetching products:', err.message);
-      showToast('Error loading inventory', 'error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Load from localStorage on mount
   useEffect(() => {
-    fetchProducts();
-    
-    // Realtime listener
-    const channel = supabase
-      .channel('products-changes')
-      .on('postgres_changes', 
-        { event: '*', table: 'products', schema: 'public' }, 
-        (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setProducts(prev => [...prev, payload.new].sort((a,b) => a.name.localeCompare(b.name)));
-          } else if (payload.eventType === 'UPDATE') {
-            setProducts(prev => prev.map(p => p.id === payload.new.id ? payload.new : p));
-          } else if (payload.eventType === 'DELETE') {
-            setProducts(prev => prev.filter(p => p.id !== payload.old.id));
-          }
-        })
-      .subscribe();
+    const saved = safeGet(STORAGE_KEY, []);
+    setProducts(saved.sort((a, b) => (a.name || '').localeCompare(b.name || '')));
+    setLoading(false);
+  }, []);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // Persist to localStorage on change
+  useEffect(() => {
+    if (!loading) {
+      safeSet(STORAGE_KEY, products);
+    }
+  }, [products, loading]);
 
-  const addProduct = async (product) => {
+  const addProduct = (product) => {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .insert([{
-           name: product.name,
-           hsn: product.hsn,
-           selling_price: parseFloat(product.sellingPrice || product.price || 0),
-           purchase_price: parseFloat(product.purchasePrice || 0),
-           quantity: parseInt(product.quantity || 0, 10),
-           low_stock_threshold: parseInt(product.lowStockThreshold || 5, 10),
-           stock_history: product.stockHistory || []
-        }])
-        .select();
+      const newProduct = {
+        id: generateId(),
+        name: product.name,
+        hsn: product.hsn,
+        selling_price: parseFloat(product.sellingPrice || product.price || 0),
+        purchase_price: parseFloat(product.purchasePrice || 0),
+        quantity: parseInt(product.quantity || 0, 10),
+        low_stock_threshold: parseInt(product.lowStockThreshold || 5, 10),
+        stock_history: product.stockHistory || [],
+        created_at: new Date().toISOString()
+      };
       
-      if (error) throw error;
+      setProducts(prev => [...prev, newProduct].sort((a, b) => a.name.localeCompare(b.name)));
       showToast('Product added successfully', 'success');
-      return data[0];
+      return newProduct;
     } catch (err) {
       console.error('Error adding product:', err.message);
       showToast('Failed to add product', 'error');
@@ -75,38 +49,29 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-  const updateProduct = async (id, data) => {
+  const updateProduct = (id, data) => {
     try {
-      // Map camelCase to snake_case for DB
-      const dbData = {};
-      if (data.name !== undefined) dbData.name = data.name;
-      if (data.hsn !== undefined) dbData.hsn = data.hsn;
-      if (data.sellingPrice !== undefined) dbData.selling_price = parseFloat(data.sellingPrice);
-      if (data.purchasePrice !== undefined) dbData.purchase_price = parseFloat(data.purchasePrice);
-      if (data.quantity !== undefined) dbData.quantity = parseInt(data.quantity, 10);
-      if (data.lowStockThreshold !== undefined) dbData.low_stock_threshold = parseInt(data.lowStockThreshold, 10);
-      if (data.stockHistory !== undefined) dbData.stock_history = data.stockHistory;
-
-      const { error } = await supabase
-        .from('products')
-        .update(dbData)
-        .eq('id', id);
-      
-      if (error) throw error;
+      setProducts(prev => prev.map(p => {
+        if (p.id !== id) return p;
+        const updated = { ...p };
+        if (data.name !== undefined) updated.name = data.name;
+        if (data.hsn !== undefined) updated.hsn = data.hsn;
+        if (data.sellingPrice !== undefined) updated.selling_price = parseFloat(data.sellingPrice);
+        if (data.purchasePrice !== undefined) updated.purchase_price = parseFloat(data.purchasePrice);
+        if (data.quantity !== undefined) updated.quantity = parseInt(data.quantity, 10);
+        if (data.lowStockThreshold !== undefined) updated.low_stock_threshold = parseInt(data.lowStockThreshold, 10);
+        if (data.stockHistory !== undefined) updated.stock_history = data.stockHistory;
+        return updated;
+      }));
     } catch (err) {
       console.error('Error updating product:', err.message);
       showToast('Failed to update product', 'error');
     }
   };
 
-  const deleteProduct = async (id) => {
+  const deleteProduct = (id) => {
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      setProducts(prev => prev.filter(p => p.id !== id));
       showToast('Product deleted', 'success');
     } catch (err) {
       console.error('Error deleting product:', err.message);
@@ -114,30 +79,29 @@ export const InventoryProvider = ({ children }) => {
     }
   };
 
-  const addStock = async (id, qtyChange, note) => {
+  const addStock = (id, qtyChange, note) => {
     try {
-      const product = products.find(p => p.id === id);
-      if (!product) return;
+      setProducts(prev => prev.map(p => {
+        if (p.id !== id) return p;
+        
+        const change = parseInt(qtyChange, 10);
+        const newQuantity = (p.quantity || 0) + change;
+        const historyEntry = { 
+          id: generateId(),
+          date: new Date().toISOString(), 
+          change, 
+          note,
+          type: change >= 0 ? 'IN' : 'OUT'
+        };
 
-      const change = parseInt(qtyChange, 10);
-      const newQuantity = (product.quantity || 0) + change;
-      const historyEntry = { 
-         id: crypto.randomUUID(),
-         date: new Date().toISOString(), 
-         change, 
-         note,
-         type: change >= 0 ? 'IN' : 'OUT'
-      };
-
-      const { error } = await supabase
-        .from('products')
-        .update({
+        return {
+          ...p,
           quantity: newQuantity,
-          stock_history: [...(product.stock_history || []), historyEntry]
-        })
-        .eq('id', id);
+          stock_history: [...(p.stock_history || []), historyEntry]
+        };
+      }));
       
-      if (error) throw error;
+      const change = parseInt(qtyChange, 10);
       showToast(`Stock ${change >= 0 ? 'added' : 'removed'} updated`, 'success');
     } catch (err) {
       console.error('Error adding stock:', err.message);

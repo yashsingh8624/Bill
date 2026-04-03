@@ -1,10 +1,10 @@
 /**
  * LEDGER - Central Utility for Balance Calculations
  *
- * This file no longer interacts with localStorage directly.
- * Instead, it provides helper functions to calculate totals from an array of ledger entries.
- * The context providers (Customer/Bill/Supplier Contexts) will be responsible for 
- * fetching the ledger data from Supabase and maintaining it in state.
+ * Provides helper functions to calculate totals from an array of ledger entries.
+ * The context providers (Customer/Bill/Supplier Contexts) are responsible for 
+ * loading and persisting ledger data via localStorage.
+ * Ready for future Google Sheets integration.
  */
 
 // Balance formula: SUM(SALE + OPENING) - SUM(PAYMENT + ROLLOVER)
