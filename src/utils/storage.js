@@ -31,11 +31,11 @@ export const exportBackup = () => {
     version: "2.0.0",
     backupDate: new Date().toISOString(),
     settings: safeGet('smartbill_settings', {}),
-    products: safeGet('smartbill_products', []),
-    bills: safeGet('smartbill_bills', []),
-    customers: safeGet('smartbill_customers', []),
-    suppliers: safeGet('smartbill_suppliers', []),
-    ledger: safeGet('smartbill_ledger', []),
+    products: safeGet('smartbill_local_PRODUCTS', []),
+    bills: safeGet('smartbill_local_BILLS', []),
+    customers: safeGet('smartbill_local_CUSTOMERS', []),
+    suppliers: safeGet('smartbill_local_SUPPLIERS', []),
+    ledger: safeGet('smartbill_local_LEDGER', []),
     audit_logs: safeGet('smartbill_audit_logs', []),
     transactions: safeGet('smartbill_transactions', [])
   };
@@ -59,11 +59,11 @@ export const restoreBackup = (jsonData) => {
     }
     
     if (data.settings) safeSet('smartbill_settings', data.settings);
-    if (data.products) safeSet('smartbill_products', data.products);
-    if (data.bills) safeSet('smartbill_bills', data.bills);
-    if (data.customers) safeSet('smartbill_customers', data.customers);
-    if (data.suppliers) safeSet('smartbill_suppliers', data.suppliers);
-    if (data.ledger) safeSet('smartbill_ledger', data.ledger);
+    if (data.products) safeSet('smartbill_local_PRODUCTS', data.products);
+    if (data.bills) safeSet('smartbill_local_BILLS', data.bills);
+    if (data.customers) safeSet('smartbill_local_CUSTOMERS', data.customers);
+    if (data.suppliers) safeSet('smartbill_local_SUPPLIERS', data.suppliers);
+    if (data.ledger) safeSet('smartbill_local_LEDGER', data.ledger);
     if (data.audit_logs) safeSet('smartbill_audit_logs', data.audit_logs);
     if (data.transactions) safeSet('smartbill_transactions', data.transactions);
     

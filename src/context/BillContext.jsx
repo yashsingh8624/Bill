@@ -29,6 +29,25 @@ export const BillProvider = ({ children }) => {
 
   const mapBillToApp = useCallback((b) => {
     const cust = customers.find(c => c.id === (b.customer_id || b.customerId)) || {};
+    
+    let parsedItems = [];
+    let meta = {};
+    if (typeof b.items_json === 'string') {
+      try {
+        const parsed = JSON.parse(b.items_json);
+        if (!Array.isArray(parsed) && parsed && parsed.items) {
+           parsedItems = parsed.items;
+           meta = parsed;
+        } else {
+           parsedItems = parsed || [];
+        }
+      } catch (e) {
+         console.error("Error parsing items_json:", e);
+      }
+    } else {
+      parsedItems = b.items || [];
+    }
+
     return {
       ...b,
       customerId: b.customer_id || b.customerId,
@@ -42,8 +61,12 @@ export const BillProvider = ({ children }) => {
       amountPaid: parseFloat(b.amount_paid || b.amountPaid || 0),
       isDeleted: b.is_deleted === 'TRUE' || b.is_deleted === true,
       deleteReason: b.delete_reason || b.deleteReason || '',
-      items: typeof b.items_json === 'string' ? JSON.parse(b.items_json || '[]') : (b.items || []),
-      outstanding: Math.max(0, parseFloat(b.total || 0) - parseFloat(b.amount_paid || b.amountPaid || 0)),
+      items: parsedItems,
+      grandTotal: meta.grandTotal !== undefined ? meta.grandTotal : parseFloat(b.total || 0),
+      previousBalance: meta.previousBalance || parseFloat(b.previous_balance || 0),
+      prevBalanceIncluded: meta.prevBalanceIncluded || 0,
+      paymentMode: meta.paymentMode || b.paymentMode || 'Cash',
+      outstanding: meta.outstanding !== undefined ? meta.outstanding : Math.max(0, parseFloat(b.total || 0) - parseFloat(b.amount_paid || b.amountPaid || 0)),
       pdf_link: b.pdf_link || '',
       readableDate: new Date(b.date).toLocaleDateString()
     };
@@ -135,7 +158,14 @@ export const BillProvider = ({ children }) => {
         customer_id: bill.customerId || bill.customer_id,
         invoice_no: invoiceNo,
         date: billDate,
-        items_json: JSON.stringify(bill.items || []),
+        items_json: JSON.stringify({
+          items: bill.items || [],
+          grandTotal: bill.grandTotal,
+          previousBalance: bill.previousBalance,
+          prevBalanceIncluded: bill.prevBalanceIncluded,
+          outstanding: bill.outstanding,
+          paymentMode: bill.paymentMode
+        }),
         sub_total: String(parseFloat(bill.subTotal || 0)),
         cgst: String(parseFloat(bill.cgst || 0)),
         sgst: String(parseFloat(bill.sgst || 0)),
@@ -185,8 +215,9 @@ export const BillProvider = ({ children }) => {
       await appendRow(spreadsheetId, LEDGER_SHEET, objectToRow(LEDGER_SHEET, saleLedger));
 
       // 5. Add PAYMENT ledger entry if paid
+      let payLedger = null;
       if (parseFloat(newBill.amount_paid) > 0) {
-        const payLedger = {
+        payLedger = {
           id: generateId(),
           date: new Date(new Date(billDate).getTime() + 1000).toISOString(),
           customer_id: newBill.customer_id,
@@ -234,6 +265,14 @@ export const BillProvider = ({ children }) => {
 
       const appBill = mapBillToApp(newBill);
       setBills(prev => [appBill, ...prev]);
+      
+      // Optimistically update ledger
+      setLedger(prev => {
+        const newLedger = [...prev, parseLedgerEntry(saleLedger)];
+        if (payLedger) newLedger.push(parseLedgerEntry(payLedger));
+        return newLedger;
+      });
+      
       window.dispatchEvent(new Event('ledger-updated'));
 
       return appBill;
@@ -258,7 +297,14 @@ export const BillProvider = ({ children }) => {
           ...targetBill,
           customer_id: targetBill.customerId,
           invoice_no: invoiceNo,
-          items_json: JSON.stringify(targetBill.items || []),
+          items_json: JSON.stringify({
+             items: targetBill.items || [],
+             grandTotal: targetBill.grandTotal,
+             previousBalance: targetBill.previousBalance,
+             prevBalanceIncluded: targetBill.prevBalanceIncluded,
+             outstanding: targetBill.outstanding,
+             paymentMode: targetBill.paymentMode
+          }),
           sub_total: String(targetBill.subTotal),
           cgst: String(targetBill.cgst),
           sgst: String(targetBill.sgst),
@@ -284,6 +330,10 @@ export const BillProvider = ({ children }) => {
 
       setBills(prev => prev.map(b =>
         b.id === id ? { ...b, isDeleted: true, deleteReason: reason } : b
+      ));
+
+      setLedger(prev => prev.map(entry => 
+        entry.invoice_id === invoiceNo ? { ...entry, is_void: true, amount: 0 } : entry
       ));
 
       addLog('DELETE', 'BILL', id, { reason, invoiceNo });

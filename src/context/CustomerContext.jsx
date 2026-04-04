@@ -39,7 +39,7 @@ export const CustomerProvider = ({ children }) => {
   const addCustomer = async (customerData) => {
     try {
       const newCustomer = {
-        id: generateId(),
+        id: customerData.id || generateId(),
         name: customerData.name || '',
         phone: customerData.phone || '',
         address: customerData.address || '',

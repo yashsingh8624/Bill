@@ -101,23 +101,33 @@ export const storeSpreadsheetId = (email, spreadsheetId) => {
 /**
  * Append rows to a sheet
  */
+/**
+ * Append rows to a sheet: Updates local cache first, then syncs to Google Sheets.
+ */
 export const appendRows = async (spreadsheetId, sheetName, rows) => {
+  const existing = getLocalData(sheetName);
+  existing.push(...rows);
+  setLocalData(sheetName, existing);
+
   if (isOffline(spreadsheetId)) {
-    const existing = getLocalData(sheetName);
-    existing.push(...rows);
-    setLocalData(sheetName, existing);
     return { updates: { updatedRows: rows.length } };
   }
-  return apiCall(async () => {
-    const response = await window.gapi.client.sheets.spreadsheets.values.append({
-      spreadsheetId,
-      range: `${sheetName}!A1`,
-      valueInputOption: 'USER_ENTERED',
-      insertDataOption: 'INSERT_ROWS',
-      resource: { values: rows }
+
+  try {
+    return await apiCall(async () => {
+      const response = await window.gapi.client.sheets.spreadsheets.values.append({
+        spreadsheetId,
+        range: `${sheetName}!A1`,
+        valueInputOption: 'USER_ENTERED',
+        insertDataOption: 'INSERT_ROWS',
+        resource: { values: rows }
+      });
+      return response.result;
     });
-    return response.result;
-  });
+  } catch (err) {
+    console.warn(`[Sync Warning] Failed to append rows to ${sheetName} on Google Sheets. Saved to local cache:`, err);
+    return { fallback: true, updates: { updatedRows: rows.length } };
+  }
 };
 
 /**
@@ -127,55 +137,41 @@ export const appendRow = async (spreadsheetId, sheetName, values) => {
   return appendRows(spreadsheetId, sheetName, [values]);
 };
 
-/**
- * Append test data specifically as requested: name, phone, address, amount
- */
-export const appendTestData = async (data) => {
-  const spreadsheetId = import.meta.env.VITE_GOOGLE_SHEET_ID;
-  const sheetName = 'Sheet1';
-  const row = [data.name || '', data.phone || '', data.address || '', data.amount || ''];
-  
-  try {
-    const response = await window.gapi.client.sheets.spreadsheets.values.append({
-      spreadsheetId,
-      range: `${sheetName}!A:D`,
-      valueInputOption: 'USER_ENTERED',
-      insertDataOption: 'INSERT_ROWS',
-      resource: { values: [row] }
-    });
-    return response.result;
-  } catch (err) {
-    const status = err?.status || err?.result?.error?.code;
-    if (status === 403) {
-      throw new Error('Permission Denied: You do not have edit access to this spreadsheet.');
-    }
-    throw err;
-  }
-};
+
 
 /**
  * Get all rows from a sheet (excluding header)
  */
 export const getRows = async (spreadsheetId, sheetName) => {
+  const headers = SHEET_DEFINITIONS[sheetName] || [];
+  
   if (isOffline(spreadsheetId)) {
-    const headers = SHEET_DEFINITIONS[sheetName] || [];
-    const rows = getLocalData(sheetName);
-    return { headers, rows };
+    return { headers, rows: getLocalData(sheetName) };
   }
-  return apiCall(async () => {
-    const response = await window.gapi.client.sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: `${sheetName}!A:ZZ`
+
+  try {
+    const data = await apiCall(async () => {
+      const response = await window.gapi.client.sheets.spreadsheets.values.get({
+        spreadsheetId,
+        range: `${sheetName}!A:ZZ`
+      });
+      
+      const allRows = response.result.values || [];
+      if (allRows.length <= 1) return { headers: allRows[0] || headers, rows: [] };
+      
+      const responseHeaders = allRows[0];
+      const dataRows = allRows.slice(1);
+      
+      return { headers: responseHeaders, rows: dataRows };
     });
     
-    const allRows = response.result.values || [];
-    if (allRows.length <= 1) return { headers: allRows[0] || [], rows: [] };
-    
-    const headers = allRows[0];
-    const dataRows = allRows.slice(1);
-    
-    return { headers, rows: dataRows };
-  });
+    // Refresh local cache with latest data
+    setLocalData(sheetName, data.rows);
+    return data;
+  } catch (err) {
+    console.warn(`[Sync Warning] Failed to fetch rows from ${sheetName} on Google Sheets. Falling back to local cache:`, err);
+    return { headers, rows: getLocalData(sheetName) };
+  }
 };
 
 /**
@@ -209,28 +205,35 @@ export const objectToRow = (sheetName, obj) => {
  * Update a specific row in a sheet (1-indexed, row 1 is header)
  */
 export const updateRow = async (spreadsheetId, sheetName, rowIndex, values) => {
+  const rows = getLocalData(sheetName);
+  const dataIndex = rowIndex - 2; // Convert from 1-indexed with header to 0-indexed
+  if (dataIndex >= 0 && dataIndex < rows.length) {
+    rows[dataIndex] = values;
+    setLocalData(sheetName, rows);
+  }
+
   if (isOffline(spreadsheetId)) {
-    const rows = getLocalData(sheetName);
-    const dataIndex = rowIndex - 2; // Convert from 1-indexed with header to 0-indexed
-    if (dataIndex >= 0 && dataIndex < rows.length) {
-      rows[dataIndex] = values;
-      setLocalData(sheetName, rows);
-    }
     return { updatedRows: 1 };
   }
-  return apiCall(async () => {
-    const headers = SHEET_DEFINITIONS[sheetName];
-    const lastCol = String.fromCharCode(64 + headers.length);
-    const range = `${sheetName}!A${rowIndex}:${lastCol}${rowIndex}`;
-    
-    const response = await window.gapi.client.sheets.spreadsheets.values.update({
-      spreadsheetId,
-      range,
-      valueInputOption: 'USER_ENTERED',
-      resource: { values: [values] }
+
+  try {
+    return await apiCall(async () => {
+      const headers = SHEET_DEFINITIONS[sheetName];
+      const lastCol = String.fromCharCode(64 + headers.length);
+      const range = `${sheetName}!A${rowIndex}:${lastCol}${rowIndex}`;
+      
+      const response = await window.gapi.client.sheets.spreadsheets.values.update({
+        spreadsheetId,
+        range,
+        valueInputOption: 'USER_ENTERED',
+        resource: { values: [values] }
+      });
+      return response.result;
     });
-    return response.result;
-  });
+  } catch (err) {
+    console.warn(`[Sync Warning] Failed to update row ${rowIndex} in ${sheetName} on Google Sheets. Saved to local cache:`, err);
+    return { fallback: true, updatedRows: 1 };
+  }
 };
 
 /**
