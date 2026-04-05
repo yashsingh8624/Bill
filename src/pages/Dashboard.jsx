@@ -3,11 +3,14 @@ import { useBills } from '../context/BillContext';
 import { useInventory } from '../context/InventoryContext';
 import { useCustomers } from '../context/CustomerContext';
 import { useSuppliers } from '../context/SupplierContext';
-import { IndianRupee, TrendingUp, AlertTriangle, FileText, ArrowRight, Target, Users, Package, Calendar, ChevronRight, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { IndianRupee, TrendingUp, AlertTriangle, FileText, ArrowRight, Target, Users, Package, Calendar, ChevronRight, ArrowUpRight, ArrowDownRight, Cloud, FolderOpen, FileSpreadsheet, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { calculateCustomerBalance } from '../utils/ledger';
+import { useAuth } from '../context/AuthContext';
 
 export default function Dashboard() {
+  const { folderId, spreadsheetId, status, isOffline } = useAuth() || {};
+
   const billsRes = useBills() || {};
   const bills = Array.isArray(billsRes.bills) ? billsRes.bills : [];
   const ledger = Array.isArray(billsRes.ledger) ? billsRes.ledger : [];
@@ -173,6 +176,54 @@ export default function Dashboard() {
           <p className="text-red-400 text-[10px] mt-2 font-black uppercase tracking-widest">Needs Re-stocking</p>
         </div>
       </div>
+
+      {/* Cloud Storage Section */}
+      {!isOffline && (
+        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
+          <div className="absolute -right-4 -top-4 w-32 h-32 bg-blue-50 rounded-full blur-2xl group-hover:scale-110 transition-transform pointer-events-none"></div>
+          <div className="relative z-10">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
+              <Cloud size={16} className="text-blue-500" /> Your Cloud Storage
+            </h3>
+            <p className="text-sm text-slate-500 font-medium">
+              Access your synced invoices and database sheets directly.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 relative z-10">
+            {(!folderId || !spreadsheetId) && status !== 'ready' ? (
+              <div className="flex items-center text-slate-500 text-sm font-bold gap-2">
+                <Loader2 size={16} className="animate-spin text-blue-500" />
+                Setting up your cloud storage...
+              </div>
+            ) : (
+              <>
+                {folderId && (
+                  <a
+                    href={`https://drive.google.com/drive/folders/${folderId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-blue-50 border border-blue-100 text-blue-600 hover:bg-blue-600 hover:text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-sm hover:shadow-md hover:shadow-blue-500/20"
+                  >
+                    <FolderOpen size={18} />
+                    Open Drive Folder
+                  </a>
+                )}
+                {spreadsheetId && spreadsheetId !== 'LOCAL_MODE' && (
+                  <a
+                    href={`https://docs.google.com/spreadsheets/d/${spreadsheetId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-emerald-50 border border-emerald-100 text-emerald-600 hover:bg-emerald-600 hover:text-white px-5 py-3 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-sm hover:shadow-md hover:shadow-emerald-500/20"
+                  >
+                    <FileSpreadsheet size={18} />
+                    Open Google Sheet
+                  </a>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Ledger Due Summaries */}
