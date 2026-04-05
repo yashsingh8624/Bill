@@ -3,8 +3,10 @@ import { useCustomers } from '../context/CustomerContext';
 import { useBills } from '../context/BillContext';
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
-import { Users, Search, IndianRupee, MessageCircle, ChevronRight, Plus, X, Receipt, Edit2, Trash2 } from 'lucide-react';
+import { useToast } from '../context/ToastContext';
+import { Users, Search, IndianRupee, MessageCircle, ChevronRight, Plus, X, Receipt, Edit2, Trash2, Download } from 'lucide-react';
 import { getFilteredLedger, calculateCustomerBalance } from '../utils/ledger';
+import { generateLedgerPDF } from '../utils/ledgerPdfGenerator';
 
 export default function CustomerLedger() {
   const customersRes = useCustomers() || {};
@@ -14,6 +16,7 @@ export default function CustomerLedger() {
   const { bills = [], ledger = [] } = useBills() || {};
   const { getTransactionsByEntityId } = useTransactions() || {};
   const { userSettings = {} } = useSettings() || {};
+  const { showToast } = useToast();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -125,6 +128,19 @@ export default function CustomerLedger() {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleDownloadLedger = () => {
+    if (!currentCustomer) return;
+    const totals = getCustomerTotals(currentCustomer);
+    try {
+      const { doc, fileName } = generateLedgerPDF(currentCustomer, ledgerEntries, totals, userSettings);
+      doc.save(fileName);
+      showToast('Ledger PDF downloaded', 'success');
+    } catch (e) {
+      console.error(e);
+      showToast('Failed to generate PDF', 'error');
+    }
+  };
+
   return (
     <div className="space-y-6 flex flex-col min-h-screen sm:h-[calc(100vh-8rem)] relative w-full">
       {!selectedCustomer ? (
@@ -233,6 +249,13 @@ export default function CustomerLedger() {
                   Reminder
                 </button>
                 <button 
+                  onClick={handleDownloadLedger}
+                  className="bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 px-4 py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Download size={18} />
+                  Download PDF
+                </button>
+                <button 
                   onClick={openPaymentModal}
                   className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20"
                 >
@@ -295,16 +318,16 @@ export default function CustomerLedger() {
                       <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold tracking-wider sticky top-0 border-b border-slate-100">
                         <tr>
                           <th className="py-3 px-6">Date</th>
-                          <th className="py-3 px-6">Description</th>
-                          <th className="py-3 px-6 text-right text-red-500 bg-red-50/30">Debit (Billed)</th>
-                          <th className="py-3 px-6 text-right text-emerald-600 bg-emerald-50/30">Credit (Paid)</th>
-                          <th className="py-3 px-6 text-right text-indigo-600 bg-indigo-50/30">Balance</th>
+                          <th className="py-3 px-6">Description / Invoice</th>
+                          <th className="py-3 px-6 text-right text-red-500 bg-red-50/30">Total (Billed)</th>
+                          <th className="py-3 px-6 text-right text-emerald-600 bg-emerald-50/30">Paid (Credit)</th>
+                          <th className="py-3 px-6 text-right text-indigo-600 bg-indigo-50/30">Running Balance</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {ledgerEntries.reduce((acc, txn) => {
-                          const debit = (txn.type === 'SALE' || txn.type === 'OPENING') ? txn.amount : 0;
-                          const credit = (txn.type === 'PAYMENT' || txn.type === 'ROLLOVER') ? txn.amount : 0;
+                          const debit = (txn.type === 'SALE' || txn.type === 'OPENING') ? parseFloat(txn.amount) : 0;
+                          const credit = (txn.type === 'PAYMENT' || txn.type === 'ROLLOVER') ? parseFloat(txn.amount) : 0;
                           acc.balance = acc.balance + debit - credit;
                           
                           acc.rows.push(
@@ -315,7 +338,7 @@ export default function CustomerLedger() {
                                  {txn.type === 'PAYMENT' && <span className="text-emerald-600 mr-2 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded text-xs shadow-sm">PAY</span>}
                                  {txn.type === 'OPENING' && <span className="text-amber-500 mr-2 border border-amber-200 bg-amber-50 px-2 py-0.5 rounded text-xs shadow-sm">OPEN</span>}
                                  {txn.type === 'ROLLOVER' && <span className="text-indigo-400 mr-2 border border-indigo-200 bg-indigo-50 px-2 py-0.5 rounded text-xs">ROLL</span>}
-                                 {txn.desc}
+                                 {txn.desc || txn.description || txn.type}
                                </td>
                                <td className="py-4 px-6 text-right text-sm font-black text-slate-800 bg-red-50/10">{debit > 0 ? `₹${debit.toFixed(2)}` : '-'}</td>
                                <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 bg-emerald-50/10">{credit > 0 ? `₹${credit.toFixed(2)}` : '-'}</td>

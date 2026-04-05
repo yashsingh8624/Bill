@@ -4,308 +4,229 @@ import autoTable from 'jspdf-autotable';
 const safeNum = (val) => parseFloat(val) || 0;
 const fmt = (val) => safeNum(val).toFixed(2);
 
-/**
- * Splits a long string into lines that fit within maxWidth pixels.
- */
-const splitLines = (doc, text, maxWidth) => {
-  if (!text) return [];
-  return doc.splitTextToSize(String(text), maxWidth);
-};
-
 export const generateInvoicePDF = (bill, settings = {}) => {
   try {
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    const pageW = doc.internal.pageSize.getWidth();   // 210
-    const pageH = doc.internal.pageSize.getHeight();  // 297
-    const margin = 12;
-    const contentW = pageW - margin * 2;
+    const pageW = doc.internal.pageSize.getWidth(); // 210
+    const pageH = doc.internal.pageSize.getHeight(); // 297
+    const marginX = 15;
+    let cursorY = 15;
 
-    // ── Colour Palette ─────────────────────────────────────────────
-    const PRIMARY   = [30, 64, 175];    // Blue-800
-    const TEXT      = [15, 23, 42];     // Slate-950
-    const MUTED     = [100, 116, 139];  // Slate-500
-    const BORDER    = [203, 213, 225];  // Slate-300
-    const LIGHT_BG  = [248, 250, 252];  // Slate-50
-    const GREEN     = [22, 163, 74];
-    const RED       = [220, 38, 38];
-    const AMBER     = [180, 83, 9];
-    const WHITE     = [255, 255, 255];
+    // --- COLORS ---
+    const TEXT_MAIN = [30, 41, 59];      // slate-800
+    const TEXT_MUTED = [100, 116, 139];  // slate-500
+    const BORDER = [226, 232, 240];      // slate-200
+    const ACCENT = [79, 70, 229];        // indigo-600
 
-    // ── Top Colour Bar ─────────────────────────────────────────────
-    doc.setFillColor(...PRIMARY);
-    doc.rect(0, 0, pageW, 8, 'F');
+    // HELPER: Write text
+    const writeText = (text, x, y, size = 10, color = TEXT_MAIN, font = 'helvetica', style = 'normal', align = 'left') => {
+      doc.setFont(font, style);
+      doc.setFontSize(size);
+      doc.setTextColor(...color);
+      doc.text(String(text), x, y, { align });
+    };
 
-    // ── Business Name (left) ───────────────────────────────────────
-    let y = 18;
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(18);
-    doc.setTextColor(...PRIMARY);
-    doc.text(String(settings.businessName || 'SmartBill Pro'), margin, y);
+    // --- HEADER SECTIONS ---
+    writeText(settings.businessName || 'SmartBill Pro', marginX, cursorY + 5, 20, TEXT_MAIN, 'helvetica', 'bold');
+    
+    // Header Right (INVOICE title)
+    writeText('TAX INVOICE', pageW - marginX, cursorY + 5, 20, ACCENT, 'helvetica', 'bold', 'right');
+    
+    cursorY += 12;
+    const headerLeftY = cursorY;
 
-    // Business address + phone + GSTIN
-    y += 5;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
-    doc.setTextColor(...MUTED);
+    // Business Details
     if (settings.businessAddress) {
-      const addrLines = splitLines(doc, settings.businessAddress, contentW / 2 - 5);
-      doc.text(addrLines, margin, y);
-      y += addrLines.length * 4;
+      const addressLines = doc.splitTextToSize(settings.businessAddress, 80);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...TEXT_MUTED);
+      doc.text(addressLines, marginX, cursorY);
+      cursorY += addressLines.length * 4;
     }
     if (settings.ownerPhone) {
-      doc.text(`Phone: ${settings.ownerPhone}`, margin, y);
-      y += 4;
+      writeText(`Phone: ${settings.ownerPhone}`, marginX, cursorY, 9, TEXT_MUTED);
+      cursorY += 5;
     }
     if (settings.gstNumber) {
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...TEXT);
-      doc.text(`GSTIN: ${settings.gstNumber}`, margin, y);
-      y += 4;
+      writeText(`GSTIN: ${settings.gstNumber}`, marginX, cursorY, 9, TEXT_MAIN, 'helvetica', 'bold');
+      cursorY += 5;
     }
 
-    // ── TAX INVOICE (right) ────────────────────────────────────────
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(22);
-    doc.setTextColor(...PRIMARY);
-    doc.text('TAX INVOICE', pageW - margin, 18, { align: 'right' });
-
-    // Invoice box
-    const infoBoxX = pageW / 2 + 5;
-    const infoBoxW = pageW / 2 - margin - 5;
-    doc.setFillColor(...LIGHT_BG);
-    doc.setDrawColor(...BORDER);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(infoBoxX, 22, infoBoxW, 20, 2, 2, 'FD');
-
-    doc.setFontSize(8.5);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...MUTED);
-    doc.text('Invoice No.', infoBoxX + 4, 30);
-    doc.text('Date', infoBoxX + 4, 37);
-
+    // Invoice Details Box (Right aligned)
+    let rightY = headerLeftY;
     const dateStr = bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A');
-    doc.setTextColor(...TEXT);
-    doc.setFont('helvetica', 'bold');
-    doc.text(String(bill.invoiceNo || 'DRAFT'), pageW - margin - 2, 30, { align: 'right' });
-    doc.text(dateStr, pageW - margin - 2, 37, { align: 'right' });
+    
+    writeText('Invoice No:', pageW - marginX - 35, rightY, 9, TEXT_MUTED);
+    writeText(String(bill.invoiceNo || 'DRAFT'), pageW - marginX, rightY, 9, TEXT_MAIN, 'helvetica', 'bold', 'right');
+    rightY += 5;
+    writeText('Date:', pageW - marginX - 35, rightY, 9, TEXT_MUTED);
+    writeText(dateStr, pageW - marginX, rightY, 9, TEXT_MAIN, 'helvetica', 'bold', 'right');
+    
+    cursorY = Math.max(cursorY, rightY) + 8;
 
-    // ── Divider ─────────────────────────────────────────────────────
-    const divY = Math.max(y + 2, 45);
+    // --- DIVIDER ---
     doc.setDrawColor(...BORDER);
     doc.setLineWidth(0.5);
-    doc.line(margin, divY, pageW - margin, divY);
+    doc.line(marginX, cursorY, pageW - marginX, cursorY);
+    cursorY += 8;
 
-    // ── Bill To Section ─────────────────────────────────────────────
-    const billToY = divY + 4;
-    doc.setFillColor(...LIGHT_BG);
-    doc.setDrawColor(...BORDER);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(margin, billToY, (contentW / 2) - 4, 22, 2, 2, 'FD');
+    // --- CUSTOMER DETAILS ---
+    writeText('BILL TO', marginX, cursorY, 8, TEXT_MUTED, 'helvetica', 'bold');
+    cursorY += 5;
+    writeText(String(bill.customerName || 'Customer').toUpperCase(), marginX, cursorY, 11, TEXT_MAIN, 'helvetica', 'bold');
+    cursorY += 5;
+    if (bill.customerPhone) {
+      writeText(`Phone: ${bill.customerPhone}`, marginX, cursorY, 9, TEXT_MUTED);
+    }
+    cursorY += 8;
 
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...MUTED);
-    doc.text('BILL TO', margin + 4, billToY + 6);
-
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...TEXT);
-    doc.text(String(bill.customerName || 'Customer').toUpperCase(), margin + 4, billToY + 13);
-
-    doc.setFontSize(8.5);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...MUTED);
-    doc.text(`Ph: ${bill.customerPhone || 'N/A'}`, margin + 4, billToY + 19);
-
-    // ── Items Table ─────────────────────────────────────────────────
-    const tableStartY = billToY + 26;
-
-    // Build table rows
-    const tableRows = (bill.items || []).map((item, idx) => {
-      const discCell = safeNum(item.discount) > 0 ? `${safeNum(item.discount)}%` : '—';
-      const gstCell  = safeNum(item.gstRate) > 0  ? `${safeNum(item.gstRate)}%`  : '0%';
-      return [
-        idx + 1,
-        item.name || 'Item',
-        item.hsn || '—',
-        item.size || '—',
-        safeNum(item.quantity) || 1,
-        `${fmt(item.rate)}`,
-        discCell,
-        gstCell,
-        `${fmt(item.amount)}`,
-      ];
-    });
+    // --- ITEMS TABLE ---
+    const tableRows = (bill.items || []).map((item, idx) => [
+      idx + 1,
+      item.name || 'Item',
+      item.hsn || '—',
+      safeNum(item.quantity) || 1,
+      fmt(item.rate),
+      safeNum(item.discount) > 0 ? `${safeNum(item.discount)}%` : '—',
+      safeNum(item.gstRate) > 0 ? `${safeNum(item.gstRate)}%` : '0%',
+      fmt(item.amount),
+    ]);
 
     autoTable(doc, {
-      startY: tableStartY,
-      head: [['#', 'Item Description', 'HSN', 'Size', 'Qty', 'Rate (₹)', 'Disc.', 'GST', 'Amount (₹)']],
+      startY: cursorY,
+      margin: { left: marginX, right: marginX },
+      head: [['#', 'Item Description', 'HSN', 'Qty', 'Rate (Rs)', 'Disc.', 'GST', 'Amount (Rs)']],
       body: tableRows,
       theme: 'grid',
       headStyles: {
-        fillColor: PRIMARY,
-        textColor: WHITE,
+        fillColor: [248, 250, 252], // slate-50
+        textColor: TEXT_MAIN,
         fontStyle: 'bold',
-        fontSize: 8,
+        fontSize: 9,
         halign: 'center',
-        cellPadding: { top: 4, bottom: 4, left: 3, right: 3 },
+        lineColor: BORDER,
+        lineWidth: 0.1
       },
       columnStyles: {
-        0: { halign: 'center', cellWidth: 8 },
-        1: { halign: 'left',   cellWidth: 48 },
-        2: { halign: 'center', cellWidth: 16 },
-        3: { halign: 'center', cellWidth: 14 },
-        4: { halign: 'center', cellWidth: 10 },
-        5: { halign: 'right',  cellWidth: 22 },
-        6: { halign: 'center', cellWidth: 14 },
-        7: { halign: 'center', cellWidth: 12 },
-        8: { halign: 'right',  cellWidth: 24, fontStyle: 'bold', textColor: TEXT },
+        0: { halign: 'center', cellWidth: 10 },
+        1: { halign: 'left', cellWidth: 'auto' },
+        2: { halign: 'center', cellWidth: 20 },
+        3: { halign: 'center', cellWidth: 15 },
+        4: { halign: 'right', cellWidth: 25 },
+        5: { halign: 'center', cellWidth: 15 },
+        6: { halign: 'center', cellWidth: 15 },
+        7: { halign: 'right', cellWidth: 30, fontStyle: 'bold' }
       },
       styles: {
-        fontSize: 8.5,
-        cellPadding: { top: 3.5, bottom: 3.5, left: 3, right: 3 },
+        fontSize: 9,
+        textColor: TEXT_MAIN,
         lineColor: BORDER,
-        lineWidth: 0.2,
-        textColor: TEXT,
+        lineWidth: 0.1,
+        cellPadding: 4
       },
-      alternateRowStyles: { fillColor: LIGHT_BG },
+      alternateRowStyles: { fillColor: [255, 255, 255] }
     });
 
-    // ── Totals Section ─────────────────────────────────────────────
-    let fy = doc.lastAutoTable.finalY + 6;
-    const totBoxX = pageW / 2 + 10;
-    const totBoxW = pageW - margin - totBoxX;
+    cursorY = doc.lastAutoTable.finalY + 8;
 
-    // Derive values safely
-    const subTotal      = safeNum(bill.subTotal);
-    const totalDiscount = safeNum(bill.totalDiscount);
-    const cgst          = safeNum(bill.cgst);
-    const sgst          = safeNum(bill.sgst);
-    const totalGST      = cgst + sgst;
-    const prevBal       = safeNum(bill.prevBalanceIncluded);
-    const amountPaid    = safeNum(bill.amountPaid);
-    // Recompute grandTotal to ensure accuracy
-    const grandTotal    = subTotal + totalGST - totalDiscount + prevBal;
-    const outstanding   = Math.max(0, grandTotal - amountPaid);
+    // --- SUMMARY SECTION ---
+    // Extract totals
+    const subTotal = safeNum(bill.subTotal);
+    const totDiscount = safeNum(bill.totalDiscount);
+    const taxableTotal = safeNum(bill.taxableTotal) || (subTotal - totDiscount);
+    const cgst = safeNum(bill.cgst);
+    const sgst = safeNum(bill.sgst);
+    const prevBal = safeNum(bill.prevBalanceIncluded);
+    const grandTotal = safeNum(bill.grandTotal);
+    const amountPaid = safeNum(bill.amountPaid);
+    const outstanding = Math.max(0, grandTotal - amountPaid);
 
-    // Helper to draw a total row
-    const drawTotRow = (label, value, opts = {}) => {
-      const { bold = false, color = TEXT, highlight = false, topLine = false } = opts;
-      if (topLine) {
+    const summaryBoxX = pageW - marginX - 75;
+    const summaryBoxW = 75;
+    
+    const drawSummaryRow = (label, value, isBold = false, addLine = false) => {
+      if (addLine) {
         doc.setDrawColor(...BORDER);
-        doc.setLineWidth(0.3);
-        doc.line(totBoxX, fy - 1, pageW - margin, fy - 1);
+        doc.line(summaryBoxX, cursorY - 3, pageW - marginX, cursorY - 3);
       }
-      doc.setFontSize(highlight ? 10 : 8.5);
-      doc.setFont('helvetica', bold || highlight ? 'bold' : 'normal');
-      doc.setTextColor(...color);
-      doc.text(label, totBoxX + 2, fy);
-      doc.text(`Rs ${value}`, pageW - margin, fy, { align: 'right' });
-      fy += highlight ? 8 : 6;
+      writeText(label, summaryBoxX, cursorY, 9, TEXT_MAIN, 'helvetica', isBold ? 'bold' : 'normal');
+      writeText(`Rs ${value}`, pageW - marginX, cursorY, 9, TEXT_MAIN, 'helvetica', isBold ? 'bold' : 'normal', 'right');
+      cursorY += 6;
     };
 
-    // ── Totals Box background ────────────────────────────────────────
-    // Pre-calculate height
-    const totRows  = 2 + (totalDiscount > 0 ? 1 : 0) + (totalGST > 0 ? 2 : 0) + (prevBal > 0 ? 1 : 0) + 1 + (outstanding > 0 ? 1 : 0);
-    const boxH     = totRows * 6 + 16;
-    doc.setFillColor(...LIGHT_BG);
-    doc.setDrawColor(...BORDER);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(totBoxX - 2, fy - 4, totBoxW + 2, boxH, 2, 2, 'FD');
+    drawSummaryRow('Subtotal', fmt(subTotal));
+    if (totDiscount > 0) drawSummaryRow('Discount', `-${fmt(totDiscount)}`);
+    
+    // Taxable Amount line if discount exists
+    if (totDiscount > 0) drawSummaryRow('Taxable Amount', fmt(taxableTotal), false, true);
 
-    drawTotRow('Subtotal', fmt(subTotal));
-    if (totalDiscount > 0) {
-      drawTotRow('Discount (−)', fmt(totalDiscount), { color: AMBER });
+    if (cgst > 0 || sgst > 0) {
+      if (cgst > 0) drawSummaryRow('CGST', fmt(cgst));
+      if (sgst > 0) drawSummaryRow('SGST', fmt(sgst));
     }
-    if (totalGST > 0) {
-      drawTotRow(`CGST`, fmt(cgst));
-      drawTotRow(`SGST`, fmt(sgst));
-    }
+    
     if (prevBal > 0) {
-      drawTotRow('Previous Balance', fmt(prevBal), { color: AMBER, bold: true });
+      drawSummaryRow('Previous Balance', fmt(prevBal), true);
     }
 
-    // Grand Total — highlighted box
-    doc.setFillColor(...PRIMARY);
-    doc.roundedRect(totBoxX - 2, fy - 4, totBoxW + 2, 11, 2, 2, 'F');
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...WHITE);
-    doc.text('GRAND TOTAL', totBoxX + 2, fy + 2);
-    doc.text(`Rs ${fmt(grandTotal)}`, pageW - margin, fy + 2, { align: 'right' });
-    fy += 12;
+    // Grand Total Row
+    doc.setFillColor(...TEXT_MAIN);
+    doc.rect(summaryBoxX, cursorY - 4, summaryBoxW, 9, 'F');
+    writeText('GRAND TOTAL', summaryBoxX + 2, cursorY + 2, 10, [255, 255, 255], 'helvetica', 'bold');
+    writeText(`Rs ${fmt(grandTotal)}`, pageW - marginX - 2, cursorY + 2, 10, [255, 255, 255], 'helvetica', 'bold', 'right');
+    cursorY += 10;
 
-    // Paid / Outstanding
-    drawTotRow('Amount Paid', fmt(amountPaid), { bold: true, color: GREEN, topLine: true });
+    drawSummaryRow('Amount Paid', fmt(amountPaid), true);
     if (outstanding > 0) {
-      drawTotRow('Outstanding Due', fmt(outstanding), { bold: true, color: RED });
+      drawSummaryRow('Outstanding Balance', fmt(outstanding), true);
+    }
+    
+    writeText(`Payment Mode: ${bill.paymentMode || 'Cash'}`, summaryBoxX, cursorY, 8, TEXT_MUTED);
+
+    // --- FOOTER SECTION (T&C and Bank Details) ---
+    // Place footer dynamically near the bottom, or just below if page is long
+    let footerY = Math.max(cursorY + 20, pageH - 45);
+    
+    // Check page break logic for footer
+    if (footerY + 30 > pageH) {
+       doc.addPage();
+       footerY = 20;
     }
 
-    // Payment mode
-    fy += 2;
-    doc.setFontSize(8);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...MUTED);
-    doc.text(`Payment Mode: ${bill.paymentMode || 'Cash'}`, totBoxX + 2, fy);
-    fy += 8;
-
-    // ── Signature Line (right) ─────────────────────────────────────
-    doc.setDrawColor(...MUTED);
-    doc.setLineWidth(0.3);
-    doc.line(pageW - margin - 50, fy, pageW - margin, fy);
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(...MUTED);
-    doc.text('Authorised Signature', pageW - margin - 25, fy + 4, { align: 'center' });
-
-    // ── Footer ─────────────────────────────────────────────────────
-    const footerY = pageH - 28;
     doc.setDrawColor(...BORDER);
-    doc.setLineWidth(0.4);
-    doc.line(margin, footerY, pageW - margin, footerY);
+    doc.line(marginX, footerY, pageW - marginX, footerY);
+    footerY += 6;
 
-    // Left: Terms & Conditions
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...TEXT);
-    doc.text('Terms & Conditions:', margin, footerY + 5);
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...MUTED);
-    const tc = settings.termsAndConditions || 'Goods once sold will not be taken back. Subject to local jurisdiction.';
-    const tcLines = splitLines(doc, tc, contentW / 2 - 5);
-    doc.text(tcLines, margin, footerY + 10);
-
-    // Right: Bank Details
+    // Bank Details & T&C side by side
     if (settings.bankName || settings.bankAccount) {
-      const bx = pageW / 2 + 5;
-      doc.setFont('helvetica', 'bold');
-      doc.setTextColor(...TEXT);
-      doc.setFontSize(7.5);
-      doc.text('Bank Details:', bx, footerY + 5);
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...MUTED);
-      if (settings.bankName)    doc.text(`Bank: ${settings.bankName}`, bx, footerY + 10);
-      if (settings.bankAccount) doc.text(`A/c No.: ${settings.bankAccount}`, bx, footerY + 15);
-      if (settings.bankIFSC)    doc.text(`IFSC: ${settings.bankIFSC}`, bx, footerY + 20);
+      writeText('Bank Details:', marginX, footerY, 8, TEXT_MAIN, 'helvetica', 'bold');
+      if (settings.bankName) writeText(`Bank: ${settings.bankName}`, marginX, footerY + 5, 8, TEXT_MUTED);
+      if (settings.bankAccount) writeText(`Account: ${settings.bankAccount}`, marginX, footerY + 10, 8, TEXT_MUTED);
+      if (settings.bankIFSC) writeText(`IFSC: ${settings.bankIFSC}`, marginX, footerY + 15, 8, TEXT_MUTED);
+      
+      writeText('Terms & Conditions:', pageW / 2, footerY, 8, TEXT_MAIN, 'helvetica', 'bold');
+      const tc = settings.termsAndConditions || 'Goods once sold will not be taken back.';
+      const tcLines = doc.splitTextToSize(tc, (pageW / 2) - marginX);
+      doc.text(tcLines, pageW / 2, footerY + 5);
     } else {
-      // Powered by line
-      doc.setFontSize(7);
-      doc.setFont('helvetica', 'italic');
-      doc.setTextColor(...MUTED);
-      doc.text('This is a computer-generated invoice. No signature required.', pageW / 2, footerY + 10, { align: 'center' });
+      writeText('Terms & Conditions:', marginX, footerY, 8, TEXT_MAIN, 'helvetica', 'bold');
+      const tc = settings.termsAndConditions || 'Goods once sold will not be taken back.';
+      const tcLines = doc.splitTextToSize(tc, pageW - (marginX * 2));
+      doc.text(tcLines, marginX, footerY + 5);
     }
 
-    // Bottom bar
-    doc.setFillColor(...PRIMARY);
-    doc.rect(0, pageH - 5, pageW, 5, 'F');
+    // Signature Area
+    const sigY = footerY + 20;
+    writeText('Authorised Signatory', pageW - marginX, sigY + 5, 9, TEXT_MAIN, 'helvetica', 'bold', 'right');
 
     const safeName = String(bill.customerName || 'Customer').replace(/\s+/g, '_');
-    const fileName = `TaxInvoice_${bill.invoiceNo || 'Draft'}_${safeName}.pdf`;
+    const fileName = `Invoice_${bill.invoiceNo || 'Draft'}_${safeName}.pdf`;
     
     return { doc, fileName };
 
   } catch (err) {
-    console.error('[PDF Generator] Error:', err);
+    console.error('PDF Generation Error:', err);
     throw err;
   }
 };

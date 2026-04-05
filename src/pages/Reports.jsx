@@ -74,12 +74,13 @@ export default function Reports() {
       'Invoice No': b.invoiceNo,
       'Date': b.readableDate || new Date(b.date).toLocaleDateString(),
       'Customer': b.customerName,
-      'Total Amount': b.grandTotal || b.total || 0,
-      'Paid': b.amountPaid,
-      'Outstanding': b.outstanding,
-      'Mode': b.paymentMode,
-      'Month': b.month || (new Date(b.date).getMonth() + 1),
-      'Year': b.year || new Date(b.date).getFullYear()
+      'Gross Amount': (b.subTotal || 0).toFixed(2),
+      'Discount': (b.totalDiscount || 0).toFixed(2),
+      'GST': (b.gstAmount || 0).toFixed(2),
+      'Grand Total': (b.grandTotal || b.total || 0).toFixed(2),
+      'Paid': (b.amountPaid || 0).toFixed(2),
+      'Outstanding': (b.outstanding || 0).toFixed(2),
+      'Mode': b.paymentMode
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);

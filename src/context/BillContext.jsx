@@ -6,7 +6,7 @@ import { useAudit } from './AuditContext';
 import { useToast } from './ToastContext';
 import { useSettings } from './SettingsContext';
 import { getSheetData, appendRow, objectToRow, findRowIndex, updateRow } from '../utils/sheetsService';
-import { generateId } from '../utils/storage';
+import { generateId, generateReadableId } from '../utils/storage';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
 import { uploadPdfToDrive } from '../utils/driveService';
 
@@ -51,8 +51,8 @@ export const BillProvider = ({ children }) => {
     return {
       ...b,
       customerId: b.customer_id || b.customerId,
-      customerName: cust.name || b.customerName || 'Unknown',
-      customerPhone: cust.phone || b.customerPhone || '',
+      customerName: cust.name || meta.customerName || b.customerName || 'Customer',
+      customerPhone: cust.phone || meta.customerPhone || b.customerPhone || '',
       invoiceNo: b.invoice_no || b.invoiceNo,
       subTotal: parseFloat(b.sub_total || b.subTotal || 0),
       cgst: parseFloat(b.cgst || 0),
@@ -129,8 +129,7 @@ export const BillProvider = ({ children }) => {
   }, [customers]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const generateBillNumber = () => {
-    const prefix = 'INV';
-    return `${prefix}-${new Date().getFullYear()}-${String(bills.length + 1).padStart(4, '0')}`;
+    return generateReadableId('INV', bills.map(b => ({ id: b.invoiceNo })));
   };
 
   const addBill = async (bill) => {
@@ -164,7 +163,9 @@ export const BillProvider = ({ children }) => {
           previousBalance: bill.previousBalance,
           prevBalanceIncluded: bill.prevBalanceIncluded,
           outstanding: bill.outstanding,
-          paymentMode: bill.paymentMode
+          paymentMode: bill.paymentMode,
+          customerName: bill.customerName || '',
+          customerPhone: bill.customerPhone || ''
         }),
         sub_total: String(parseFloat(bill.subTotal || 0)),
         cgst: String(parseFloat(bill.cgst || 0)),
@@ -303,7 +304,9 @@ export const BillProvider = ({ children }) => {
              previousBalance: targetBill.previousBalance,
              prevBalanceIncluded: targetBill.prevBalanceIncluded,
              outstanding: targetBill.outstanding,
-             paymentMode: targetBill.paymentMode
+             paymentMode: targetBill.paymentMode,
+             customerName: targetBill.customerName,
+             customerPhone: targetBill.customerPhone
           }),
           sub_total: String(targetBill.subTotal),
           cgst: String(targetBill.cgst),

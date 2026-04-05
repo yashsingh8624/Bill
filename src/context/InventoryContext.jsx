@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
 import { getSheetData, appendRow, objectToRow, findRowIndex, updateRow } from '../utils/sheetsService';
-import { generateId } from '../utils/storage';
+import { generateId, generateReadableId } from '../utils/storage';
 
 const SHEET_NAME = 'PRODUCTS';
 
@@ -48,7 +48,7 @@ export const InventoryProvider = ({ children }) => {
   const addProduct = async (product) => {
     try {
       const newProduct = {
-        id: generateId(),
+        id: generateReadableId('P', products),
         name: product.name || '',
         hsn: product.hsn || '',
         selling_price: String(parseFloat(product.sellingPrice || product.price || 0)),

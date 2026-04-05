@@ -5,6 +5,44 @@
 
 import { apiCall } from './googleApi';
 
+// Internal queue for background sync
+let syncQueue = [];
+let isSyncing = false;
+
+const startBackgroundSync = async (spreadsheetId) => {
+  if (isSyncing || syncQueue.length === 0 || spreadsheetId === 'LOCAL_MODE') return;
+  isSyncing = true;
+
+  while (syncQueue.length > 0) {
+    const task = syncQueue[0];
+    let success = false;
+    let retries = 0;
+    const maxRetries = 2;
+
+    while (retries <= maxRetries && !success) {
+      try {
+        await task.fn();
+        success = true;
+      } catch (err) {
+        retries++;
+        if (retries <= maxRetries) {
+          console.warn(`[Sync Retry ${retries}] for ${task.sheetName}. Waiting 2s...`);
+          await new Promise(r => setTimeout(r, 2000));
+        } else {
+          console.error(`[Sync Failed] Permanent failure for ${task.sheetName}:`, err);
+          window.dispatchEvent(new CustomEvent('sync-error', { 
+            detail: { message: `Failed to sync ${task.sheetName} to Cloud. Data is safe locally.` } 
+          }));
+        }
+      }
+    }
+
+    syncQueue.shift(); // Remove task even if it failed all retries (since we already warned/toasted)
+  }
+
+  isSyncing = false;
+};
+
 // Sheet tab definitions with headers
 const SHEET_DEFINITIONS = {
   LEDGER: ['id', 'date', 'customer_id', 'supplier_id', 'type', 'invoice_id', 'amount', 'description', 'is_void', 'created_at'],
@@ -113,21 +151,25 @@ export const appendRows = async (spreadsheetId, sheetName, rows) => {
     return { updates: { updatedRows: rows.length } };
   }
 
-  try {
-    return await apiCall(async () => {
-      const response = await window.gapi.client.sheets.spreadsheets.values.append({
-        spreadsheetId,
-        range: `${sheetName}!A1`,
-        valueInputOption: 'USER_ENTERED',
-        insertDataOption: 'INSERT_ROWS',
-        resource: { values: rows }
+  // Push to sync queue and start background drain
+  syncQueue.push({
+    sheetName,
+    fn: async () => {
+      return await apiCall(async () => {
+        const response = await window.gapi.client.sheets.spreadsheets.values.append({
+          spreadsheetId,
+          range: `${sheetName}!A1`,
+          valueInputOption: 'USER_ENTERED',
+          insertDataOption: 'INSERT_ROWS',
+          resource: { values: rows }
+        });
+        return response.result;
       });
-      return response.result;
-    });
-  } catch (err) {
-    console.warn(`[Sync Warning] Failed to append rows to ${sheetName} on Google Sheets. Saved to local cache:`, err);
-    return { fallback: true, updates: { updatedRows: rows.length } };
-  }
+    }
+  });
+
+  startBackgroundSync(spreadsheetId);
+  return { updates: { updatedRows: rows.length }, optimistic: true };
 };
 
 /**
@@ -144,9 +186,17 @@ export const appendRow = async (spreadsheetId, sheetName, values) => {
  */
 export const getRows = async (spreadsheetId, sheetName) => {
   const headers = SHEET_DEFINITIONS[sheetName] || [];
+  const localRows = getLocalData(sheetName);
   
   if (isOffline(spreadsheetId)) {
-    return { headers, rows: getLocalData(sheetName) };
+    return { headers, rows: localRows };
+  }
+
+  // If we have local data, return it instantly (Local-First)
+  // But fire a background refresh to keep cache warm
+  if (localRows.length > 0) {
+    // Background refresh logic could go here, but for now we prioritize speed.
+    // If it's a fresh load or empty, we must await.
   }
 
   try {
@@ -157,7 +207,7 @@ export const getRows = async (spreadsheetId, sheetName) => {
       });
       
       const allRows = response.result.values || [];
-      if (allRows.length <= 1) return { headers: allRows[0] || headers, rows: [] };
+      if (allRows.length <= 1) return { headers: (allRows[0] && allRows[0].length > 0) ? allRows[0] : headers, rows: [] };
       
       const responseHeaders = allRows[0];
       const dataRows = allRows.slice(1);
@@ -170,7 +220,7 @@ export const getRows = async (spreadsheetId, sheetName) => {
     return data;
   } catch (err) {
     console.warn(`[Sync Warning] Failed to fetch rows from ${sheetName} on Google Sheets. Falling back to local cache:`, err);
-    return { headers, rows: getLocalData(sheetName) };
+    return { headers, rows: localRows };
   }
 };
 
@@ -216,24 +266,28 @@ export const updateRow = async (spreadsheetId, sheetName, rowIndex, values) => {
     return { updatedRows: 1 };
   }
 
-  try {
-    return await apiCall(async () => {
-      const headers = SHEET_DEFINITIONS[sheetName];
-      const lastCol = String.fromCharCode(64 + headers.length);
-      const range = `${sheetName}!A${rowIndex}:${lastCol}${rowIndex}`;
-      
-      const response = await window.gapi.client.sheets.spreadsheets.values.update({
-        spreadsheetId,
-        range,
-        valueInputOption: 'USER_ENTERED',
-        resource: { values: [values] }
+  // Push update to sync queue
+  syncQueue.push({
+    sheetName,
+    fn: async () => {
+      return await apiCall(async () => {
+        const headers = SHEET_DEFINITIONS[sheetName];
+        const lastCol = String.fromCharCode(64 + headers.length);
+        const range = `${sheetName}!A${rowIndex}:${lastCol}${rowIndex}`;
+        
+        const response = await window.gapi.client.sheets.spreadsheets.values.update({
+          spreadsheetId,
+          range,
+          valueInputOption: 'USER_ENTERED',
+          resource: { values: [values] }
+        });
+        return response.result;
       });
-      return response.result;
-    });
-  } catch (err) {
-    console.warn(`[Sync Warning] Failed to update row ${rowIndex} in ${sheetName} on Google Sheets. Saved to local cache:`, err);
-    return { fallback: true, updatedRows: 1 };
-  }
+    }
+  });
+
+  startBackgroundSync(spreadsheetId);
+  return { updatedRows: 1, optimistic: true };
 };
 
 /**

@@ -8,6 +8,7 @@ import { Plus, Trash2, Save, Download, RefreshCw, Tag } from 'lucide-react';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
 import { useToast } from '../context/ToastContext';
 import { calculateCustomerBalance } from '../utils/ledger';
+import { generateReadableId } from '../utils/storage';
 
 const GST_RATES = [0, 5, 12, 18, 28];
 const SIZES = ['N/A', 'Free Size', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
@@ -137,13 +138,14 @@ export default function NewBill() {
   const removeItem = (index) => setItems(items.filter((_, i) => i !== index));
 
   // ----- Calculations -----
-  const subTotal       = items.reduce((s, i) => s + i.taxableAmount, 0);
+  const subTotal       = items.reduce((s, i) => s + (i.rate * i.quantity), 0);
   const totalDiscount  = items.reduce((s, i) => s + i.discountAmt, 0);
+  const taxableTotal   = subTotal - totalDiscount;
   const totalGST       = items.reduce((s, i) => s + i.gstAmt, 0);
   const cgst           = totalGST / 2;
   const sgst           = totalGST / 2;
   const totalProfit    = items.reduce((s, i) => s + (i.profit || 0), 0);
-  const itemsTotal     = subTotal + totalGST; // taxable + gst (discount already applied)
+  const itemsTotal     = taxableTotal + totalGST; // taxable + gst
   const grandTotal     = itemsTotal + (includePrevBalance ? prevBalance : 0);
 
   const amountPaid = amountPaidInput === ''
@@ -161,7 +163,7 @@ export default function NewBill() {
       if (existing) {
         custId = existing.id;
       } else {
-        custId = crypto.randomUUID();
+        custId = generateReadableId('C', customers);
         addCustomer({ id: custId, name: customerName, phone: customerPhone, createdAt: new Date().toISOString() });
       }
     }
@@ -175,6 +177,7 @@ export default function NewBill() {
       items,
       subTotal,
       totalDiscount,
+      taxableTotal,
       cgst, sgst,
       gstEnabled: totalGST > 0,
       gstAmount: totalGST,
@@ -215,7 +218,7 @@ export default function NewBill() {
     try {
       const { doc, fileName } = generateInvoicePDF({
         invoiceNo, date, customerName, customerPhone,
-        items, subTotal, totalDiscount,
+        items, subTotal, totalDiscount, taxableTotal,
         cgst, sgst, gstEnabled: totalGST > 0, gstAmount: totalGST,
         grandTotal,
         prevBalanceIncluded: includePrevBalance ? prevBalance : 0,
@@ -513,7 +516,7 @@ export default function NewBill() {
 
             <div className="space-y-2.5 mb-6 relative z-10 text-sm">
               <div className="flex justify-between text-slate-300 font-medium">
-                <span>Subtotal (Taxable)</span>
+                <span>Subtotal (Gross)</span>
                 <span>₹{subTotal.toFixed(2)}</span>
               </div>
               {totalDiscount > 0 && (
@@ -522,6 +525,10 @@ export default function NewBill() {
                   <span>− ₹{totalDiscount.toFixed(2)}</span>
                 </div>
               )}
+              <div className="flex justify-between text-indigo-300 font-semibold border-t border-slate-700/50 pt-1 mt-1">
+                <span>Taxable Amount</span>
+                <span>₹{taxableTotal.toFixed(2)}</span>
+              </div>
               {totalGST > 0 && (
                 <>
                   <div className="flex justify-between text-slate-300 font-medium">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useInventory } from '../context/InventoryContext';
 import { Package, Plus, Search, Edit2, Trash2, X, ArchiveRestore, AlertCircle, History, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import { generateId } from '../utils/storage';
 
 export default function Products() {
   const { products, addProduct, updateProduct, deleteProduct, addStock } = useInventory();
@@ -74,7 +75,7 @@ export default function Products() {
       addProduct({
          ...productData,
          stockHistory: [{
-            id: crypto.randomUUID(),
+            id: generateId(),
             date: new Date().toISOString(),
             change: productData.quantity,
             note: 'Initial Stock',

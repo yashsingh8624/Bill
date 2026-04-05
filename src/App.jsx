@@ -3,7 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import { AppProvider } from './context/AppContext';
 import { useAuth } from './context/AuthContext';
-import { ToastProvider } from './context/ToastContext';
+import { ToastProvider, useToast } from './context/ToastContext';
+import { useEffect } from 'react';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -156,9 +157,24 @@ const AuthGate = () => {
   return <AppRoutes />;
 };
 
+const SyncStatusListener = () => {
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    const handleSyncError = (e) => {
+      showToast(e.detail?.message || 'Sync failed', 'error');
+    };
+    window.addEventListener('sync-error', handleSyncError);
+    return () => window.removeEventListener('sync-error', handleSyncError);
+  }, [showToast]);
+
+  return null;
+};
+
 function App() {
   return (
     <ToastProvider>
+      <SyncStatusListener />
       <AppProvider>
         <AuthGate />
       </AppProvider>

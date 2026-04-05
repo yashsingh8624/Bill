@@ -24,7 +24,25 @@ export const safeRemove = (key) => {
   }
 };
 
-export const generateId = () => crypto.randomUUID();
+export const generateId = () => Math.random().toString(36).substring(2, 10).toUpperCase();
+
+export const generateReadableId = (prefix, existingArray) => {
+  if (!existingArray || existingArray.length === 0) return `${prefix}-001`;
+  
+  let maxNum = 0;
+  for (const item of existingArray) {
+    if (item.id && typeof item.id === 'string' && item.id.startsWith(`${prefix}-`)) {
+      const numStr = item.id.split('-')[1];
+      const num = parseInt(numStr, 10);
+      if (!isNaN(num) && num > maxNum) {
+        maxNum = num;
+      }
+    }
+  }
+  
+  const nextNum = maxNum + 1;
+  return `${prefix}-${String(nextNum).padStart(3, '0')}`;
+};
 
 export const exportBackup = () => {
   const data = {

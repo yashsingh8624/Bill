@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
 import { getSheetData, appendRow, objectToRow, findRowIndex, updateRow } from '../utils/sheetsService';
-import { generateId } from '../utils/storage';
+import { generateId, generateReadableId } from '../utils/storage';
 
 const SHEET_NAME = 'CUSTOMERS';
 const LEDGER_SHEET = 'LEDGER';
@@ -39,7 +39,7 @@ export const CustomerProvider = ({ children }) => {
   const addCustomer = async (customerData) => {
     try {
       const newCustomer = {
-        id: customerData.id || generateId(),
+        id: customerData.id || generateReadableId('C', customers),
         name: customerData.name || '',
         phone: customerData.phone || '',
         address: customerData.address || '',
