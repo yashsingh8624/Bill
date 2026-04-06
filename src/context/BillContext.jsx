@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { useInventory } from './InventoryContext';
 import { useCustomers } from './CustomerContext';
@@ -348,8 +348,12 @@ export const BillProvider = ({ children }) => {
     }
   };
 
+  const contextValue = useMemo(() => ({
+    bills, ledger, loading, addBill, deleteBill, generateBillNumber, refreshBills: fetchData
+  }), [bills, ledger, loading, addBill, deleteBill, generateBillNumber, fetchData]);
+
   return (
-    <BillContext.Provider value={{ bills, ledger, loading, addBill, deleteBill, generateBillNumber, refreshBills: fetchData }}>
+    <BillContext.Provider value={contextValue}>
       {children}
     </BillContext.Provider>
   );

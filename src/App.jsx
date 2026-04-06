@@ -162,10 +162,20 @@ const SyncStatusListener = () => {
 
   useEffect(() => {
     const handleSyncError = (e) => {
-      showToast(e.detail?.message || 'Sync failed', 'error');
+      showToast(e.detail?.message || 'Sync retrying...', 'warning');
+    };
+    const handleSyncSuccess = (e) => {
+      // Silent success — only log, don't toast on every sync
+      if (e.detail?.queueRemaining === 0) {
+        console.log('[Sync] All items synced successfully');
+      }
     };
     window.addEventListener('sync-error', handleSyncError);
-    return () => window.removeEventListener('sync-error', handleSyncError);
+    window.addEventListener('sync-success', handleSyncSuccess);
+    return () => {
+      window.removeEventListener('sync-error', handleSyncError);
+      window.removeEventListener('sync-success', handleSyncSuccess);
+    };
   }, [showToast]);
 
   return null;

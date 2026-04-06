@@ -5,11 +5,15 @@
 
 import { apiCall } from './googleApi';
 
-// Internal queue for background sync
+// Internal queue for background sync — zero-failure design
 let syncQueue = [];
 let isSyncing = false;
+let _lastSpreadsheetId = null;
+
+export const getSyncQueueLength = () => syncQueue.length;
 
 const startBackgroundSync = async (spreadsheetId) => {
+  _lastSpreadsheetId = spreadsheetId;
   if (isSyncing || syncQueue.length === 0 || spreadsheetId === 'LOCAL_MODE') return;
   isSyncing = true;
 
@@ -17,31 +21,47 @@ const startBackgroundSync = async (spreadsheetId) => {
     const task = syncQueue[0];
     let success = false;
     let retries = 0;
-    const maxRetries = 2;
+    const maxRetries = 5;
 
     while (retries <= maxRetries && !success) {
       try {
         await task.fn();
         success = true;
+        window.dispatchEvent(new CustomEvent('sync-success', {
+          detail: { sheetName: task.sheetName, queueRemaining: syncQueue.length - 1 }
+        }));
       } catch (err) {
         retries++;
         if (retries <= maxRetries) {
-          console.warn(`[Sync Retry ${retries}] for ${task.sheetName}. Waiting 2s...`);
-          await new Promise(r => setTimeout(r, 2000));
+          const waitTime = Math.min(2000 * Math.pow(2, retries - 1), 32000);
+          console.warn(`[Sync Retry ${retries}/${maxRetries}] for ${task.sheetName}. Waiting ${waitTime/1000}s...`);
+          await new Promise(r => setTimeout(r, waitTime));
         } else {
-          console.error(`[Sync Failed] Permanent failure for ${task.sheetName}:`, err);
-          window.dispatchEvent(new CustomEvent('sync-error', { 
-            detail: { message: `Failed to sync ${task.sheetName} to Cloud. Data is safe locally.` } 
-          }));
+          // Don't permanently drop — re-queue at the end for next cycle
+          console.warn(`[Sync Deferred] ${task.sheetName} will retry in next cycle.`);
+          syncQueue.push({ ...task, _retryCount: (task._retryCount || 0) + 1 });
+          // Only show user warning if it's been failing multiple cycles
+          if ((task._retryCount || 0) >= 2) {
+            window.dispatchEvent(new CustomEvent('sync-error', {
+              detail: { message: `Sync delayed for ${task.sheetName}. Will keep retrying. Data is safe locally.` }
+            }));
+          }
         }
       }
     }
 
-    syncQueue.shift(); // Remove task even if it failed all retries (since we already warned/toasted)
+    syncQueue.shift();
   }
 
   isSyncing = false;
 };
+
+// Periodic heartbeat — drain any remaining queue items every 30s
+setInterval(() => {
+  if (_lastSpreadsheetId && syncQueue.length > 0 && !isSyncing) {
+    startBackgroundSync(_lastSpreadsheetId);
+  }
+}, 30000);
 
 // Sheet tab definitions with headers
 const SHEET_DEFINITIONS = {

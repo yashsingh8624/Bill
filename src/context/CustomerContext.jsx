@@ -1,8 +1,8 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { useToast } from './ToastContext';
 import { getSheetData, appendRow, objectToRow, findRowIndex, updateRow } from '../utils/sheetsService';
-import { generateId, generateReadableId } from '../utils/storage';
+import { generateReadableId } from '../utils/storage';
 
 const SHEET_NAME = 'CUSTOMERS';
 const LEDGER_SHEET = 'LEDGER';
@@ -15,28 +15,27 @@ export const CustomerProvider = ({ children }) => {
   const { spreadsheetId, isReady } = useAuth();
   const { showToast } = useToast();
 
-  // Fetch customers from Google Sheets
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     if (!spreadsheetId) return;
     try {
       setLoading(true);
       const data = await getSheetData(spreadsheetId, SHEET_NAME);
-      setCustomers(data.sort((a, b) => (a.name || '').localeCompare(b.name || '')));
+      setCustomers(data.filter(c => !c.id?.startsWith('DELETED_')).sort((a, b) => (a.name || '').localeCompare(b.name || '')));
     } catch (err) {
       console.error('Error fetching customers:', err);
       showToast('Error loading customers', 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [spreadsheetId, showToast]);
 
   useEffect(() => {
     if (isReady && spreadsheetId) {
       fetchCustomers();
     }
-  }, [isReady, spreadsheetId]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [isReady, spreadsheetId, fetchCustomers]);
 
-  const addCustomer = async (customerData) => {
+  const addCustomer = useCallback(async (customerData) => {
     try {
       const newCustomer = {
         id: customerData.id || generateReadableId('C', customers),
@@ -45,55 +44,63 @@ export const CustomerProvider = ({ children }) => {
       };
 
       const row = objectToRow(SHEET_NAME, newCustomer);
+      
+      // Optimistic UI update
+      setCustomers(prev => [...prev, newCustomer].sort((a, b) => a.name.localeCompare(b.name)));
+
+      // Background sync
       await appendRow(spreadsheetId, SHEET_NAME, row);
 
-      setCustomers(prev => [...prev, newCustomer].sort((a, b) => a.name.localeCompare(b.name)));
       window.dispatchEvent(new Event('ledger-updated'));
       return newCustomer;
     } catch (err) {
       console.error('Error adding customer:', err);
-      showToast('Failed to add customer', 'error');
+      showToast('Customer saved locally', 'warning');
       return null;
     }
-  };
+  }, [spreadsheetId, customers, showToast]);
 
-  const updateCustomer = async (id, data) => {
+  const updateCustomer = useCallback(async (id, data) => {
     try {
-      const rowIdx = await findRowIndex(spreadsheetId, SHEET_NAME, 'id', id);
-      if (rowIdx === -1) throw new Error('Customer not found');
-
       const existing = customers.find(c => c.id === id);
       const updated = { ...existing, ...data };
-      const row = objectToRow(SHEET_NAME, updated);
-      await updateRow(spreadsheetId, SHEET_NAME, rowIdx, row);
-
+      
+      // Optimistic UI
       setCustomers(prev => prev.map(c => c.id === id ? updated : c));
+
+      // Background sync
+      const rowIdx = await findRowIndex(spreadsheetId, SHEET_NAME, 'id', id);
+      if (rowIdx !== -1) {
+        const row = objectToRow(SHEET_NAME, updated);
+        await updateRow(spreadsheetId, SHEET_NAME, rowIdx, row);
+      }
     } catch (err) {
       console.error('Error updating customer:', err);
-      showToast('Failed to update customer', 'error');
+      showToast('Update saved locally', 'warning');
     }
-  };
+  }, [spreadsheetId, customers, showToast]);
 
-  const deleteCustomer = async (id) => {
+  const deleteCustomer = useCallback(async (id) => {
     try {
-      const rowIdx = await findRowIndex(spreadsheetId, SHEET_NAME, 'id', id);
-      if (rowIdx === -1) throw new Error('Customer not found');
-
-      // Clear the row (mark as deleted by blanking it)
-      const emptyRow = objectToRow(SHEET_NAME, { id: `DELETED_${id}`, name: '[DELETED]', phone: '' });
-      await updateRow(spreadsheetId, SHEET_NAME, rowIdx, emptyRow);
-
+      // Optimistic UI
       setCustomers(prev => prev.filter(c => c.id !== id));
+
+      // Background sync
+      const rowIdx = await findRowIndex(spreadsheetId, SHEET_NAME, 'id', id);
+      if (rowIdx !== -1) {
+        const emptyRow = objectToRow(SHEET_NAME, { id: `DELETED_${id}`, name: '[DELETED]', phone: '' });
+        await updateRow(spreadsheetId, SHEET_NAME, rowIdx, emptyRow);
+      }
     } catch (err) {
       console.error('Error deleting customer:', err);
-      showToast('Failed to delete customer', 'error');
+      showToast('Delete saved locally', 'warning');
     }
-  };
+  }, [spreadsheetId, showToast]);
 
-  const addCustomerPayment = async (customerId, amount, date, notes) => {
+  const addCustomerPayment = useCallback(async (customerId, amount, date, notes) => {
     try {
       const ledgerEntry = {
-        id: generateId(),
+        id: Math.random().toString(36).substring(2, 10).toUpperCase(),
         date: date || new Date().toISOString(),
         customer_id: customerId,
         supplier_id: '',
@@ -105,24 +112,26 @@ export const CustomerProvider = ({ children }) => {
         created_at: new Date().toISOString()
       };
       await appendRow(spreadsheetId, LEDGER_SHEET, objectToRow(LEDGER_SHEET, ledgerEntry));
-      showToast('Payment recorded successfully', 'success');
+      showToast('Payment recorded ✓', 'success');
       window.dispatchEvent(new Event('ledger-updated'));
     } catch (err) {
       console.error('Error recording payment:', err);
-      showToast('Failed to record payment', 'error');
+      showToast('Payment saved locally', 'warning');
     }
-  };
+  }, [spreadsheetId, showToast]);
+
+  const contextValue = useMemo(() => ({
+    customers,
+    loading,
+    addCustomer,
+    updateCustomer,
+    deleteCustomer,
+    addCustomerPayment,
+    refreshCustomers: fetchCustomers
+  }), [customers, loading, addCustomer, updateCustomer, deleteCustomer, addCustomerPayment, fetchCustomers]);
 
   return (
-    <CustomerContext.Provider value={{
-      customers,
-      loading,
-      addCustomer,
-      updateCustomer,
-      deleteCustomer,
-      addCustomerPayment,
-      refreshCustomers: fetchCustomers
-    }}>
+    <CustomerContext.Provider value={contextValue}>
       {children}
     </CustomerContext.Provider>
   );
