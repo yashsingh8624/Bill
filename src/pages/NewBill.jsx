@@ -164,7 +164,7 @@ export default function NewBill() {
         custId = existing.id;
       } else {
         custId = generateReadableId('C', customers);
-        addCustomer({ id: custId, name: customerName, phone: customerPhone, createdAt: new Date().toISOString() });
+        addCustomer({ id: custId, name: customerName, phone: customerPhone });
       }
     }
 

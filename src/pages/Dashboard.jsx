@@ -49,7 +49,7 @@ export default function Dashboard() {
     const getBillSaleAmount = (b) => {
       if (Array.isArray(b?.items) && b.items.length > 0) {
         const itemsSubtotal = b.items.reduce((sum, item) => sum + (parseFloat(item?.amount) || 0), 0);
-        return itemsSubtotal + (parseFloat(b?.cgst) || 0) + (parseFloat(b?.sgst) || 0);
+        return itemsSubtotal;
       }
       // Fallback for legacy bills without items array: use subTotal only (not grandTotal which may have prev balance)
       return (parseFloat(b?.subTotal) || 0) + (parseFloat(b?.cgst) || 0) + (parseFloat(b?.sgst) || 0);

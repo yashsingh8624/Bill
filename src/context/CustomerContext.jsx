@@ -41,32 +41,11 @@ export const CustomerProvider = ({ children }) => {
       const newCustomer = {
         id: customerData.id || generateReadableId('C', customers),
         name: customerData.name || '',
-        phone: customerData.phone || '',
-        address: customerData.address || '',
-        gstin: customerData.gstin || '',
-        previous_balance: String(customerData.previousBalance || 0),
-        created_at: new Date().toISOString()
+        phone: customerData.phone || ''
       };
 
       const row = objectToRow(SHEET_NAME, newCustomer);
       await appendRow(spreadsheetId, SHEET_NAME, row);
-
-      // Opening balance ledger entry
-      if (parseFloat(customerData.previousBalance || 0) > 0) {
-        const ledgerEntry = {
-          id: generateId(),
-          date: new Date().toISOString(),
-          customer_id: newCustomer.id,
-          supplier_id: '',
-          type: 'OPENING',
-          invoice_id: '',
-          amount: String(customerData.previousBalance),
-          description: 'Opening Balance',
-          is_void: 'FALSE',
-          created_at: new Date().toISOString()
-        };
-        await appendRow(spreadsheetId, LEDGER_SHEET, objectToRow(LEDGER_SHEET, ledgerEntry));
-      }
 
       setCustomers(prev => [...prev, newCustomer].sort((a, b) => a.name.localeCompare(b.name)));
       window.dispatchEvent(new Event('ledger-updated'));
@@ -101,7 +80,7 @@ export const CustomerProvider = ({ children }) => {
       if (rowIdx === -1) throw new Error('Customer not found');
 
       // Clear the row (mark as deleted by blanking it)
-      const emptyRow = objectToRow(SHEET_NAME, { id: `DELETED_${id}`, name: '[DELETED]', phone: '', address: '', gstin: '', previous_balance: '0', created_at: '' });
+      const emptyRow = objectToRow(SHEET_NAME, { id: `DELETED_${id}`, name: '[DELETED]', phone: '' });
       await updateRow(spreadsheetId, SHEET_NAME, rowIdx, emptyRow);
 
       setCustomers(prev => prev.filter(c => c.id !== id));

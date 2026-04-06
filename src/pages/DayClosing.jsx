@@ -27,13 +27,11 @@ export default function DayClosing() {
 
   const stats = useMemo(() => {
     return todayBills.reduce((acc, b) => {
-      // Items-only subtotal to avoid including prev balances
-      const itemsSubtotal = Array.isArray(b.items) && b.items.length > 0
+      const billTotal = Array.isArray(b.items) && b.items.length > 0
         ? b.items.reduce((s, i) => s + (parseFloat(i?.amount) || 0), 0)
-        : (parseFloat(b.subTotal) || 0);
-      const gst = (parseFloat(b.cgst) || 0) + (parseFloat(b.sgst) || 0);
+        : (parseFloat(b.subTotal) || 0) + (parseFloat(b.cgst) || 0) + (parseFloat(b.sgst) || 0);
 
-      acc.totalSales    += itemsSubtotal + gst;
+      acc.totalSales    += billTotal;
       acc.totalCollected += parseFloat(b.amountPaid || b.paidAmount || 0);
       acc.totalOutstanding += parseFloat(b.outstanding || b.finalOutstanding || 0);
       acc.billCount     += 1;
@@ -166,10 +164,9 @@ export default function DayClosing() {
             <div className="p-12 text-center text-slate-400 font-medium">No sales recorded today yet.</div>
           ) : (
             todayBills.map((bill, idx) => {
-              const itemsSubtotal = Array.isArray(bill.items) && bill.items.length > 0
+              const billTotal = Array.isArray(bill.items) && bill.items.length > 0
                 ? bill.items.reduce((s, i) => s + (parseFloat(i?.amount) || 0), 0)
-                : (parseFloat(bill.subTotal) || 0);
-              const billTotal = itemsSubtotal + (parseFloat(bill.cgst) || 0) + (parseFloat(bill.sgst) || 0);
+                : (parseFloat(bill.subTotal) || 0) + (parseFloat(bill.cgst) || 0) + (parseFloat(bill.sgst) || 0);
               return (
                 <div key={idx} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-4">

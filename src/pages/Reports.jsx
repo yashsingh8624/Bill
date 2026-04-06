@@ -50,7 +50,10 @@ export default function Reports() {
 
   const stats = useMemo(() => {
     return filteredBills.reduce((acc, b) => {
-      acc.totalSales += (b.grandTotal || b.total || 0);
+      const billSaleAmount = Array.isArray(b.items) && b.items.length > 0
+        ? b.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
+        : (parseFloat(b.subTotal) || 0) + (parseFloat(b.cgst) || 0) + (parseFloat(b.sgst) || 0);
+      acc.totalSales += billSaleAmount;
       acc.totalPaid += (b.amountPaid || 0);
       acc.totalOutstanding += (b.outstanding || 0);
       acc.totalBills += 1;
@@ -76,8 +79,11 @@ export default function Reports() {
       'Customer': b.customerName,
       'Gross Amount': (b.subTotal || 0).toFixed(2),
       'Discount': (b.totalDiscount || 0).toFixed(2),
-      'GST': (b.gstAmount || 0).toFixed(2),
-      'Grand Total': (b.grandTotal || b.total || 0).toFixed(2),
+      'GST': (b.gstAmount || ((parseFloat(b.cgst) || 0) + (parseFloat(b.sgst) || 0))).toFixed(2),
+      'Bill Total': (Array.isArray(b.items) && b.items.length > 0 
+        ? b.items.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0) 
+        : ((parseFloat(b.subTotal) || 0) + (parseFloat(b.cgst) || 0) + (parseFloat(b.sgst) || 0))).toFixed(2),
+      'Grand Total (with Udhaar)': (b.grandTotal || b.total || 0).toFixed(2),
       'Paid': (b.amountPaid || 0).toFixed(2),
       'Outstanding': (b.outstanding || 0).toFixed(2),
       'Mode': b.paymentMode

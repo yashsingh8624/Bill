@@ -60,7 +60,9 @@ export default function BillHistory() {
       'Invoice No': b.invoiceNo,
       'Date': b.readableDate || new Date(b.date).toLocaleDateString(),
       'Customer': b.customerName,
-      'Total Amount': b.grandTotal || b.total || 0,
+      'Total Amount': Array.isArray(b.items) && b.items.length > 0 
+        ? b.items.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0) 
+        : ((parseFloat(b.subTotal) || 0) + (parseFloat(b.cgst) || 0) + (parseFloat(b.sgst) || 0)),
       'Paid': b.amountPaid || 0,
       'Outstanding': b.outstanding || 0,
       'Mode': b.paymentMode,
@@ -170,12 +172,11 @@ export default function BillHistory() {
                      </td>
                      <td className="py-4 px-6 text-slate-800 font-black text-right">
                        {(() => {
-                         // Derive subtotal strictly from items to avoid showing prev-balance-inflated totals
-                         const itemsSubtotal = Array.isArray(bill?.items) && bill.items.length > 0
+                         // Derive total strictly from items to avoid showing prev-balance-inflated totals
+                         const totalAmount = Array.isArray(bill?.items) && bill.items.length > 0
                            ? bill.items.reduce((sum, item) => sum + (parseFloat(item?.amount) || 0), 0)
-                           : (parseFloat(bill?.subTotal) || 0);
-                         const gst = (parseFloat(bill?.cgst) || 0) + (parseFloat(bill?.sgst) || 0);
-                         return `₹${(itemsSubtotal + gst).toFixed(2)}`;
+                           : (parseFloat(bill?.subTotal) || 0) + (parseFloat(bill?.cgst) || 0) + (parseFloat(bill?.sgst) || 0);
+                         return `₹${totalAmount.toFixed(2)}`;
                        })()}
                      </td>
                      <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{parseFloat(bill?.amountPaid || bill?.paidAmount || 0).toFixed(2)}</td>
