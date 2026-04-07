@@ -1,20 +1,18 @@
 import { readdirSync, statSync } from 'fs';
 import { join } from 'path';
 
-function find(dir, name, depth = 0) {
+function tree(dir, depth = 0) {
   if (depth > 4) return;
   let entries;
   try { entries = readdirSync(dir); } catch { return; }
   for (const e of entries) {
+    if (e === 'node_modules' || e === 'dist' || e.startsWith('.')) continue;
     const full = join(dir, e);
-    if (e === name) { console.log(full); }
-    try {
-      if (statSync(full).isDirectory() && !e.startsWith('.') && e !== 'node_modules') {
-        find(full, name, depth + 1);
-      }
-    } catch {}
+    const indent = '  '.repeat(depth);
+    const isDir = (() => { try { return statSync(full).isDirectory(); } catch { return false; } })();
+    console.log(indent + (isDir ? '[D] ' : '[F] ') + e);
+    if (isDir) tree(full, depth + 1);
   }
 }
 
-find('/home/user', 'App.jsx');
-find('/vercel', 'App.jsx');
+tree('/home/user');

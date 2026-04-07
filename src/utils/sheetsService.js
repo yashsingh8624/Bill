@@ -72,7 +72,8 @@ const SHEET_DEFINITIONS = {
   SUPPLIERS: ['id', 'name', 'phone', 'address', 'gstin', 'previous_balance', 'created_at'],
   PRODUCTS: ['id', 'name', 'hsn', 'selling_price', 'purchase_price', 'quantity', 'low_stock_threshold', 'stock_history_json', 'created_at'],
   SETTINGS: ['key', 'value'],
-  DAY_REPORTS: ['id', 'date', 'total_sales', 'total_collected', 'total_outstanding', 'bills_count', 'created_at']
+  DAY_REPORTS: ['id', 'date', 'total_sales', 'total_collected', 'total_outstanding', 'bills_count', 'created_at'],
+  BILLING_ENTRIES: ['name', 'phone', 'address', 'amount', 'date'],
 };
 
 // ============= LOCAL STORAGE FALLBACK =============
