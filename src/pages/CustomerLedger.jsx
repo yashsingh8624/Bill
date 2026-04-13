@@ -154,7 +154,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
   };
 
   return (
-    <div className="space-y-6 flex flex-col min-h-screen sm:h-[calc(100vh-8rem)] relative w-full">
+    <div className="space-y-6 flex flex-col w-full pb-24 sm:pb-6" style={{ minHeight: 'calc(100vh - 10rem)' }}>
       {!selectedCustomer ? (
         <>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

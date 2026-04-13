@@ -74,7 +74,7 @@ export default function Parties() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 flex flex-col h-[calc(100vh-8rem)] relative w-full max-w-full overflow-hidden">
+    <div className="space-y-4 sm:space-y-6 flex flex-col w-full max-w-full" style={{ minHeight: 'calc(100vh - 10rem)' }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2 sm:px-0">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-slate-800 tracking-tight">Parties</h2>
@@ -93,8 +93,8 @@ export default function Parties() {
         />
       </div>
 
-      <div className="bg-white mx-2 sm:mx-0 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 flex-1 overflow-hidden flex flex-col min-h-0">
-        <div className="overflow-x-auto overflow-y-auto flex-1 h-full custom-scrollbar w-full">
+      <div className="bg-white mx-2 sm:mx-0 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 overflow-hidden">
+        <div className="overflow-x-auto overflow-y-auto w-full custom-scrollbar" style={{ maxHeight: 'calc(100vh - 18rem)' }}>
           {parties.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-500 p-12 text-center">
               <div className="bg-slate-50 p-6 rounded-full mb-4 text-slate-300">
