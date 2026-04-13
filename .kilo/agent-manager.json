@@ -1,0 +1,28 @@
+{
+  "worktrees": {
+    "wt-1775990196987-1": {
+      "branch": "industrious-cockroach",
+      "path": "c:\\Users\\akash\\OneDrive\\Desktop\\bill\\.kilo\\worktrees\\industrious-cockroach",
+      "parentBranch": "main",
+      "createdAt": "2026-04-12T10:36:36.988Z",
+      "remote": "origin"
+    },
+    "wt-1775990728178-2": {
+      "branch": "spiky-roll",
+      "path": "c:\\Users\\akash\\OneDrive\\Desktop\\bill\\.kilo\\worktrees\\spiky-roll",
+      "parentBranch": "main",
+      "createdAt": "2026-04-12T10:45:28.178Z",
+      "remote": "origin"
+    }
+  },
+  "sessions": {
+    "ses_27ebbd4d8ffeeudb5Buyf0NGp1": {
+      "worktreeId": "wt-1775990196987-1",
+      "createdAt": "2026-04-12T10:37:30.134Z"
+    },
+    "ses_27f797178ffeATvhDGsSTUpDxb": {
+      "worktreeId": "wt-1775990728178-2",
+      "createdAt": "2026-04-12T10:45:28.583Z"
+    }
+  }
+}
