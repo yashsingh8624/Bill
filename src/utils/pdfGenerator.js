@@ -240,10 +240,10 @@ export const generateInvoicePDF = async (bill, settings = {}) => {
 
     // --- FOOTER SECTION (T&C and Bank Details) ---
     // Place footer dynamically near the bottom, or just below if page is long
-    let footerY = Math.max(cursorY + 20, pageH - 55);
+    let footerY = Math.max(cursorY + 20, pageH - 68);
     
     // Check page break logic for footer
-    if (footerY + 40 > pageH) {
+    if (footerY + 50 > pageH) {
        doc.addPage();
        footerY = 20;
     }
@@ -252,33 +252,31 @@ export const generateInvoicePDF = async (bill, settings = {}) => {
     doc.line(marginX, footerY, pageW - marginX, footerY);
     footerY += 6;
 
-    // Bank Details & T&C side by side
+    // Terms & Conditions (Always left aligned, full width)
+    const tc = settings.termsAndConditions || 'Goods once sold will not be taken back.';
+    writeText('Terms & Conditions:', marginX, footerY, 8, TEXT_MAIN, 'helvetica', 'bold');
+    const tcLines = doc.splitTextToSize(tc, pageW - (marginX * 2));
+    doc.text(tcLines, marginX, footerY + 5);
+    
+    footerY += (tcLines.length * 4) + 8; // Adjust Y below Terms
+
+    // 3-Column Footer Layout: Bank Details (Left), QR Code (Center), Signature (Right)
+    const bottomSectionY = footerY;
+
+    // Left: Bank Details
     if (settings.bankName || settings.bankAccount) {
-      writeText('Bank Details:', marginX, footerY, 8, TEXT_MAIN, 'helvetica', 'bold');
-      if (settings.bankName) writeText(`Bank: ${settings.bankName}`, marginX, footerY + 5, 8, TEXT_MUTED);
-      if (settings.bankAccount) writeText(`Account: ${settings.bankAccount}`, marginX, footerY + 10, 8, TEXT_MUTED);
-      if (settings.bankIFSC) writeText(`IFSC: ${settings.bankIFSC}`, marginX, footerY + 15, 8, TEXT_MUTED);
-      
-      writeText('Terms & Conditions:', pageW / 2, footerY, 8, TEXT_MAIN, 'helvetica', 'bold');
-      const tc = settings.termsAndConditions || 'Goods once sold will not be taken back.';
-      const tcLines = doc.splitTextToSize(tc, (pageW / 2) - marginX);
-      doc.text(tcLines, pageW / 2, footerY + 5);
-    } else {
-      writeText('Terms & Conditions:', marginX, footerY, 8, TEXT_MAIN, 'helvetica', 'bold');
-      const tc = settings.termsAndConditions || 'Goods once sold will not be taken back.';
-      const tcLines = doc.splitTextToSize(tc, pageW - (marginX * 2));
-      doc.text(tcLines, marginX, footerY + 5);
+      writeText('Bank Details:', marginX, bottomSectionY, 8, TEXT_MAIN, 'helvetica', 'bold');
+      if (settings.bankName) writeText(`Bank: ${settings.bankName}`, marginX, bottomSectionY + 5, 8, TEXT_MUTED);
+      if (settings.bankAccount) writeText(`Account: ${settings.bankAccount}`, marginX, bottomSectionY + 10, 8, TEXT_MUTED);
+      if (settings.bankIFSC) writeText(`IFSC: ${settings.bankIFSC}`, marginX, bottomSectionY + 15, 8, TEXT_MUTED);
     }
 
-    // Signature Area
-    const sigY = footerY + 20;
-
-    // --- QR CODE (Uploaded Image) ---
+    // Center: QR Code
     if (finalQr) {
       try {
-        const qrSize = 22;
+        const qrSize = 25;
         const qrX = pageW / 2 - qrSize / 2;
-        const qrY = footerY - 2;
+        const qrY = bottomSectionY;
         doc.addImage(finalQr, 'PNG', qrX, qrY, qrSize, qrSize);
         writeText('Scan to Pay', pageW / 2, qrY + qrSize + 4, 8, TEXT_MUTED, 'helvetica', 'bold', 'center');
       } catch (e) {
@@ -286,7 +284,9 @@ export const generateInvoicePDF = async (bill, settings = {}) => {
       }
     }
 
-    writeText('Authorised Signatory', pageW - marginX, sigY + 5, 9, TEXT_MAIN, 'helvetica', 'bold', 'right');
+    // Right: Signature Area
+    const sigY = bottomSectionY + 10;
+    writeText('Authorised Signatory', pageW - marginX, sigY + 10, 9, TEXT_MAIN, 'helvetica', 'bold', 'right');
 
     const safeName = String(bill.customerName || 'Customer').replace(/\s+/g, '_');
     const fileName = `Invoice_${bill.invoiceNo || 'Draft'}_${safeName}.pdf`;
