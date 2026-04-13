@@ -80,7 +80,7 @@ export default function BillHistory() {
   };
 
   return (
-    <div className="space-y-6 flex flex-col h-[calc(100vh-8rem)] relative">
+    <div className="space-y-6 flex flex-col w-full max-w-5xl mx-auto page-animate px-4 sm:px-0 min-w-0" style={{ minHeight: 'calc(100vh - 10rem)' }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Bill History</h2>
@@ -141,14 +141,15 @@ export default function BillHistory() {
             </div>
           ) : (
             <div className="space-y-8">
+            <>
                {(!searchTerm && dateFilter === 'ALL' && filteredBills.length > 5) && (
-                 <div className="bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100/50 overflow-x-auto">
+                 <div className="bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100/50 min-w-0">
                     <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                        <h3 className="font-bold text-slate-800">Recent Bills</h3>
                     </div>
                      <>
-                       {/* Desktop Table View */}
-                       <div className="hidden sm:block w-full overflow-x-auto min-w-full">
+                        {/* Desktop Table View */}
+                        <div className="hidden sm:block table-wrapper">
                          <table className="w-full text-left border-collapse min-w-[800px]">
                            <thead className="bg-slate-50/95 backdrop-blur-sm shadow-sm z-10 border-b border-slate-200">
                              <tr className="text-slate-500 text-xs uppercase font-bold tracking-wider">
@@ -227,7 +228,7 @@ export default function BillHistory() {
                  </div>
                )}
 
-               <div className="bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100/50 overflow-x-auto">
+                <div className="bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100/50 min-w-0">
                   {(!searchTerm && dateFilter === 'ALL' && filteredBills.length > 5) && (
                     <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                        <h3 className="font-bold text-slate-800">All Bills</h3>
@@ -235,7 +236,7 @@ export default function BillHistory() {
                   )}
                   <>
                     {/* Desktop Table View */}
-                    <div className="hidden sm:block w-full overflow-x-auto min-w-full">
+                    <div className="hidden sm:block table-wrapper">
                       <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm shadow-sm z-10 border-b border-slate-200">
                           <tr className="text-slate-500 text-xs uppercase font-bold tracking-wider">

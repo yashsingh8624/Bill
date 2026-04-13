@@ -38,7 +38,7 @@ export default function Expenses() {
   const cashExpenses = expenses.filter(e => e.payment_mode === 'Cash').reduce((sum, e) => sum + (e.amount || 0), 0);
 
   return (
-    <div className="space-y-6 w-full px-4 sm:px-0 max-w-5xl mx-auto pb-24 sm:pb-0">
+    <div className="space-y-6 w-full max-w-5xl mx-auto pb-24 sm:pb-0 px-4 sm:px-0 min-w-0">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Expense Tracker</h2>
@@ -150,7 +150,7 @@ export default function Expenses() {
           </span>
         </div>
         
-        <div className="overflow-x-auto">
+        <div className="table-wrapper">
           {expenses.length === 0 ? (
             <div className="py-20 text-center flex flex-col items-center">
                <div className="bg-slate-50 p-6 rounded-full mb-4 border border-slate-100">

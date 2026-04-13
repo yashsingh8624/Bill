@@ -52,7 +52,7 @@ export default function Products() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-8 animate-in fade-in h-[calc(100vh-8rem)] flex flex-col relative w-full">
+    <div className="space-y-6 w-full max-w-5xl mx-auto pb-8 animate-in fade-in flex flex-col relative min-h-0 min-w-0">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 flex-shrink-0">
         <div>
@@ -106,6 +106,7 @@ export default function Products() {
               <p className="font-bold text-slate-600">No items match "{searchTerm}"</p>
             </div>
           ) : (
+            <div className="table-wrapper">
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm z-10 border-b border-slate-200">
                 <tr className="text-slate-500 text-xs uppercase font-bold tracking-wider">
@@ -158,6 +159,7 @@ export default function Products() {
                 })}
               </tbody>
             </table>
+            </div>
           )}
         </div>
       </div>

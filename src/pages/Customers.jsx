@@ -51,7 +51,7 @@ export default function Customers() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 flex flex-col w-full max-w-full page-animate px-2 sm:px-0" style={{ minHeight: 'calc(100vh - 10rem)' }}>
+    <div className="space-y-4 sm:space-y-6 flex flex-col w-full max-w-5xl mx-auto page-animate px-4 sm:px-0 min-w-0" style={{ minHeight: 'calc(100vh - 10rem)' }}>
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="bg-indigo-600 text-white p-2.5 rounded-2xl shadow-lg shadow-indigo-200">
@@ -81,8 +81,8 @@ export default function Customers() {
         />
       </div>
 
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <div className="overflow-x-auto overflow-y-auto w-full max-w-full custom-scrollbar" style={{ maxHeight: 'calc(100vh - 18rem)' }}>
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-slate-100 overflow-hidden min-w-0">
+        <div className="table-wrapper" style={{ maxHeight: 'calc(100vh - 18rem)' }}>
           {processedCustomers.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-slate-500 p-12 text-center">
               <div className="bg-slate-50 p-8 rounded-full mb-4 text-slate-300 border border-slate-100">
