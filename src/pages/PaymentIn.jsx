@@ -109,7 +109,7 @@ export default function PaymentIn() {
   };
 
   return (
-    <div className="page-animate max-w-2xl mx-auto pb-10 space-y-6 flex flex-col pt-2 sm:pt-4">
+    <div className="page-animate w-full px-4 sm:px-0 max-w-2xl mx-auto pb-24 space-y-6 flex flex-col pt-2 sm:pt-4">
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">

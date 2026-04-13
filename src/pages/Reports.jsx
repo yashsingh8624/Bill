@@ -4,7 +4,7 @@ import { useCustomers } from '../context/PartiesContext';
 import { useSettings } from '../context/SettingsContext';
 import { useInventory } from '../context/InventoryContext';
 import { useExpenses } from '../context/ExpenseContext';
-import { FileSpreadsheet, TrendingUp, AlertCircle, ShoppingBag, Search, Filter, Calendar, ChevronRight, FileText, Wallet } from 'lucide-react';
+import { FileSpreadsheet, TrendingUp, AlertCircle, ShoppingBag, Search, Filter, Calendar, ChevronRight, FileText, Wallet, Eye } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 export default function Reports() {

@@ -8,15 +8,21 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   * {
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* Prevent pull-to-refresh on mobile */
+  /* Prevent pull-to-refresh on mobile and horizontal scroll */
   html {
     overscroll-behavior: none;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   /* Base input globals for clean UI — scoped to standalone inputs, NOT search bars */
@@ -109,6 +115,15 @@
 /* ===== Smooth transitions on all interactive elements ===== */
 button, a, input, select, textarea {
   transition: all 0.15s ease;
+}
+
+button {
+  cursor: pointer;
+}
+
+/* Global table responsive wrapper */
+.table-wrapper {
+  @apply w-full overflow-x-auto custom-scrollbar;
 }
 
 /* ===== Safe area for mobile bottom nav ===== */

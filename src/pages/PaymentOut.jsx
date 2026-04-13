@@ -44,7 +44,7 @@ export default function PaymentOut() {
   };
 
   return (
-    <div className="page-animate max-w-lg mx-auto pb-6 h-[calc(100vh-8rem)] flex flex-col">
+    <div className="page-animate w-full px-4 sm:px-0 max-w-lg mx-auto pb-24 space-y-6 flex flex-col pt-2 sm:pt-4" style={{ minHeight: 'calc(100vh - 10rem)' }}>
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center gap-3">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
