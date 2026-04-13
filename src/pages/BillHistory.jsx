@@ -142,7 +142,7 @@ export default function BillHistory() {
           ) : (
             <div className="space-y-8">
                {(!searchTerm && dateFilter === 'ALL' && filteredBills.length > 5) && (
-                 <div className="bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100/50 overflow-hidden">
+                 <div className="bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100/50 overflow-x-auto">
                     <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                        <h3 className="font-bold text-slate-800">Recent Bills</h3>
                     </div>
@@ -185,7 +185,7 @@ export default function BillHistory() {
                  </div>
                )}
 
-               <div className="bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100/50 overflow-hidden">
+               <div className="bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100/50 overflow-x-auto">
                   {(!searchTerm && dateFilter === 'ALL' && filteredBills.length > 5) && (
                     <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                        <h3 className="font-bold text-slate-800">All Bills</h3>

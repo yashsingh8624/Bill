@@ -52,7 +52,7 @@ export default function Products() {
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto pb-8 animate-in fade-in h-[calc(100vh-8rem)] flex flex-col relative w-full overflow-hidden">
+    <div className="space-y-6 max-w-4xl mx-auto pb-8 animate-in fade-in h-[calc(100vh-8rem)] flex flex-col relative w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 flex-shrink-0">
         <div>
