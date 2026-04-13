@@ -104,58 +104,105 @@ export default function Parties() {
               <p className="text-sm mt-2 font-medium">Add customers by billing them, and suppliers from the ledger.</p>
             </div>
           ) : (
-            <table className="w-full text-left border-collapse min-w-[600px]">
-              <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm z-10 border-b border-slate-200">
-                <tr className="text-slate-500 text-xs uppercase font-bold tracking-wider">
-                  <th className="py-4 px-6">Party Name</th>
-                  <th className="py-4 px-6">Category</th>
-                  <th className="py-4 px-6 text-right">Amount</th>
-                  <th className="py-4 px-6 text-center w-16"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100/80">
+            <>
+              {/* Desktop View */}
+              <div className="hidden sm:block overflow-x-auto min-w-full">
+                <table className="w-full text-left border-collapse min-w-[600px]">
+                  <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm z-10 border-b border-slate-200">
+                    <tr className="text-slate-500 text-xs uppercase font-bold tracking-wider">
+                      <th className="py-4 px-6">Party Name</th>
+                      <th className="py-4 px-6">Category</th>
+                      <th className="py-4 px-6 text-right">Amount</th>
+                      <th className="py-4 px-6 text-center w-16"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100/80">
+                    {filteredParties.map(party => (
+                      <tr 
+                        key={party.id + party.partyType} 
+                        onClick={() => setSelectedParty(party)}
+                        className="hover:bg-indigo-50/30 transition-colors cursor-pointer group"
+                      >
+                         <td className="py-4 px-6 flex items-center gap-4">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm uppercase shadow-sm ${party.partyType === 'customer' ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600'}`}>
+                               {(party.displayName || '??').substring(0,2)}
+                            </div>
+                            <div>
+                               <p className="font-bold text-slate-800 text-[15px]">{party.displayName}</p>
+                               <p className="text-xs font-medium text-slate-500 mt-0.5">{party.displayPhone || 'No Phone'}</p>
+                            </div>
+                         </td>
+                         <td className="py-4 px-6">
+                            <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md border ${party.partyType === 'customer' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
+                               {party.partyType}
+                            </span>
+                         </td>
+                         <td className="py-4 px-6 text-right">
+                            <div className="flex flex-col items-end gap-1">
+                               <span className="font-black text-[15px] text-slate-800">{party.amountText}</span>
+                               {party.balance > 0 && (
+                                 <span className={`text-[10px] uppercase font-black tracking-widest px-1.5 py-0.5 rounded shadow-[0_1px_2px_rgba(0,0,0,0.05)] ${!party.showRed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                   {!party.showRed ? "You'll Get" : "You'll Give"}
+                                 </span>
+                               )}
+                               {party.balance === 0 && (
+                                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Settled</span>
+                               )}
+                            </div>
+                         </td>
+                         <td className="py-4 px-6 text-center">
+                            <div className="flex justify-center text-slate-300 group-hover:text-indigo-600 transition-colors">
+                               <ChevronRight size={20} />
+                            </div>
+                         </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile View */}
+              <div className="block sm:hidden p-4 space-y-3">
                 {filteredParties.map(party => (
-                  <tr 
+                  <div 
                     key={party.id + party.partyType} 
                     onClick={() => setSelectedParty(party)}
-                    className="hover:bg-indigo-50/30 transition-colors cursor-pointer group"
+                    className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm active:bg-slate-50 transition-colors cursor-pointer"
                   >
-                     <td className="py-4 px-6 flex items-center gap-4">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm uppercase shadow-sm ${party.partyType === 'customer' ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600'}`}>
-                           {(party.displayName || '??').substring(0,2)}
+                    <div className="flex justify-between items-center mb-3 pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center font-bold text-sm uppercase shadow-sm ${party.partyType === 'customer' ? 'bg-indigo-50 text-indigo-600' : 'bg-amber-50 text-amber-600'}`}>
+                          {(party.displayName || '??').substring(0,2)}
                         </div>
-                        <div>
-                           <p className="font-bold text-slate-800 text-[15px]">{party.displayName}</p>
-                           <p className="text-xs font-medium text-slate-500 mt-0.5">{party.displayPhone || 'No Phone'}</p>
+                        <div className="overflow-hidden">
+                          <p className="font-bold text-slate-800 text-[15px] truncate">{party.displayName}</p>
+                          <p className="text-xs font-medium text-slate-500 mt-0.5 truncate">{party.displayPhone || 'No Phone'}</p>
                         </div>
-                     </td>
-                     <td className="py-4 px-6">
-                        <span className={`text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md border ${party.partyType === 'customer' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' : 'bg-amber-50 text-amber-600 border-amber-100'}`}>
-                           {party.partyType}
+                      </div>
+                      <ChevronRight size={20} className="text-slate-300" />
+                    </div>
+                    
+                    <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100/50">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Category</span>
+                        <span className={`text-xs font-black uppercase tracking-widest ${party.partyType === 'customer' ? 'text-indigo-600' : 'text-amber-600'}`}>
+                          {party.partyType}
                         </span>
-                     </td>
-                     <td className="py-4 px-6 text-right">
-                        <div className="flex flex-col items-end gap-1">
-                           <span className="font-black text-[15px] text-slate-800">{party.amountText}</span>
-                           {party.balance > 0 && (
-                             <span className={`text-[10px] uppercase font-black tracking-widest px-1.5 py-0.5 rounded shadow-[0_1px_2px_rgba(0,0,0,0.05)] ${!party.showRed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                               {!party.showRed ? "You'll Get" : "You'll Give"}
-                             </span>
-                           )}
-                           {party.balance === 0 && (
-                             <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Settled</span>
-                           )}
-                        </div>
-                     </td>
-                     <td className="py-4 px-6 text-center">
-                        <div className="flex justify-center text-slate-300 group-hover:text-indigo-600 transition-colors">
-                           <ChevronRight size={20} />
-                        </div>
-                     </td>
-                  </tr>
+                      </div>
+                      <div className="w-px h-6 bg-slate-200"></div>
+                      <div className="flex flex-col text-right">
+                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">
+                          {party.balance === 0 ? "Status" : (!party.showRed ? "You'll Get" : "You'll Give")}
+                        </span>
+                        <span className={`font-black text-sm tracking-tight ${party.balance === 0 ? 'text-slate-500' : (!party.showRed ? 'text-emerald-600' : 'text-red-500')}`}>
+                          {party.balance === 0 ? "SETTLED" : party.amountText}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            </>
           )}
         </div>
       </div>

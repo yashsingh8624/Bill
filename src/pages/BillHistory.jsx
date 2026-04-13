@@ -146,42 +146,84 @@ export default function BillHistory() {
                     <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                        <h3 className="font-bold text-slate-800">Recent Bills</h3>
                     </div>
-                    <table className="w-full text-left border-collapse min-w-[800px]">
-                      <thead className="bg-slate-50/95 backdrop-blur-sm shadow-sm z-10 border-b border-slate-200">
-                        <tr className="text-slate-500 text-xs uppercase font-bold tracking-wider">
-                          <th className="py-4 px-6">Bill No.</th>
-                          <th className="py-4 px-6">Customer</th>
-                          <th className="py-4 px-6">Date</th>
-                          <th className="py-4 px-6 text-right">Subtotal</th>
-                          <th className="py-4 px-6 text-right">Paid</th>
-                          <th className="py-4 px-6 text-right">Remaining</th>
-                          <th className="py-4 px-6 text-center w-24">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {filteredBills.slice(0, 5).map((bill) => (
-                           <tr key={bill?.id || Math.random()} className="hover:bg-indigo-50/30 transition-colors group">
-                             <td className="py-4 px-6 font-bold text-slate-700">#{bill?.invoiceNo || (bill?.id && String(bill.id).slice(-4)) || '????'}</td>
-                             <td className="py-4 px-6">
-                                <p className="text-slate-800 font-bold">{bill.customerName || 'Unnamed Customer'}</p>
-                             </td>
-                             <td className="py-4 px-6 text-slate-500 text-sm font-medium">
-                               {bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}
-                             </td>
-                             <td className="py-4 px-6 text-slate-800 font-black text-right">
-                               ₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}
-                             </td>
-                             <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{parseFloat(bill?.amountPaid || bill?.paidAmount || 0).toFixed(2)}</td>
-                             <td className="py-4 px-6 text-red-500 font-black text-right">₹{parseFloat(bill?.outstanding || bill?.finalOutstanding || 0).toFixed(2)}</td>
-                             <td className="py-4 px-6 text-center">
-                                <button onClick={() => setSelectedBill(bill)} className="p-2 text-slate-400 group-hover:text-purple-600 hover:bg-white rounded-lg transition-all border border-transparent group-hover:border-purple-100 group-hover:shadow-sm">
-                                  <Eye size={18} />
-                                </button>
-                             </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                     <>
+                       {/* Desktop Table View */}
+                       <div className="hidden sm:block w-full overflow-x-auto min-w-full">
+                         <table className="w-full text-left border-collapse min-w-[800px]">
+                           <thead className="bg-slate-50/95 backdrop-blur-sm shadow-sm z-10 border-b border-slate-200">
+                             <tr className="text-slate-500 text-xs uppercase font-bold tracking-wider">
+                               <th className="py-4 px-6">Bill No.</th>
+                               <th className="py-4 px-6">Customer</th>
+                               <th className="py-4 px-6">Date</th>
+                               <th className="py-4 px-6 text-right">Total</th>
+                               <th className="py-4 px-6 text-right">Paid</th>
+                               <th className="py-4 px-6 text-right">Remaining</th>
+                               <th className="py-4 px-6 text-center w-24">Action</th>
+                             </tr>
+                           </thead>
+                           <tbody className="divide-y divide-slate-100">
+                             {filteredBills.slice(0, 5).map((bill) => (
+                                <tr key={bill?.id || Math.random()} className="hover:bg-indigo-50/30 transition-colors group">
+                                  <td className="py-4 px-6 font-bold text-slate-700">#{bill?.invoiceNo || (bill?.id && String(bill.id).slice(-4)) || '????'}</td>
+                                  <td className="py-4 px-6">
+                                     <p className="text-slate-800 font-bold">{bill.customerName || 'Unnamed Customer'}</p>
+                                  </td>
+                                  <td className="py-4 px-6 text-slate-500 text-sm font-medium">
+                                    {bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}
+                                  </td>
+                                  <td className="py-4 px-6 text-slate-800 font-black text-right">
+                                    ₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}
+                                  </td>
+                                  <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{parseFloat(bill?.amountPaid || bill?.paidAmount || 0).toFixed(2)}</td>
+                                  <td className="py-4 px-6 text-red-500 font-black text-right">₹{parseFloat(bill?.outstanding || bill?.finalOutstanding || 0).toFixed(2)}</td>
+                                  <td className="py-4 px-6 text-center">
+                                     <button onClick={() => setSelectedBill(bill)} className="p-2 text-slate-400 group-hover:text-purple-600 hover:bg-white rounded-lg transition-all border border-transparent group-hover:border-purple-100 group-hover:shadow-sm">
+                                       <Eye size={18} />
+                                     </button>
+                                  </td>
+                               </tr>
+                             ))}
+                           </tbody>
+                         </table>
+                       </div>
+                       
+                       {/* Mobile Card View */}
+                       <div className="block sm:hidden p-4 space-y-3 bg-slate-50/30">
+                         {filteredBills.slice(0, 5).map((bill) => (
+                            <div 
+                              key={bill?.id || Math.random()} 
+                              onClick={() => setSelectedBill(bill)}
+                              className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm active:bg-slate-50 transition-colors cursor-pointer"
+                            >
+                              <div className="flex justify-between items-start mb-3 border-b border-slate-100 pb-3">
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">
+                                      #{bill?.invoiceNo || (bill?.id && String(bill.id).slice(-4)) || '????'}
+                                    </span>
+                                    <span className="text-[10px] font-bold text-slate-400">{bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}</span>
+                                  </div>
+                                  <p className="font-bold text-slate-800 text-sm truncate max-w-[180px]">{bill.customerName || 'Unnamed Customer'}</p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-black text-slate-800 text-lg leading-tight tracking-tight">₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}</p>
+                                </div>
+                              </div>
+                              <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100/50">
+                                <div className="flex flex-col">
+                                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Paid</span>
+                                  <span className="text-emerald-600 font-black text-sm">₹{parseFloat(bill?.amountPaid || bill?.paidAmount || 0).toFixed(2)}</span>
+                                </div>
+                                <div className="w-px h-6 bg-slate-200"></div>
+                                <div className="flex flex-col text-right">
+                                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Due</span>
+                                  <span className="text-red-500 font-black text-sm">₹{parseFloat(bill?.outstanding || bill?.finalOutstanding || 0).toFixed(2)}</span>
+                                </div>
+                              </div>
+                            </div>
+                         ))}
+                       </div>
+                     </>
                  </div>
                )}
 
@@ -191,42 +233,84 @@ export default function BillHistory() {
                        <h3 className="font-bold text-slate-800">All Bills</h3>
                     </div>
                   )}
-                  <table className="w-full text-left border-collapse min-w-[800px]">
-                    <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm shadow-sm z-10 border-b border-slate-200">
-                      <tr className="text-slate-500 text-xs uppercase font-bold tracking-wider">
-                        <th className="py-4 px-6">Bill No.</th>
-                        <th className="py-4 px-6">Customer</th>
-                        <th className="py-4 px-6">Date</th>
-                        <th className="py-4 px-6 text-right">Subtotal</th>
-                        <th className="py-4 px-6 text-right">Paid</th>
-                        <th className="py-4 px-6 text-right">Remaining</th>
-                        <th className="py-4 px-6 text-center w-24">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
+                  <>
+                    {/* Desktop Table View */}
+                    <div className="hidden sm:block w-full overflow-x-auto min-w-full">
+                      <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm shadow-sm z-10 border-b border-slate-200">
+                          <tr className="text-slate-500 text-xs uppercase font-bold tracking-wider">
+                            <th className="py-4 px-6">Bill No.</th>
+                            <th className="py-4 px-6">Customer</th>
+                            <th className="py-4 px-6">Date</th>
+                            <th className="py-4 px-6 text-right">Total</th>
+                            <th className="py-4 px-6 text-right">Paid</th>
+                            <th className="py-4 px-6 text-right">Remaining</th>
+                            <th className="py-4 px-6 text-center w-24">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {((!searchTerm && dateFilter === 'ALL' && filteredBills.length > 5) ? filteredBills.slice(5) : filteredBills).map((bill) => (
+                             <tr key={bill?.id || Math.random()} className="hover:bg-indigo-50/30 transition-colors group">
+                               <td className="py-4 px-6 font-bold text-slate-700">#{bill?.invoiceNo || (bill?.id && String(bill.id).slice(-4)) || '????'}</td>
+                               <td className="py-4 px-6">
+                                  <p className="text-slate-800 font-bold">{bill.customerName || 'Unnamed Customer'}</p>
+                               </td>
+                               <td className="py-4 px-6 text-slate-500 text-sm font-medium">
+                                 {bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}
+                               </td>
+                               <td className="py-4 px-6 text-slate-800 font-black text-right">
+                                 ₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}
+                               </td>
+                               <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{parseFloat(bill?.amountPaid || bill?.paidAmount || 0).toFixed(2)}</td>
+                               <td className="py-4 px-6 text-red-500 font-black text-right">₹{parseFloat(bill?.outstanding || bill?.finalOutstanding || 0).toFixed(2)}</td>
+                               <td className="py-4 px-6 text-center">
+                                  <button onClick={() => setSelectedBill(bill)} className="p-2 text-slate-400 group-hover:text-purple-600 hover:bg-white rounded-lg transition-all border border-transparent group-hover:border-purple-100 group-hover:shadow-sm">
+                                    <Eye size={18} />
+                                  </button>
+                               </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    
+                    {/* Mobile Card View */}
+                    <div className="block sm:hidden p-4 space-y-3 bg-slate-50/30">
                       {((!searchTerm && dateFilter === 'ALL' && filteredBills.length > 5) ? filteredBills.slice(5) : filteredBills).map((bill) => (
-                         <tr key={bill?.id || Math.random()} className="hover:bg-indigo-50/30 transition-colors group">
-                           <td className="py-4 px-6 font-bold text-slate-700">#{bill?.invoiceNo || (bill?.id && String(bill.id).slice(-4)) || '????'}</td>
-                           <td className="py-4 px-6">
-                              <p className="text-slate-800 font-bold">{bill.customerName || 'Unnamed Customer'}</p>
-                           </td>
-                           <td className="py-4 px-6 text-slate-500 text-sm font-medium">
-                             {bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}
-                           </td>
-                           <td className="py-4 px-6 text-slate-800 font-black text-right">
-                             ₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}
-                           </td>
-                           <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{parseFloat(bill?.amountPaid || bill?.paidAmount || 0).toFixed(2)}</td>
-                           <td className="py-4 px-6 text-red-500 font-black text-right">₹{parseFloat(bill?.outstanding || bill?.finalOutstanding || 0).toFixed(2)}</td>
-                           <td className="py-4 px-6 text-center">
-                              <button onClick={() => setSelectedBill(bill)} className="p-2 text-slate-400 group-hover:text-purple-600 hover:bg-white rounded-lg transition-all border border-transparent group-hover:border-purple-100 group-hover:shadow-sm">
-                                <Eye size={18} />
-                              </button>
-                           </td>
-                        </tr>
+                         <div 
+                           key={bill?.id || Math.random()} 
+                           onClick={() => setSelectedBill(bill)}
+                           className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm active:bg-slate-50 transition-colors cursor-pointer"
+                         >
+                           <div className="flex justify-between items-start mb-3 border-b border-slate-100 pb-3">
+                             <div>
+                               <div className="flex items-center gap-2 mb-1">
+                                 <span className="bg-purple-50 text-purple-600 border border-purple-100 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">
+                                   #{bill?.invoiceNo || (bill?.id && String(bill.id).slice(-4)) || '????'}
+                                 </span>
+                                 <span className="text-[10px] font-bold text-slate-400">{bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}</span>
+                               </div>
+                               <p className="font-bold text-slate-800 text-sm truncate max-w-[180px]">{bill.customerName || 'Unnamed Customer'}</p>
+                             </div>
+                             <div className="text-right">
+                               <p className="font-black text-slate-800 text-lg leading-tight tracking-tight">₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}</p>
+                             </div>
+                           </div>
+                           <div className="flex justify-between items-center bg-slate-50 p-2.5 rounded-lg border border-slate-100/50">
+                             <div className="flex flex-col">
+                               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Paid</span>
+                               <span className="text-emerald-600 font-black text-sm">₹{parseFloat(bill?.amountPaid || bill?.paidAmount || 0).toFixed(2)}</span>
+                             </div>
+                             <div className="w-px h-6 bg-slate-200"></div>
+                             <div className="flex flex-col text-right">
+                               <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest leading-none mb-1">Due</span>
+                               <span className="text-red-500 font-black text-sm">₹{parseFloat(bill?.outstanding || bill?.finalOutstanding || 0).toFixed(2)}</span>
+                             </div>
+                           </div>
+                         </div>
                       ))}
-                    </tbody>
-                  </table>
+                    </div>
+                  </>
                </div>
             </div>
           )}

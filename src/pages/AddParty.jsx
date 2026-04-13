@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { User, Phone, Check, ArrowLeft, Users, Truck } from 'lucide-react';
+import { User, Phone, Check, ArrowLeft, Users, Truck, IndianRupee } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
 import { useToast } from '../context/ToastContext';
 
@@ -115,9 +115,9 @@ export default function AddParty() {
 
           <div>
              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Opening Balance</label>
-             <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">₹</span>
-                <input type="number" step="0.01" value={formData.openingBalance || ''} onChange={(e) => setFormData({...formData, openingBalance: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-bold text-slate-800 placeholder-slate-400 transition-all outline-none" placeholder="0.00" />
+             <div className="relative search-wrapper">
+                <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
+                <input type="number" step="0.01" value={formData.openingBalance || ''} onChange={(e) => setFormData({...formData, openingBalance: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-bold text-slate-800 placeholder-slate-400 transition-all outline-none search-clean" placeholder="0.00" />
              </div>
           </div>
 

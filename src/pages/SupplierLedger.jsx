@@ -452,9 +452,15 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
                </div>
                <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Opening Balance</label>
-                  <div className="flex items-center">
-                    <span className="bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl px-4 py-3 text-slate-500 font-bold">₹</span>
-                    <input type="number" step="0.01" value={editForm.openingBalance} onChange={(e) => setEditForm({...editForm, openingBalance: e.target.value})} className="w-full px-4 py-3 rounded-r-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium" />
+                  <div className="relative search-wrapper">
+                    <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
+                    <input 
+                      type="number" step="0.01" 
+                      value={editForm.openingBalance} 
+                      onChange={(e) => setEditForm({...editForm, openingBalance: e.target.value})} 
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-bold outline-none search-clean" 
+                      placeholder="0.00"
+                    />
                   </div>
                </div>
                <div className="pt-4"><button type="submit" className="w-full py-3.5 bg-indigo-600 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30">Save Changes</button></div>
@@ -486,9 +492,15 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Opening Balance</label>
-                <div className="flex items-center">
-                  <span className="bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl px-4 py-3 text-slate-500 font-bold">₹</span>
-                  <input type="number" step="0.01" value={supplierForm.openingBalance} onChange={(e) => setSupplierForm({...supplierForm, openingBalance: e.target.value})} className="w-full px-4 py-3 rounded-r-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-white font-medium text-slate-800" placeholder="0.00" />
+                <div className="relative search-wrapper">
+                  <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
+                  <input 
+                    type="number" step="0.01" 
+                    value={supplierForm.openingBalance} 
+                    onChange={(e) => setSupplierForm({...supplierForm, openingBalance: e.target.value})} 
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-white font-bold text-slate-800 outline-none search-clean" 
+                    placeholder="0.00" 
+                  />
                 </div>
               </div>
               <div className="pt-4 flex gap-3">
@@ -519,9 +531,15 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
             <form onSubmit={handleInvoiceSubmit} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Invoice Amount</label>
-                <div className="flex items-center">
-                  <span className="bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl px-4 py-3 text-slate-500 font-black">₹</span>
-                  <input type="number" required min="1" step="0.01" value={invoiceForm.amount} onChange={(e) => setInvoiceForm({...invoiceForm, amount: e.target.value})} className="w-full px-4 py-3 rounded-r-xl border border-slate-200 focus:ring-2 focus:outline-none focus:ring-amber-500/50 focus:border-amber-500 bg-white font-black text-amber-600 text-xl shadow-inner" placeholder="0.00" />
+                <div className="relative search-wrapper">
+                  <IndianRupee size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-600 search-icon" />
+                  <input 
+                    type="number" required min="1" step="0.01" 
+                    value={invoiceForm.amount} 
+                    onChange={(e) => setInvoiceForm({...invoiceForm, amount: e.target.value})} 
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:outline-none focus:ring-amber-500/50 focus:border-amber-500 bg-white font-black text-amber-600 text-xl shadow-inner search-clean" 
+                    placeholder="0.00" 
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -564,9 +582,15 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
               </div>
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Amount Sent</label>
-                <div className="flex items-center">
-                  <span className="bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl px-4 py-3 text-slate-500 font-bold">₹</span>
-                  <input type="number" required min="1" step="0.01" value={paymentForm.amount} onChange={(e) => setPaymentForm({...paymentForm, amount: e.target.value})} className="w-full px-4 py-3 rounded-r-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 bg-white font-black text-emerald-600 text-xl shadow-inner" placeholder="0.00" />
+                <div className="relative search-wrapper">
+                  <IndianRupee size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 search-icon" />
+                  <input 
+                    type="number" required min="1" step="0.01" 
+                    value={paymentForm.amount} 
+                    onChange={(e) => setPaymentForm({...paymentForm, amount: e.target.value})} 
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 bg-white font-black text-emerald-600 text-xl shadow-inner search-clean" 
+                    placeholder="0.00" 
+                  />
                 </div>
               </div>
               <div>

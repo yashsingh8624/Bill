@@ -99,10 +99,10 @@ export default function Layout() {
           </ul>
         </nav>
 
-        {/* Logout Button - Desktop */}
+        {/* User Info - Desktop */}
         <div className="px-4 py-4 border-t border-slate-100 mt-auto">
           {user && (
-            <div className="flex items-center gap-3 mb-3 px-2">
+            <div className="flex items-center gap-3 mb-1 px-2">
               {user.picture ? (
                 <img src={user.picture} alt="" className="w-8 h-8 rounded-full border border-slate-200" />
               ) : (
@@ -114,13 +114,6 @@ export default function Layout() {
               </div>
             </div>
           )}
-          <button
-            onClick={logout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-rose-600 hover:bg-rose-50 font-bold transition-all border border-transparent hover:border-rose-100"
-          >
-            <LogOut size={20} />
-            Log Out
-          </button>
         </div>
       </aside>
 
@@ -182,10 +175,10 @@ export default function Layout() {
                 })}
               </ul>
               
-              {/* Logout - Mobile */}
+              {/* User Info - Mobile */}
               {user && (
                 <div className="px-4 mt-6 pt-4 border-t border-slate-100">
-                  <div className="flex items-center gap-3 mb-3 px-2">
+                  <div className="flex items-center gap-3 px-2">
                     {user.picture ? (
                       <img src={user.picture} alt="" className="w-8 h-8 rounded-full border border-slate-200" />
                     ) : (
@@ -196,13 +189,6 @@ export default function Layout() {
                       <p className="text-[10px] text-slate-400 font-medium truncate">{user.email}</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => { setMobileMenuOpen(false); logout(); }}
-                    className="w-full flex items-center gap-4 px-4 py-3.5 rounded-2xl text-rose-600 hover:bg-rose-50 font-bold transition-all"
-                  >
-                    <LogOut size={20} />
-                    Log Out
-                  </button>
                 </div>
               )}
            </div>

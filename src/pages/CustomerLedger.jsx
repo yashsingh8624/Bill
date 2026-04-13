@@ -453,13 +453,14 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                </div>
                <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Opening Balance</label>
-                  <div className="flex items-center">
-                    <span className="bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl px-4 py-3 text-slate-500 font-bold">₹</span>
+                  <div className="relative search-wrapper">
+                    <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
                     <input 
                       type="number" step="0.01"
                       value={editForm.openingBalance}
                       onChange={(e) => setEditForm({...editForm, openingBalance: e.target.value})}
-                      className="w-full px-4 py-3 rounded-r-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium"
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-bold outline-none search-clean"
+                      placeholder="0.00"
                     />
                   </div>
                </div>
@@ -497,13 +498,13 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
               
               <div>
                 <label className="block text-sm font-bold text-slate-700 mb-1.5">Amount Received</label>
-                <div className="flex items-center">
-                  <span className="bg-slate-100 border border-r-0 border-slate-200 rounded-l-xl px-4 py-3 text-slate-500 font-black">₹</span>
+                <div className="relative search-wrapper">
+                  <IndianRupee size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 search-icon" />
                   <input 
                     type="number" required min="1" step="0.01"
                     value={paymentForm.amount}
                     onChange={(e) => setPaymentForm({...paymentForm, amount: e.target.value})}
-                    className="w-full px-4 py-3 rounded-r-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 text-emerald-600 text-xl font-black shadow-inner"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 text-emerald-600 text-xl font-black shadow-inner search-clean"
                     placeholder="0.00"
                   />
                 </div>

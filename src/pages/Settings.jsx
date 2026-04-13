@@ -161,16 +161,6 @@ export default function Settings() {
           <h2 className="text-2xl font-bold text-slate-800 tracking-tight">System Settings</h2>
           <p className="text-slate-500 text-sm mt-1">Manage your business profile, print preferences, and database.</p>
         </div>
-        {/* Logout Button - Prominent */}
-        <button
-          onClick={handleLogout}
-          id="settings-logout-btn"
-          className="flex items-center gap-2.5 px-6 py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-2xl border border-rose-200 transition-all active:scale-95 shadow-sm hover:shadow-md whitespace-nowrap"
-        >
-          <LogOut size={20} />
-          Log Out
-          {user && <span className="text-xs text-rose-400 font-medium hidden sm:inline">({user.email})</span>}
-        </button>
       </div>
 
       {/* SECTION 1: Logo & QR Upload */}
@@ -344,58 +334,36 @@ export default function Settings() {
          <Database size={20} className="text-indigo-600" /> Database Utilities
       </h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center flex flex-col items-center hover:border-emerald-200 transition-colors group">
-          <div className="bg-emerald-50 text-emerald-600 p-4 rounded-xl mb-4 group-hover:scale-110 transition-transform">
-            <FileSpreadsheet size={24} />
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-5 mb-8">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6 hover:border-emerald-200 transition-colors group">
+          <div className="flex items-center gap-4">
+             <div className="bg-emerald-50 text-emerald-600 p-4 rounded-xl group-hover:scale-110 transition-transform">
+               <FileSpreadsheet size={24} />
+             </div>
+             <div className="text-left">
+                <h4 className="font-bold text-slate-800 text-lg mb-1">Export Master Data</h4>
+                <p className="text-sm text-slate-500 font-medium max-w-md">Download a complete Excel workbook to view all records, inventory, and history on your PC.</p>
+             </div>
           </div>
-          <h4 className="font-bold text-slate-800 mb-2">Export Master Data</h4>
-          <p className="text-sm text-slate-500 mb-6 flex-1 font-medium">Download a complete Excel workbook to view all records on your PC.</p>
-          <button onClick={exportAllToExcel} className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2">
+          <button onClick={exportAllToExcel} className="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
             <FileSpreadsheet size={18} /> Export .XLSX
-          </button>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center flex flex-col items-center hover:border-blue-200 transition-colors group">
-          <div className="bg-blue-50 text-blue-600 p-4 rounded-xl mb-4 group-hover:scale-110 transition-transform">
-            <Download size={24} />
-          </div>
-          <h4 className="font-bold text-slate-800 mb-2">Take Smart Backup</h4>
-          <p className="text-sm text-slate-500 mb-6 flex-1 font-medium">Download an encrypted JSON backup file which can be restored anytime.</p>
-          <button onClick={exportBackup} className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
-            <Download size={18} /> Save JSON Backup
-          </button>
-        </div>
-
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center flex flex-col items-center hover:border-amber-200 transition-colors group">
-          <div className="bg-amber-50 text-amber-600 p-4 rounded-xl mb-4 group-hover:scale-110 transition-transform">
-            <Upload size={24} />
-          </div>
-          <h4 className="font-bold text-slate-800 mb-2">Restore App Data</h4>
-          <p className="text-sm text-slate-500 mb-5 flex-1 font-medium">Restore everything from a previously downloaded .json backup file.</p>
-          
-          <input type="file" accept=".json" ref={fileInputRef} onChange={handleRestore} className="hidden" />
-          <button onClick={() => fileInputRef.current.click()} className="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white font-bold rounded-xl shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-2">
-            <Upload size={18} /> Restore File
           </button>
         </div>
       </div>
 
-      {/* Danger Zone */}
-      <div className="mt-8">
-        <div className="bg-red-50 p-6 rounded-2xl border-2 border-red-100 flex flex-col sm:flex-row items-center justify-between gap-6">
-           <div>
-             <h4 className="font-black text-red-700 text-lg">Danger Zone: Factory Reset</h4>
-             <p className="text-sm font-bold text-red-500 mt-1 max-w-lg">Permanently deletes all products, bills, customers, settings, and logs you out. You cannot undo this unless you have a backup.</p>
+      {/* Logout Section */}
+      <div className="mt-8 pt-8 border-t border-slate-200">
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-rose-100 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+           <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50 rounded-bl-full pointer-events-none opacity-50"></div>
+           <div className="relative z-10 text-center sm:text-left">
+             <h4 className="font-black text-rose-600 text-lg sm:text-xl">Account Security</h4>
+             <p className="text-sm font-bold text-slate-500 mt-1">End your current session completely.</p>
            </div>
-           <button onClick={() => {
-              if(window.confirm("CRITICAL WARNING: This will permanently delete ALL data. Are you absolutely sure?")) {
-                 localStorage.clear();
-                 sessionStorage.clear();
-                 window.location.href = '/login';
-              }
-           }} className="bg-red-600 hover:bg-red-700 text-white px-8 py-3.5 rounded-xl font-black whitespace-nowrap shadow-lg shadow-red-600/30 transition-all">
-              Initialize Reset
+           <button 
+             onClick={logout} 
+             className="relative z-10 w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white px-10 py-3.5 rounded-xl font-black shadow-lg shadow-rose-600/30 transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
+           >
+              <LogOut size={20} strokeWidth={2.5} /> Log Out Now
            </button>
         </div>
       </div>

@@ -93,12 +93,22 @@ export default function Dashboard() {
     return Math.round((cashCollected - cashEx) * 100) / 100;
   }, [bills, expenses]);
 
-  // Monthly Chart Data (Last 6 months)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const availableYears = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    return [currentYear, currentYear - 1, currentYear - 2, currentYear - 3, currentYear - 4];
+  }, []);
+
+  // Monthly Chart Data (Last 6 months with trends based on selected year)
   const chartData = useMemo(() => {
     const months = [];
-    const now = new Date();
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const currentYear = new Date().getFullYear();
+    // If selected year is current year, show till current month. Else show till December (index 11).
+    const endMonth = selectedYear === currentYear ? new Date().getMonth() : 11;
+
+    // Fetch 7 months to calculate the trend for the oldest displayed month
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(selectedYear, endMonth - i, 1);
       months.push({
         label: d.toLocaleString('default', { month: 'short' }),
         key: d.toISOString().slice(0, 7),
@@ -117,8 +127,22 @@ export default function Dashboard() {
       }
     });
 
-    return months;
-  }, [bills]);
+    const displayMonths = [];
+    for (let i = 1; i <= 6; i++) {
+        const current = months[i];
+        const prev = months[i-1];
+        let trend = 'flat';
+        if (current.value > prev.value) trend = 'up';
+        if (current.value < prev.value) trend = 'down';
+        
+        displayMonths.push({
+            ...current,
+            trend
+        });
+    }
+
+    return displayMonths;
+  }, [bills, selectedYear]);
 
   const totalCustomerDue = useMemo(() => 
     customers.reduce((sum, c) => sum + parseFloat(calculateCustomerBalance(ledger, c?.id, c) || 0), 0)
@@ -130,46 +154,6 @@ export default function Dashboard() {
 
   const lowStockProducts = products.filter(p => p.quantity <= (p.lowStockThreshold || 5));
 
-  // ========== SALES MOMENTUM - Real-time from ledger ==========
-  const salesMomentum = useMemo(() => {
-    const now = new Date();
-    const todayStr = now.toISOString().split('T')[0];
-    const thisMonthStr = todayStr.slice(0, 7);
-
-    let totalSales = 0;       // Sum of all SALE amounts
-    let totalReceived = 0;    // Sum of all customer PAYMENT amounts
-    let totalGiven = 0;       // Sum of all PAYMENT_MADE / PAYMENT_OUT amounts
-    let todaySales = 0;
-    let thisMonthSales = 0;
-
-    ledger.forEach(entry => {
-      if (!entry || entry.is_void === true || entry.is_void === 'TRUE') return;
-      const amt = parseFloat(entry.amount || 0);
-      const type = String(entry.type || '').toUpperCase();
-      const dateStr = entry.date || '';
-
-      if (type === 'SALE' || type === 'OPENING') {
-        totalSales += amt;
-        if (dateStr.startsWith(todayStr)) todaySales += amt;
-        if (dateStr.startsWith(thisMonthStr)) thisMonthSales += amt;
-      }
-      if (type === 'PAYMENT' || type === 'PAYMENT_IN') {
-        totalReceived += amt;
-      }
-      if (type === 'PAYMENT_MADE' || type === 'PAYMENT_OUT') {
-        totalGiven += amt;
-      }
-    });
-
-    return {
-      totalSales: Math.round(totalSales * 100) / 100,
-      totalReceived: Math.round(totalReceived * 100) / 100,
-      totalGiven: Math.round(totalGiven * 100) / 100,
-      netBalance: Math.round((totalReceived - totalGiven) * 100) / 100,
-      todaySales: Math.round(todaySales * 100) / 100,
-      thisMonthSales: Math.round(thisMonthSales * 100) / 100
-    };
-  }, [ledger]);
 
 
   const topProducts = useMemo(() => {
@@ -260,98 +244,43 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Monthly Chart Card */}
-      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 relative overflow-hidden">
-        <div className="flex justify-between items-center mb-10">
+      {/* Sales Momentum Section */}
+      <div className="bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100 relative overflow-hidden">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
            <div>
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-1">
-                <TrendingUp size={16} className="text-indigo-500" /> Sales Momentum
-              </h3>
-              <p className="text-sm text-slate-500 font-bold">Last 6 Months Performance</p>
+             <h3 className="text-xl font-black text-slate-800 flex items-center gap-2 mb-1">
+               <TrendingUp size={24} className="text-indigo-600" /> Sales Momentum
+             </h3>
+             <p className="text-sm text-slate-500 font-bold">Last 6 Months Performance</p>
            </div>
-           <div className="flex items-center gap-2">
-              <span className="w-3 h-3 bg-indigo-500 rounded-full"></span>
-              <span className="text-[10px] font-black uppercase text-slate-400">Net Sales</span>
+           <div>
+              <select 
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="w-full sm:w-auto px-5 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none shadow-sm cursor-pointer transition-colors"
+                style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.25rem', paddingRight: '2.5rem' }}
+              >
+                {availableYears.map(year => (
+                  <option key={year} value={year}>{year} Year</option>
+                ))}
+              </select>
            </div>
         </div>
         
-        <div className="h-48 w-full flex items-end justify-between gap-2 px-2">
-          {chartData.map((d, i) => {
-            const max = Math.max(...chartData.map(m => m.value), 1);
-            const height = (d.value / max) * 100;
-            return (
-              <div key={i} className="flex-1 flex flex-col items-center group">
-                <div className="mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                   <span className="bg-slate-800 text-white text-[9px] font-bold px-2 py-0.5 rounded shadow-lg whitespace-nowrap">₹{Math.round(d.value).toLocaleString()}</span>
-                </div>
-                <div 
-                  className="w-full max-w-[40px] bg-slate-100 rounded-t-xl group-hover:bg-indigo-500 transition-all duration-500 relative"
-                  style={{ height: `${Math.max(height, 5)}%` }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent rounded-t-xl"></div>
-                </div>
-                <span className="text-[10px] font-black text-slate-400 uppercase mt-4 tracking-tighter">{d.label}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ========== SALES MOMENTUM SUMMARY ========== */}
-      <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 relative overflow-hidden">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-1">
-              <Banknote size={16} className="text-emerald-500" /> Sales Momentum
-            </h3>
-            <p className="text-sm text-slate-500 font-bold">Real-time financial overview</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Sales */}
-          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-2xl border border-indigo-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 w-16 h-16 bg-indigo-100 rounded-full blur-xl group-hover:scale-125 transition-transform" />
-            <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-2 relative z-10">Total Sales</p>
-            <p className="text-2xl font-black text-indigo-700 tracking-tight relative z-10">₹{salesMomentum.totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
-            <p className="text-[10px] font-bold text-indigo-400 mt-2 relative z-10 uppercase tracking-wider">All-time billed</p>
-          </div>
-
-          {/* Total Received */}
-          <div className="bg-gradient-to-br from-emerald-50 to-green-50 p-5 rounded-2xl border border-emerald-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 w-16 h-16 bg-emerald-100 rounded-full blur-xl group-hover:scale-125 transition-transform" />
-            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-2 relative z-10">Total Received</p>
-            <p className="text-2xl font-black text-emerald-700 tracking-tight relative z-10">₹{salesMomentum.totalReceived.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
-            <p className="text-[10px] font-bold text-emerald-400 mt-2 relative z-10 uppercase tracking-wider flex items-center gap-1"><ArrowDown size={10} /> From customers</p>
-          </div>
-
-          {/* Total Given */}
-          <div className="bg-gradient-to-br from-rose-50 to-pink-50 p-5 rounded-2xl border border-rose-100 relative overflow-hidden group hover:shadow-md transition-shadow">
-            <div className="absolute -right-3 -top-3 w-16 h-16 bg-rose-100 rounded-full blur-xl group-hover:scale-125 transition-transform" />
-            <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-2 relative z-10">Total Given</p>
-            <p className="text-2xl font-black text-rose-700 tracking-tight relative z-10">₹{salesMomentum.totalGiven.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
-            <p className="text-[10px] font-bold text-rose-400 mt-2 relative z-10 uppercase tracking-wider flex items-center gap-1"><ArrowUpRight size={10} /> To suppliers</p>
-          </div>
-
-          {/* Net Balance */}
-          <div className={`p-5 rounded-2xl border relative overflow-hidden group hover:shadow-md transition-shadow ${salesMomentum.netBalance >= 0 ? 'bg-gradient-to-br from-slate-800 to-slate-900 border-slate-700' : 'bg-gradient-to-br from-orange-50 to-amber-50 border-orange-100'}`}>
-            <div className={`absolute -right-3 -top-3 w-16 h-16 rounded-full blur-xl group-hover:scale-125 transition-transform ${salesMomentum.netBalance >= 0 ? 'bg-white/10' : 'bg-orange-100'}`} />
-            <p className={`text-[10px] font-black uppercase tracking-widest mb-2 relative z-10 ${salesMomentum.netBalance >= 0 ? 'text-slate-400' : 'text-orange-400'}`}>Net Balance</p>
-            <p className={`text-2xl font-black tracking-tight relative z-10 ${salesMomentum.netBalance >= 0 ? 'text-white' : 'text-orange-700'}`}>₹{salesMomentum.netBalance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
-            <p className={`text-[10px] font-bold mt-2 relative z-10 uppercase tracking-wider ${salesMomentum.netBalance >= 0 ? 'text-emerald-400' : 'text-orange-400'}`}>{salesMomentum.netBalance >= 0 ? 'Positive Flow' : 'Deficit'}</p>
-          </div>
-        </div>
-
-        {/* Today & Month micro-stats */}
-        <div className="mt-5 flex flex-wrap gap-4 text-sm">
-          <div className="flex items-center gap-2 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-100">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Today Sales</span>
-            <span className="font-black text-slate-800">₹{salesMomentum.todaySales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-          </div>
-          <div className="flex items-center gap-2 bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-100">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">This Month</span>
-            <span className="font-black text-slate-800">₹{salesMomentum.thisMonthSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
-          </div>
+        <div className="flex flex-col divide-y divide-slate-100 border border-slate-100 rounded-2xl bg-white overflow-hidden shadow-sm">
+          {chartData.map((d, i) => (
+            <div key={i} className="flex items-center justify-between p-4 sm:p-5 hover:bg-slate-50 transition-colors">
+               <span className="font-black text-slate-500 uppercase tracking-widest text-sm sm:text-base">{d.label}</span>
+               <div className="flex items-center gap-4 sm:gap-6">
+                  <span className="font-black text-slate-800 text-lg sm:text-xl tracking-tight">₹{d.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <div className="w-6 flex justify-center">
+                    {d.trend === 'up' && <span className="text-green-500 font-black text-2xl leading-none">↑</span>}
+                    {d.trend === 'down' && <span className="text-red-500 font-black text-2xl leading-none">↓</span>}
+                    {d.trend === 'flat' && <span className="text-slate-300 font-black text-2xl leading-none">-</span>}
+                  </div>
+               </div>
+            </div>
+          ))}
         </div>
       </div>
 
