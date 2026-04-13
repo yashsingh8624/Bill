@@ -52,8 +52,8 @@ export default function Settings() {
   const handleLogoUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1024 * 500) { // Limit to 500KB to prevent localStorage quota issues
-        alert("Logo file is too large! Please upload smaller image (Max 500KB)");
+      if (file.size > 1024 * 1024) { // Limit to 1MB to prevent localStorage quota issues
+        alert("Logo file is too large! Please upload smaller image (Max 1MB)");
         return;
       }
       const reader = new FileReader();
@@ -71,8 +71,8 @@ export default function Settings() {
   const handleQrUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 1024 * 500) {
-        alert("QR file is too large! Please upload smaller image (Max 500KB)");
+      if (file.size > 1024 * 1024) {
+        alert("QR file is too large! Please upload smaller image (Max 1MB)");
         return;
       }
       const reader = new FileReader();
@@ -187,7 +187,7 @@ export default function Settings() {
                 )}
                 <input type="file" accept="image/png, image/jpeg" onChange={handleLogoUpload} className="absolute inset-0 opacity-0 cursor-pointer" title="Click to upload logo" />
               </div>
-              <p className="text-[10px] text-slate-500 text-center font-medium max-w-[180px]">Square PNG/JPG under 500KB. Shows on PDF invoices.</p>
+              <p className="text-[10px] text-slate-500 text-center font-medium max-w-[180px]">Square PNG/JPG under 1MB. Shows on PDF invoices.</p>
             </div>
 
             {/* QR Upload */}
