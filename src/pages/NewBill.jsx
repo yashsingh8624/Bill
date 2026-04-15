@@ -46,9 +46,16 @@ export default function NewBill() {
   const [paymentMode, setPaymentMode] = useState('Cash');
   const [amountPaidInput, setAmountPaidInput] = useState('');
 
-  // Prev balance UI completely removed as requested
-  const enablePrevBalance = false;
-  const customerPrevBalance = 0;
+  const [enablePrevBalance, setEnablePrevBalance] = useState(false);
+  const customerPrevBalance = useMemo(() => {
+    let custId = selectedCustomerId;
+    if (!custId && customerName) {
+      const match = customers.find(c => c.name.toLowerCase() === customerName.toLowerCase());
+      if (match) custId = match.id;
+    }
+    if (!custId || !Array.isArray(ledger)) return 0;
+    return calculateCustomerBalance(ledger.filter(b => b.invoiceNo !== invoiceNo), custId, customers.find(c => c.id === custId));
+  }, [selectedCustomerId, customerName, ledger, customers, invoiceNo]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
@@ -139,10 +146,12 @@ export default function NewBill() {
     return { subTotal: sTotal, totalDiscount: tDiscount, taxableTotal: tTaxable, totalGST: tGST, cgst: cGST, sgst: sGST, totalProfit: tProfit, grandTotal: gTotal };
   }, [items]);
 
+  const finalGrandTotal = enablePrevBalance ? grandTotal + customerPrevBalance : grandTotal;
+
   const amountPaid = amountPaidInput === ''
-    ? (paymentMode === 'Credit' ? 0 : grandTotal)
+    ? (paymentMode === 'Credit' ? 0 : finalGrandTotal)
     : parseFloat(amountPaidInput) || 0;
-  const outstanding = Math.round(Math.max(0, grandTotal - amountPaid) * 100) / 100;
+  const outstanding = Math.round(Math.max(0, finalGrandTotal - amountPaid) * 100) / 100;
 
   // ----- Save -----
   const handleSaveBill = async (isNew = false) => {
@@ -185,15 +194,15 @@ export default function NewBill() {
       total: grandTotal,
       grandTotal: grandTotal,
       totalAmount: grandTotal,
-      previousBalance: 0,
-      prevBalanceIncluded: false,
+      previousBalance: enablePrevBalance ? customerPrevBalance : 0,
+      prevBalanceIncluded: enablePrevBalance,
       paymentMode,
       paymentStatus,
       paidAmount: amountPaid,
       amountPaid,
       outstanding: finalOut,
       finalOutstanding: finalOut,
-      pdfCustomPrevBalance: calculatedPrevBalance,
+      pdfCustomPrevBalance: enablePrevBalance ? customerPrevBalance : 0,
     };
 
     const result = await addBill(billData);
@@ -247,9 +256,9 @@ export default function NewBill() {
       const { doc, fileName } = await generateInvoicePDF({
         invoiceNo, date, customerName, customerPhone,
         items, subTotal, totalDiscount, taxableTotal,
-        cgst, sgst, gstEnabled: totalGST > 0, gstAmount: totalGST,
+        sgst, gstEnabled: totalGST > 0, gstAmount: totalGST,
         grandTotal,
-        prevBalanceIncluded: calculatedPrevBalance,
+        prevBalanceIncluded: enablePrevBalance ? calculatedPrevBalance : 0,
         paymentMode, amountPaid, outstanding,
       }, userSettings);
       const blob = doc.output('blob');
@@ -578,7 +587,17 @@ export default function NewBill() {
           {/* Final Summary */}
           <div className="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 text-white relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-bl-full pointer-events-none"></div>
-            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide mb-4 border-b border-slate-700 pb-2">Final Summary</h3>
+            <div className="flex items-center justify-between mb-4 border-b border-slate-700 pb-2 relative z-10">
+              <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wide">Final Summary</h3>
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <div className="relative">
+                  <input type="checkbox" className="sr-only" checked={enablePrevBalance} onChange={e => setEnablePrevBalance(e.target.checked)} />
+                  <div className={`block w-8 h-4.5 rounded-full transition-colors ${enablePrevBalance ? 'bg-indigo-500' : 'bg-slate-600'}`}></div>
+                  <div className={`dot absolute left-0.5 top-0.5 bg-white w-3.5 h-3.5 rounded-full transition-transform ${enablePrevBalance ? 'transform translate-x-3.5' : ''}`}></div>
+                </div>
+                <span className="text-xs font-bold text-slate-400 group-hover:text-slate-200 transition-colors">Add Old Dues</span>
+              </label>
+            </div>
 
             <div className="space-y-2.5 mb-6 relative z-10 text-sm">
               <div className="flex justify-between text-slate-300 font-medium">
@@ -612,9 +631,15 @@ export default function NewBill() {
                 </>
               )}
 
+              {enablePrevBalance && (
+                <div className="pt-3 border-t border-slate-600 flex justify-between items-center text-rose-300">
+                  <span className="text-sm font-medium">Prev. Balance</span>
+                  <span className="text-lg font-bold">+ ₹{customerPrevBalance.toFixed(2)}</span>
+                </div>
+              )}
               <div className="pt-3 border-t border-slate-600 flex justify-between items-center">
-                <span className="text-lg">Grand Total</span>
-                <span className="text-3xl font-black text-white tracking-tight">₹{grandTotal.toFixed(2)}</span>
+                <span className="text-lg">Total Payable</span>
+                <span className="text-3xl font-black text-white tracking-tight">₹{finalGrandTotal.toFixed(2)}</span>
               </div>
               <div className="pt-2 border-t border-slate-700 space-y-2 mt-1">
                 <div className="flex justify-between items-center font-bold">
