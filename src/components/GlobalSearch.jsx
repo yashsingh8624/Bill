@@ -71,7 +71,7 @@ export default function GlobalSearch({ isOpen, onClose }) {
             ref={inputRef}
             type="text"
             placeholder="Search products, customers, or bills... (Esc to close)"
-            className="search-clean flex-1 text-lg outline-none text-slate-700 dark:text-slate-300 transition-colors duration-300 placeholder:text-slate-400 font-medium"
+            className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 search-clean flex-1 text-lg outline-none transition-colors duration-300 placeholder: font-medium"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -115,7 +115,7 @@ export default function GlobalSearch({ isOpen, onClose }) {
                     <Package size={18} />
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-slate-800 dark:text-white transition-colors duration-300">{p.name}</p>
+                    <p className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300">{p.name}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-500 transition-colors duration-300">Stock: {p.quantity} | Price: ₹{p.sellingPrice || p.price}</p>
                   </div>
                   <ArrowRight size={16} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
@@ -137,7 +137,7 @@ export default function GlobalSearch({ isOpen, onClose }) {
                     <Users size={18} />
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-slate-800 dark:text-white transition-colors duration-300">{c.name}</p>
+                    <p className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300">{c.name}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-500 transition-colors duration-300">{c.phone || 'No phone'} | Balance: ₹{(c.balance || 0).toFixed(2)}</p>
                   </div>
                   <ArrowRight size={16} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
@@ -159,7 +159,7 @@ export default function GlobalSearch({ isOpen, onClose }) {
                     <Receipt size={18} />
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-slate-800 dark:text-white transition-colors duration-300">#{b.invoiceNo}</p>
+                    <p className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300">#{b.invoiceNo}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-500 transition-colors duration-300">{b.customerName} | ₹{(b.grandTotal || b.total).toFixed(2)}</p>
                   </div>
                   <ArrowRight size={16} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />

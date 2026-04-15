@@ -135,20 +135,20 @@ export default function PaymentIn() {
               {/* Receipt & Date Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                    <div>
-                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Receipt No</label>
+                    <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Receipt No</label>
                     <div className="relative">
                       <input type="text" value={formData.receiptNo || ''} onChange={(e) => setFormData({...formData, receiptNo: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-100 text-sm transition-all" placeholder="Enter receipt no" />
                     </div>
                   </div>
                  <div>
-                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Date</label>
+                   <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Date</label>
                    <input type="date" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-100 text-sm transition-all" />
                  </div>
               </div>
 
               {/* Customer Search & Preview */}
               <div>
-                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                 <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2 flex items-center justify-between">
                     <span>Customer Name <span className="text-rose-500">*</span></span>
                     {selectedCustomer && <button type="button" onClick={() => setFormData({...formData, customerId: ''})} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 text-[10px]">CHANGE</button>}
                  </label>
@@ -203,7 +203,7 @@ export default function PaymentIn() {
 
               {/* Amount Entry */}
               <div>
-                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Received Amount (₹) <span className="text-rose-500">*</span></label>
+                 <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Received Amount (₹) <span className="text-rose-500">*</span></label>
                  <div className="relative">
                     <input 
                       required 
@@ -227,7 +227,7 @@ export default function PaymentIn() {
 
               {/* Payment Method Tabs */}
               <div>
-                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Payment Mode</label>
+                 <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Payment Mode</label>
                  <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl">
                    {['Cash', 'UPI', 'Bank'].map(method => (
                      <button
@@ -247,7 +247,7 @@ export default function PaymentIn() {
 
               {/* Notes */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Description</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Description</label>
                 <input type="text" value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm transition-all" placeholder="Optional notes... e.g. Bill payment" />
               </div>
 
@@ -277,7 +277,7 @@ export default function PaymentIn() {
                            <ArrowDownRight size={16} strokeWidth={3} />
                         </div>
                         <div className="overflow-hidden pr-2">
-                           <h4 className="font-bold text-slate-800 dark:text-white transition-colors duration-300 text-sm truncate max-w-full max-w-sm sm:max-w-full max-w-sm">
+                           <h4 className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300 text-sm truncate max-w-full max-w-sm sm:max-w-full max-w-sm">
                               {txn.customer_name || customers.find(c => c.id === txn.customer_id)?.name || 'Unknown'}
                            </h4>
                            <p className="text-[10px] font-bold text-slate-400 mt-0.5">{new Date(txn.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</p>

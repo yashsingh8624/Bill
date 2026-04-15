@@ -72,7 +72,7 @@ const LoginForm = () => {
     <div className="relative">
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5 transition-colors duration-300">Email</label>
+          <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5 transition-colors duration-300">Email</label>
           <input
             type="email"
             id="login-email"
@@ -81,11 +81,11 @@ const LoginForm = () => {
             required
             autoComplete="email"
             placeholder="your@email.com"
-            className="w-full px-4 py-3.5 rounded-xl bg-gray-100 dark:bg-slate-700 border-none text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-medium duration-300"
+            className="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-700 border-none text-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-medium duration-300"
           />
         </div>
         <div>
-          <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5 transition-colors duration-300">Password</label>
+          <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5 transition-colors duration-300">Password</label>
           <input
             type="password"
             id="login-password"
@@ -94,7 +94,7 @@ const LoginForm = () => {
             required
             autoComplete="current-password"
             placeholder="Enter your password"
-            className="w-full px-4 py-3.5 rounded-xl bg-gray-100 dark:bg-slate-700 border-none text-black dark:text-white placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-medium duration-300"
+            className="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-700 border-none text-slate-800 dark:text-slate-100 placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-medium duration-300"
           />
         </div>
 
@@ -163,7 +163,7 @@ const SignupForm = () => {
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5 transition-colors duration-300">Full Name *</label>
+        <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5 transition-colors duration-300">Full Name *</label>
         <input
           type="text"
           id="signup-name"
@@ -172,11 +172,11 @@ const SignupForm = () => {
           required
           autoComplete="name"
           placeholder="Your full name"
-          className="w-full px-4 py-3.5 rounded-xl bg-gray-100 dark:bg-slate-700 border-none text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-medium duration-300"
+          className="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-700 border-none text-slate-800 dark:text-slate-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-medium duration-300"
         />
       </div>
       <div>
-        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5 transition-colors duration-300">Email *</label>
+        <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5 transition-colors duration-300">Email *</label>
         <input
           type="email"
           id="signup-email"
@@ -185,11 +185,11 @@ const SignupForm = () => {
           required
           autoComplete="email"
           placeholder="your@email.com"
-          className="w-full px-4 py-3.5 rounded-xl bg-gray-100 dark:bg-slate-700 border-none text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-medium duration-300"
+          className="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-700 border-none text-slate-800 dark:text-slate-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-medium duration-300"
         />
       </div>
       <div>
-        <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5 transition-colors duration-300">Password *</label>
+        <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5 transition-colors duration-300">Password *</label>
         <input
           type="password"
           id="signup-password"
@@ -199,7 +199,7 @@ const SignupForm = () => {
           autoComplete="new-password"
           placeholder="Min 6 characters"
           minLength={6}
-          className="w-full px-4 py-3.5 rounded-xl bg-gray-100 dark:bg-slate-700 border-none text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-medium duration-300"
+          className="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-700 border-none text-slate-800 dark:text-slate-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500/50 transition-all font-medium duration-300"
         />
       </div>
 
@@ -273,12 +273,12 @@ const ForgotPasswordModal = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1 transition-colors duration-300">Reset Password</h3>
+            <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-1 transition-colors duration-300">Reset Password</h3>
             <p className="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">Enter your email and we'll send a reset link.</p>
           </div>
 
           <div>
-            <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-1.5 transition-colors duration-300">Email Address</label>
+            <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5 transition-colors duration-300">Email Address</label>
             <input
               type="email"
               id="forgot-email"
@@ -287,7 +287,7 @@ const ForgotPasswordModal = () => {
               required
               autoComplete="email"
               placeholder="your@email.com"
-              className="w-full px-4 py-3.5 rounded-xl bg-gray-100 dark:bg-slate-700 border-none text-black dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all font-medium duration-300"
+              className="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-slate-700 border-none text-slate-800 dark:text-slate-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all font-medium duration-300"
             />
           </div>
 
@@ -340,7 +340,7 @@ const AuthGate = () => {
       <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors duration-300 flex flex-col items-center justify-center p-6">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-green-500/30 border-t-green-500 rounded-full animate-spin mx-auto mb-6"></div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 transition-colors duration-300">SmartBill Pro</h2>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2 transition-colors duration-300">SmartBill Pro</h2>
           <p className="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">
             {status === 'initializing' ? 'Starting up...' : 'Singing you in...'}
           </p>
@@ -360,7 +360,7 @@ const AuthGate = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <h2 className="text-3xl font-black text-gray-900 dark:text-white mb-1 transition-colors duration-300">SmartBill Pro</h2>
+            <h2 className="text-3xl font-black text-slate-800 dark:text-slate-100 mb-1 transition-colors duration-300">SmartBill Pro</h2>
             <p className="text-gray-500 dark:text-gray-400 text-sm transition-colors duration-300">
               {authMode === 'login' && 'Sign in to your account'}
               {authMode === 'signup' && 'Create a new account'}

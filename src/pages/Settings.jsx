@@ -188,7 +188,7 @@ export default function Settings() {
                     <span className="text-xs font-bold mt-2 uppercase tracking-wider">Upload Logo</span>
                   </div>
                 )}
-                <input type="file" accept="image/png, image/jpeg" onChange={handleLogoUpload} className="absolute inset-0 opacity-0 cursor-pointer" title="Click to upload logo" />
+                <input type="file" accept="image/png, image/jpeg" onChange={handleLogoUpload} className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 absolute inset-0 opacity-0 cursor-pointer" title="Click to upload logo" />
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center font-medium max-w-[180px]">Square PNG/JPG under 1MB. Shows on PDF invoices.</p>
             </div>
@@ -210,7 +210,7 @@ export default function Settings() {
                     <span className="text-xs font-bold mt-2 uppercase tracking-wider">Upload QR</span>
                   </div>
                 )}
-                <input type="file" accept="image/png, image/jpeg" onChange={handleQrUpload} className="absolute inset-0 opacity-0 cursor-pointer" title="Click to upload QR code" />
+                <input type="file" accept="image/png, image/jpeg" onChange={handleQrUpload} className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 absolute inset-0 opacity-0 cursor-pointer" title="Click to upload QR code" />
               </div>
               <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center font-medium max-w-[180px]">Upload your UPI / Payment QR. Prints on PDF bottom.</p>
             </div>
@@ -226,23 +226,23 @@ export default function Settings() {
             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-2">Business Identity</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Business Name *</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Business Name *</label>
                 <input type="text" required value={formData.businessName} onChange={e => setFormData({...formData, businessName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-bold transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Owner / Contact Name *</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Owner / Contact Name *</label>
                 <input type="text" required value={formData.ownerName} onChange={e => setFormData({...formData, ownerName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-bold transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">WhatsApp Number</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">WhatsApp Number</label>
                 <input type="text" placeholder="Include country code" value={formData.ownerPhone} onChange={e => setFormData({...formData, ownerPhone: e.target.value.replace(/\D/g, '')})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-medium transition-all" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">GST Number / Tax ID</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">GST Number / Tax ID</label>
                 <input type="text" value={formData.gstNumber} onChange={e => setFormData({...formData, gstNumber: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-bold uppercase transition-all" placeholder="22AAAAA0000A1Z5" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Business Address (shown on invoice)</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Business Address (shown on invoice)</label>
                 <textarea rows={2} value={formData.businessAddress} onChange={e => setFormData({...formData, businessAddress: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-medium transition-all resize-none" placeholder="Shop No. 12, Market Road, City - 400001" />
               </div>
             </div>
@@ -252,19 +252,19 @@ export default function Settings() {
              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-2">Bank Details <span className="text-xs font-medium text-slate-400">(shown on PDF footer)</span></h3>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Bank Name</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Bank Name</label>
                   <input type="text" value={formData.bankName} onChange={e => setFormData({...formData, bankName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500/50 text-slate-800 dark:text-slate-100 font-medium transition-all" placeholder="State Bank of India" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Account Number</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Account Number</label>
                   <input type="text" value={formData.bankAccount} onChange={e => setFormData({...formData, bankAccount: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500/50 text-slate-800 dark:text-slate-100 font-medium transition-all" placeholder="1234567890" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">IFSC Code</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">IFSC Code</label>
                   <input type="text" value={formData.bankIFSC} onChange={e => setFormData({...formData, bankIFSC: e.target.value.toUpperCase()})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500/50 text-slate-800 dark:text-slate-100 font-bold uppercase transition-all" placeholder="SBIN0000123" />
                 </div>
                 <div className="md:col-span-3">
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Terms &amp; Conditions</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Terms &amp; Conditions</label>
                   <textarea rows={2} value={formData.termsAndConditions} onChange={e => setFormData({...formData, termsAndConditions: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500/50 text-slate-800 dark:text-slate-100 font-medium transition-all resize-none" placeholder="Goods once sold will not be returned..." />
                 </div>
              </div>
@@ -304,7 +304,7 @@ export default function Settings() {
              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-2">Billing & Printing</h3>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Currency Symbol</label>
+                   <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Currency Symbol</label>
                    <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-bold transition-all">
                       <option value="₹">₹ (INR)</option>
                       <option value="$">$ (USD)</option>
@@ -313,7 +313,7 @@ export default function Settings() {
                    </select>
                 </div>
                 <div>
-                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Invoice Number Prefix</label>
+                   <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Invoice Number Prefix</label>
                    <input type="text" value={formData.invoicePrefix} onChange={e => setFormData({...formData, invoicePrefix: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-bold uppercase transition-all" placeholder="INV-" />
                 </div>
              </div>

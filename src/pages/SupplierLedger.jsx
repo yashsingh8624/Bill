@@ -155,7 +155,7 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
             <input 
               type="text" 
               placeholder="Search by name or business..." 
-              className="flex-1 py-2 focus:outline-none bg-transparent text-slate-700 dark:text-slate-100 placeholder:text-slate-400 font-medium"
+              className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 flex-1 py-2 focus:outline-none placeholder: font-medium"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -439,19 +439,19 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
             </div>
             <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Supplier Name</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Supplier Name</label>
                   <input type="text" required value={editForm.name} onChange={(e) => setEditForm({...editForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium" />
                </div>
                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Business / Company</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Business / Company</label>
                   <input type="text" value={editForm.businessName} onChange={(e) => setEditForm({...editForm, businessName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium" />
                </div>
                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Phone Number</label>
                   <input type="text" value={editForm.phone} onChange={(e) => setEditForm({...editForm, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium" />
                </div>
                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Opening Balance</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Opening Balance</label>
                   <div className="relative search-wrapper">
                     <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
                     <input 
@@ -479,26 +479,26 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
             </div>
             <form onSubmit={handleAddSupplier} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Supplier Name</label>
-                <input type="text" required value={supplierForm.name} onChange={(e) => setSupplierForm({...supplierForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-medium text-slate-800 dark:text-white transition-colors duration-300" placeholder="John Doe" />
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Supplier Name</label>
+                <input type="text" required value={supplierForm.name} onChange={(e) => setSupplierForm({...supplierForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-medium text-slate-800 dark:text-slate-100 transition-colors duration-300" placeholder="John Doe" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Business Name</label>
-                <input type="text" value={supplierForm.businessName} onChange={(e) => setSupplierForm({...supplierForm, businessName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-medium text-slate-800 dark:text-white transition-colors duration-300" placeholder="Acme Logistics Ltd." />
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Business Name</label>
+                <input type="text" value={supplierForm.businessName} onChange={(e) => setSupplierForm({...supplierForm, businessName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-medium text-slate-800 dark:text-slate-100 transition-colors duration-300" placeholder="Acme Logistics Ltd." />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Phone Number</label>
-                <input type="text" value={supplierForm.phone} onChange={(e) => setSupplierForm({...supplierForm, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-medium text-slate-800 dark:text-white transition-colors duration-300" placeholder="9876543210" />
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Phone Number</label>
+                <input type="text" value={supplierForm.phone} onChange={(e) => setSupplierForm({...supplierForm, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-medium text-slate-800 dark:text-slate-100 transition-colors duration-300" placeholder="9876543210" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Opening Balance</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Opening Balance</label>
                 <div className="relative search-wrapper">
                   <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
                   <input 
                     type="number" step="0.01" 
                     value={supplierForm.openingBalance} 
                     onChange={(e) => setSupplierForm({...supplierForm, openingBalance: e.target.value})} 
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-bold text-slate-800 dark:text-white transition-colors duration-300 outline-none search-clean" 
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300 outline-none search-clean" 
                     placeholder="0.00" 
                   />
                 </div>
@@ -530,7 +530,7 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
             </div>
             <form onSubmit={handleInvoiceSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Invoice Amount</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Invoice Amount</label>
                 <div className="relative search-wrapper">
                   <IndianRupee size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-600 search-icon" />
                   <input 
@@ -544,16 +544,16 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Inv No</label>
-                  <input type="text" value={invoiceForm.invoiceNo} onChange={(e) => setInvoiceForm({...invoiceForm, invoiceNo: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-amber-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-800 dark:text-white transition-colors duration-300 font-medium" placeholder="#123" />
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Inv No</label>
+                  <input type="text" value={invoiceForm.invoiceNo} onChange={(e) => setInvoiceForm({...invoiceForm, invoiceNo: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-amber-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-800 dark:text-slate-100 transition-colors duration-300 font-medium" placeholder="#123" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Date</label>
-                  <input type="date" required value={invoiceForm.date} onChange={(e) => setInvoiceForm({...invoiceForm, date: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-amber-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-800 dark:text-white transition-colors duration-300 font-medium" />
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Date</label>
+                  <input type="date" required value={invoiceForm.date} onChange={(e) => setInvoiceForm({...invoiceForm, date: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-amber-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-800 dark:text-slate-100 transition-colors duration-300 font-medium" />
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Notes</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Notes</label>
                 <input type="text" value={invoiceForm.note} onChange={(e) => setInvoiceForm({...invoiceForm, note: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-amber-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-700 dark:text-slate-300 transition-colors duration-300 font-medium" placeholder="E.g. Received new stock" />
               </div>
               <div className="pt-4">
@@ -575,13 +575,13 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
             <form onSubmit={handlePaymentSubmit} className="p-6 space-y-4">
               <div className="bg-slate-50 dark:bg-slate-900/50 transition-colors duration-300 border border-slate-200 dark:border-slate-700 transition-colors duration-300 p-4 rounded-xl text-center">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">To Supplier</p>
-                <p className="font-black text-slate-800 dark:text-white transition-colors duration-300 text-xl">{currentSupplier?.name}</p>
+                <p className="font-black text-slate-800 dark:text-slate-100 transition-colors duration-300 text-xl">{currentSupplier?.name}</p>
                 <div className="mt-2 text-sm bg-white dark:bg-slate-800 transition-colors duration-300 border border-slate-100 dark:border-slate-700/50 transition-colors duration-300 inline-block px-3 py-1 rounded-lg">
                    Pending: <span className="font-black text-amber-500">₹{currentSupplierBalance.toFixed(2)}</span>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Amount Sent</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Amount Sent</label>
                 <div className="relative search-wrapper">
                   <IndianRupee size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 search-icon" />
                   <input 
@@ -594,11 +594,11 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Date</label>
-                <input type="date" required value={paymentForm.date} onChange={(e) => setPaymentForm({...paymentForm, date: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-800 dark:text-white transition-colors duration-300 font-medium" />
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Date</label>
+                <input type="date" required value={paymentForm.date} onChange={(e) => setPaymentForm({...paymentForm, date: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-800 dark:text-slate-100 transition-colors duration-300 font-medium" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 mb-1.5">Note</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Note</label>
                 <input type="text" value={paymentForm.note} onChange={(e) => setPaymentForm({...paymentForm, note: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-700 dark:text-slate-300 transition-colors duration-300 font-medium" placeholder="E.g. Bank Transfer Ref 123" />
               </div>
               <div className="pt-2">

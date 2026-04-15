@@ -81,7 +81,7 @@ export default function Expenses() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Expense Name *</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-xs font-black uppercase tracking-widest mb-1.5 ml-1">Expense Name *</label>
                 <input
                   type="text" required
                   value={formData.name}
@@ -91,7 +91,7 @@ export default function Expenses() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Amount (₹) *</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-xs font-black uppercase tracking-widest mb-1.5 ml-1">Amount (₹) *</label>
                 <input
                   type="number" required min="0" step="0.01"
                   value={formData.amount || ''}
@@ -104,7 +104,7 @@ export default function Expenses() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Date</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-xs font-black uppercase tracking-widest mb-1.5 ml-1">Date</label>
                 <input
                   type="date" required
                   value={formData.date}
@@ -113,7 +113,7 @@ export default function Expenses() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Payment Mode</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-xs font-black uppercase tracking-widest mb-1.5 ml-1">Payment Mode</label>
                 <div className="flex gap-2">
                   {['Cash', 'Online'].map(mode => (
                     <button

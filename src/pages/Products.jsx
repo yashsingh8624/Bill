@@ -75,7 +75,7 @@ export default function Products() {
         <input 
           type="text" 
           placeholder="Search items..." 
-          className="search-input flex-1 py-1.5 focus:outline-none text-slate-700 dark:text-slate-100 placeholder:text-slate-400 font-medium bg-transparent pl-0"
+          className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 search-input flex-1 py-1.5 focus:outline-none placeholder: font-medium pl-0"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -182,7 +182,7 @@ export default function Products() {
             </div>
             <form onSubmit={handleProductSubmit} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Item Name *</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Item Name *</label>
                 <input 
                   type="text" required autoFocus
                   value={productForm.name}
@@ -193,7 +193,7 @@ export default function Products() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Purchase Price</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Purchase Price</label>
                   <input 
                     type="number" min="0" step="0.01"
                     value={productForm.purchasePrice}
@@ -203,7 +203,7 @@ export default function Products() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Sale Price *</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Sale Price *</label>
                   <input 
                     type="number" required min="0" step="0.01"
                     value={productForm.sellingPrice}

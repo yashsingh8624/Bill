@@ -177,7 +177,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
             <input 
               type="text" 
               placeholder="Search by name or phone..." 
-              className="flex-1 py-2 focus:outline-none text-slate-700 dark:text-slate-300 transition-colors duration-300 placeholder:text-slate-400 font-medium"
+              className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 flex-1 py-2 focus:outline-none transition-colors duration-300 placeholder: font-medium"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -441,7 +441,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
             </div>
             <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Customer Name</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Customer Name</label>
                   <input 
                     type="text" required
                     value={editForm.name}
@@ -450,7 +450,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                   />
                </div>
                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Phone Number</label>
                   <input 
                     type="text" 
                     value={editForm.phone}
@@ -459,7 +459,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                   />
                </div>
                <div>
-                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Opening Balance</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Opening Balance</label>
                   <div className="relative search-wrapper">
                     <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
                     <input 
@@ -504,7 +504,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
               </div>
               
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Amount Received</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Amount Received</label>
                 <div className="relative search-wrapper">
                   <IndianRupee size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 search-icon" />
                   <input 
@@ -518,7 +518,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Date</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Date</label>
                 <input 
                   type="date" required
                   value={paymentForm.date}
@@ -528,7 +528,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
               </div>
               
               <div>
-                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Note (Optional)</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Note (Optional)</label>
                 <input 
                   type="text" 
                   value={paymentForm.note}

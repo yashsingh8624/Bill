@@ -62,7 +62,7 @@ export default function PaymentOut() {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-1">
           
           <div className="md:col-span-2">
-             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Select Supplier <span className="text-rose-500">*</span></label>
+             <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Select Supplier <span className="text-rose-500">*</span></label>
              {!formData.supplierId ? (
                 <div className="space-y-3">
                    <div className="relative search-wrapper">
@@ -85,7 +85,7 @@ export default function PaymentOut() {
           </div>
 
           <div>
-             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Amount Paid (₹) <span className="text-rose-500">*</span></label>
+             <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Amount Paid (₹) <span className="text-rose-500">*</span></label>
              <div className="relative">
                 <input 
                   required 
@@ -102,12 +102,12 @@ export default function PaymentOut() {
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Date</label>
+            <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Date</label>
             <input type="date" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-rose-500 outline-none font-bold text-slate-700 dark:text-slate-100 transition-all" />
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Notes</label>
+            <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Notes</label>
             <input type="text" value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-rose-500 outline-none font-bold text-slate-700 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all" placeholder="Optional notes..." />
           </div>
 

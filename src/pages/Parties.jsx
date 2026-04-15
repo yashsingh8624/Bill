@@ -87,7 +87,7 @@ export default function Parties() {
         <input 
           type="text" 
           placeholder="Search parties..." 
-          className="search-input flex-1 py-1.5 focus:outline-none text-sm sm:text-base text-slate-700 dark:text-slate-100 placeholder:text-slate-400 font-medium bg-transparent pl-0"
+          className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 search-input flex-1 py-1.5 focus:outline-none text-sm sm:text-base placeholder: font-medium pl-0"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />

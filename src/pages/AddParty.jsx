@@ -89,7 +89,7 @@ export default function AddParty() {
           )}
 
           <div>
-             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">{isCustomer ? 'Customer' : 'Supplier'} Name <span className="text-rose-500">*</span></label>
+             <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">{isCustomer ? 'Customer' : 'Supplier'} Name <span className="text-rose-500">*</span></label>
              <div className="relative search-wrapper">
                 <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
                 <input required autoFocus type="text" value={formData.name || ''} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-bold text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all outline-none search-clean" placeholder={`Enter ${isCustomer ? 'customer' : 'supplier'} name`} />
@@ -98,7 +98,7 @@ export default function AddParty() {
 
           {formData.role === 'supplier' && (
             <div className="animate-in slide-in-from-top-2 duration-300">
-               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Business / Company Name</label>
+               <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Business / Company Name</label>
                <div className="relative">
                   <input type="text" value={formData.businessName || ''} onChange={(e) => setFormData({...formData, businessName: e.target.value})} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-bold text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all outline-none" placeholder="Enter business name" />
                </div>
@@ -106,7 +106,7 @@ export default function AddParty() {
           )}
 
           <div>
-             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Phone Number</label>
+             <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Phone Number</label>
              <div className="relative search-wrapper">
                 <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
                 <input type="text" value={formData.phone || ''} onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/[^0-9+]/g, '')})} className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-bold text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all outline-none search-clean" placeholder="Enter phone number" />
@@ -114,7 +114,7 @@ export default function AddParty() {
           </div>
 
           <div>
-             <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Opening Balance</label>
+             <label className="text-gray-700 dark:text-gray-300 block text-xs font-bold uppercase tracking-wider mb-2">Opening Balance</label>
              <div className="relative search-wrapper">
                 <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
                 <input type="number" step="0.01" value={formData.openingBalance || ''} onChange={(e) => setFormData({...formData, openingBalance: e.target.value})} className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-bold text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all outline-none search-clean" placeholder="0.00" />

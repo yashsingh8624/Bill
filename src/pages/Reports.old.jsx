@@ -92,7 +92,7 @@ export default function Reports() {
     <div className="max-w-6xl mx-auto space-y-6 pb-12 animate-in fade-in duration-500">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-white transition-colors duration-300 tracking-tight">Business Reports</h2>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300 tracking-tight">Business Reports</h2>
           <p className="text-slate-500 dark:text-slate-500 transition-colors duration-300 text-sm mt-1 font-medium italic">"Data is the new oil of the digital economy."</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -112,7 +112,7 @@ export default function Reports() {
             <input 
               type="text" 
               placeholder="Search by customer or invoice..." 
-              className="flex-1 py-1 focus:outline-none text-slate-700 dark:text-slate-300 transition-colors duration-300 placeholder:text-slate-400 font-medium"
+              className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 flex-1 py-1 focus:outline-none transition-colors duration-300 placeholder: font-medium"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -142,7 +142,7 @@ export default function Reports() {
            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
              <ShoppingBag size={12} className="text-indigo-500" /> Total Sales
            </p>
-           <h3 className="text-3xl font-black text-slate-800 dark:text-white transition-colors duration-300">Γé╣{stats.totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+           <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100 transition-colors duration-300">Γé╣{stats.totalSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
            <p className="text-slate-400 text-xs mt-4 font-bold tracking-tight">{stats.totalBills} Bills generated</p>
         </div>
 
@@ -162,7 +162,7 @@ export default function Reports() {
            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
              <AlertCircle size={12} className="text-blue-500" /> Total Collected
            </p>
-           <h3 className="text-3xl font-black text-slate-800 dark:text-white transition-colors duration-300">Γé╣{stats.totalPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+           <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100 transition-colors duration-300">Γé╣{stats.totalPaid.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
            <p className="text-slate-400 text-xs mt-4 font-bold">Successfully received</p>
         </div>
 
@@ -171,7 +171,7 @@ export default function Reports() {
            <p className="text-red-500 text-[10px] font-black uppercase tracking-widest mb-1.5 flex items-center gap-1.5">
              <AlertCircle size={12} /> Market Credit
            </p>
-           <h3 className={`text-3xl font-black ${stats.totalOutstanding > 0 ? 'text-red-500' : 'text-slate-800 dark:text-white transition-colors duration-300'}`}>
+           <h3 className={`text-3xl font-black ${stats.totalOutstanding > 0 ? 'text-red-500' : 'text-slate-800 dark:text-slate-100 transition-colors duration-300'}`}>
              Γé╣{stats.totalOutstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
            </h3>
            <p className="text-red-400 text-xs mt-4 font-bold">Pending accounts recovery</p>
@@ -180,7 +180,7 @@ export default function Reports() {
 
       <div className="bg-white dark:bg-slate-800 transition-colors duration-300 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 transition-colors duration-300 overflow-hidden">
         <div className="p-6 border-b border-slate-50 bg-slate-50/50 flex justify-between items-center px-8">
-           <h3 className="font-black text-slate-800 dark:text-white transition-colors duration-300 uppercase tracking-widest text-xs flex items-center gap-2">
+           <h3 className="font-black text-slate-800 dark:text-slate-100 transition-colors duration-300 uppercase tracking-widest text-xs flex items-center gap-2">
              <FileText size={16} className="text-indigo-600" /> Transactional Ledger
            </h3>
            <span className="text-[10px] font-black bg-white dark:bg-slate-800 transition-colors duration-300 border border-slate-200 dark:border-slate-700 transition-colors duration-300 px-3 py-1 rounded-full text-slate-400 tracking-wider">
@@ -215,7 +215,7 @@ export default function Reports() {
                                <FileText size={18} />
                             </div>
                             <div>
-                               <p className="font-black text-slate-800 dark:text-white transition-colors duration-300 text-sm">#{bill.invoiceNo}</p>
+                               <p className="font-black text-slate-800 dark:text-slate-100 transition-colors duration-300 text-sm">#{bill.invoiceNo}</p>
                                <p className="text-[10px] text-slate-400 font-bold tracking-wider">{bill.readableDate || new Date(bill.date).toLocaleDateString()}</p>
                             </div>
                          </div>
@@ -225,7 +225,7 @@ export default function Reports() {
                          <p className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">{bill.paymentMode} Payment</p>
                       </td>
                       <td className="py-5 px-6 text-right">
-                         <p className="font-black text-slate-800 dark:text-white transition-colors duration-300 text-sm">Γé╣{bill.amountPaid.toFixed(2)}</p>
+                         <p className="font-black text-slate-800 dark:text-slate-100 transition-colors duration-300 text-sm">Γé╣{bill.amountPaid.toFixed(2)}</p>
                          <p className={`text-[10px] font-black uppercase tracking-tighter ${bill.outstanding > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
                             {bill.outstanding > 0 ? `- Γé╣${bill.outstanding.toFixed(2)} Pending` : 'Fully Paid'}
                          </p>

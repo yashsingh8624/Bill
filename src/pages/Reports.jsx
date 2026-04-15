@@ -169,7 +169,7 @@ export default function Reports() {
             <input 
               type="text" 
               placeholder="Search by customer or invoice..." 
-              className="flex-1 py-1 focus:outline-none bg-transparent text-slate-700 dark:text-slate-100 placeholder:text-slate-400 font-medium"
+              className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 flex-1 py-1 focus:outline-none placeholder: font-medium"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />

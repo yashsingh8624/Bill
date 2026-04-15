@@ -112,7 +112,7 @@ export default function Reports() {
             <input 
               type="text" 
               placeholder="Search by customer or invoice..." 
-              className="flex-1 py-1 focus:outline-none text-slate-700 dark:text-slate-100 placeholder:text-slate-400 font-medium bg-transparent"
+              className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 flex-1 py-1 focus:outline-none placeholder: font-medium"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -231,7 +231,7 @@ export default function Reports() {
                          </p>
                       </td>
                       <td className="py-5 px-8 text-right">
-                         <p className="font-black text-slate-900 dark:text-white text-lg tracking-tight">₹{(bill.grandTotal || bill.total || 0).toFixed(2)}</p>
+                         <p className="font-black text-slate-800 dark:text-slate-100 text-lg tracking-tight">₹{(bill.grandTotal || bill.total || 0).toFixed(2)}</p>
                          <div className="flex justify-end mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <ChevronRight size={14} className="text-indigo-400 translate-x-1" />
                          </div>

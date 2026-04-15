@@ -286,7 +286,7 @@ export default function NewBill() {
               type="date" 
               readOnly
               value={date} 
-              className="border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 shadow-inner select-none outline-none" 
+              className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm font-medium shadow-inner select-none outline-none" 
               title="System Date" 
             />
           </div>
@@ -330,7 +330,7 @@ export default function NewBill() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Customer Name *</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-medium mb-1">Customer Name *</label>
                 <div className="relative search-wrapper">
                   <SearchIcon size={18} className="search-icon absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
@@ -373,7 +373,7 @@ export default function NewBill() {
                 })()}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Phone Number</label>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-medium mb-1">Phone Number</label>
                 <input
                   type="text"
                   value={customerPhone || ''}
@@ -401,7 +401,7 @@ export default function NewBill() {
               {/* Row 1: Name */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-12">
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Item Name *</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-xs font-semibold mb-1">Item Name *</label>
                 <div className="relative search-wrapper">
                     <SearchIcon size={16} className="search-icon absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
@@ -410,7 +410,7 @@ export default function NewBill() {
                       type="text" required
                       value={itemForm.name}
                       onChange={handleItemNameChange}
-                      className="search-clean w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 text-sm bg-white dark:bg-slate-900/50 text-slate-800 dark:text-slate-100"
+                      className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 search-clean w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 text-sm /50"
                       placeholder="Type to search..."
                       autoComplete="off"
                     />
@@ -421,7 +421,7 @@ export default function NewBill() {
               {/* Row 2: Rate, Qty, GST%, Discount, Add */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3 items-end">
                 <div className="md:col-span-3">
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Rate (₹) *</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-xs font-semibold mb-1">Rate (₹) *</label>
                   <input
                     type="number" required min="0" step="0.01"
                     value={itemForm.rate || ''}
@@ -432,7 +432,7 @@ export default function NewBill() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Qty *</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-xs font-semibold mb-1">Qty *</label>
                   <input
                     type="number" required min="1"
                     value={itemForm.qty}
@@ -443,7 +443,7 @@ export default function NewBill() {
                 </div>
                 {userSettings?.uiMode === 'advanced' && (
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">GST %</label>
+                    <label className="text-gray-700 dark:text-gray-300 block text-xs font-semibold mb-1">GST %</label>
                     <select
                       value={itemForm.gstRate}
                       onChange={e => setItemForm(p => ({ ...p, gstRate: e.target.value }))}
@@ -454,7 +454,7 @@ export default function NewBill() {
                   </div>
                 )}
                 <div className={userSettings?.uiMode === 'advanced' ? "md:col-span-2" : "md:col-span-4"}>
-                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Discount %</label>
+                  <label className="text-gray-700 dark:text-gray-300 block text-xs font-semibold mb-1">Discount %</label>
                   <input
                     type="number" min="0" max="100" step="0.1"
                     value={itemForm.discount || ''}
@@ -556,7 +556,7 @@ export default function NewBill() {
               <div className="flex justify-between items-center text-sm">
                 <span className="text-slate-600 dark:text-slate-400 font-medium">Received (₹)</span>
                 {paymentMode === 'Credit' ? (
-                  <input type="number" value={0} readOnly className="w-24 px-2 py-1 text-right bg-transparent text-slate-800 dark:text-slate-100 font-bold" />
+                  <input type="number" value={0} readOnly className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 w-24 px-2 py-1 text-right font-bold" />
                 ) : (
                   <input
                     type="number" min="0" step="0.01"

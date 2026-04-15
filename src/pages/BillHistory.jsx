@@ -104,7 +104,7 @@ export default function BillHistory() {
           <input 
             type="text" 
             placeholder="Search by customer or invoice..." 
-            className="flex-1 py-1 focus:outline-none text-slate-700 dark:text-slate-100 placeholder:text-slate-400 font-medium bg-transparent shadow-none px-0 rounded-none border-none focus:ring-0"
+            className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 flex-1 py-1 focus:outline-none placeholder: font-medium shadow-none px-0 rounded-none border-none focus:ring-0"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -147,7 +147,7 @@ export default function BillHistory() {
                {(!searchTerm && dateFilter === 'ALL' && filteredBills.length > 5) && (
                  <div className="bg-white dark:bg-slate-800 rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 dark:border-slate-600 min-w-0">
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
-                       <h3 className="font-bold text-slate-800 dark:text-white transition-colors duration-300">Recent Bills</h3>
+                       <h3 className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300">Recent Bills</h3>
                     </div>
                      <>
                         {/* Desktop Table View */}
@@ -169,12 +169,12 @@ export default function BillHistory() {
                                 <tr key={bill?.id || Math.random()} className="hover:bg-indigo-50/30 dark:hover:bg-slate-700/50 transition-colors group">
                                   <td className="py-4 px-6 font-bold text-slate-700 dark:text-slate-300">#{bill?.invoiceNo || (bill?.id && String(bill.id).slice(-4)) || '????'}</td>
                                   <td className="py-4 px-6">
-                                     <p className="text-slate-800 dark:text-white transition-colors duration-300 font-bold">{bill.customerName || 'Unnamed Customer'}</p>
+                                     <p className="text-slate-800 dark:text-slate-100 transition-colors duration-300 font-bold">{bill.customerName || 'Unnamed Customer'}</p>
                                   </td>
                                   <td className="py-4 px-6 text-slate-500 dark:text-slate-500 transition-colors duration-300 text-sm font-medium">
                                     {bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}
                                   </td>
-                                  <td className="py-4 px-6 text-slate-800 dark:text-white transition-colors duration-300 font-black text-right">
+                                  <td className="py-4 px-6 text-slate-800 dark:text-slate-100 transition-colors duration-300 font-black text-right">
                                     ₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}
                                   </td>
                                   <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{parseFloat(bill?.amountPaid || bill?.paidAmount || 0).toFixed(2)}</td>
@@ -206,10 +206,10 @@ export default function BillHistory() {
                                     </span>
                                     <span className="text-[10px] font-bold text-slate-400">{bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}</span>
                                   </div>
-                                  <p className="font-bold text-slate-800 dark:text-white transition-colors duration-300 text-sm truncate max-w-full max-w-sm">{bill.customerName || 'Unnamed Customer'}</p>
+                                  <p className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300 text-sm truncate max-w-full max-w-sm">{bill.customerName || 'Unnamed Customer'}</p>
                                 </div>
                                 <div className="text-right">
-                                  <p className="font-black text-slate-800 dark:text-white transition-colors duration-300 text-lg leading-tight tracking-tight">₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}</p>
+                                  <p className="font-black text-slate-800 dark:text-slate-100 transition-colors duration-300 text-lg leading-tight tracking-tight">₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}</p>
                                 </div>
                               </div>
                               <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 transition-colors duration-300 p-2.5 rounded-lg border border-slate-100 dark:border-slate-700/50 transition-colors duration-300/50">
@@ -233,7 +233,7 @@ export default function BillHistory() {
                 <div className="bg-white dark:bg-slate-800 transition-colors duration-300 rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100 dark:border-slate-700/50 transition-colors duration-300/50 min-w-0">
                   {(!searchTerm && dateFilter === 'ALL' && filteredBills.length > 5) && (
                     <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 transition-colors duration-300 bg-slate-50/50 flex justify-between items-center">
-                       <h3 className="font-bold text-slate-800 dark:text-white transition-colors duration-300">All Bills</h3>
+                       <h3 className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300">All Bills</h3>
                     </div>
                   )}
                   <>
@@ -256,12 +256,12 @@ export default function BillHistory() {
                              <tr key={bill?.id || Math.random()} className="hover:bg-indigo-50/30 transition-colors group">
                                <td className="py-4 px-6 font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300">#{bill?.invoiceNo || (bill?.id && String(bill.id).slice(-4)) || '????'}</td>
                                <td className="py-4 px-6">
-                                  <p className="text-slate-800 dark:text-white transition-colors duration-300 font-bold">{bill.customerName || 'Unnamed Customer'}</p>
+                                  <p className="text-slate-800 dark:text-slate-100 transition-colors duration-300 font-bold">{bill.customerName || 'Unnamed Customer'}</p>
                                </td>
                                <td className="py-4 px-6 text-slate-500 dark:text-slate-500 transition-colors duration-300 text-sm font-medium">
                                  {bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}
                                </td>
-                               <td className="py-4 px-6 text-slate-800 dark:text-white transition-colors duration-300 font-black text-right">
+                               <td className="py-4 px-6 text-slate-800 dark:text-slate-100 transition-colors duration-300 font-black text-right">
                                  ₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}
                                </td>
                                <td className="py-4 px-6 text-emerald-600 font-black text-right">₹{parseFloat(bill?.amountPaid || bill?.paidAmount || 0).toFixed(2)}</td>
@@ -293,10 +293,10 @@ export default function BillHistory() {
                                  </span>
                                  <span className="text-[10px] font-bold text-slate-400">{bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A')}</span>
                                </div>
-                               <p className="font-bold text-slate-800 dark:text-white transition-colors duration-300 text-sm truncate max-w-full max-w-sm">{bill.customerName || 'Unnamed Customer'}</p>
+                               <p className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300 text-sm truncate max-w-full max-w-sm">{bill.customerName || 'Unnamed Customer'}</p>
                              </div>
                              <div className="text-right">
-                               <p className="font-black text-slate-800 dark:text-white transition-colors duration-300 text-lg leading-tight tracking-tight">₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}</p>
+                               <p className="font-black text-slate-800 dark:text-slate-100 transition-colors duration-300 text-lg leading-tight tracking-tight">₹{parseFloat(bill?.grandTotal || bill?.total || 0).toFixed(2)}</p>
                              </div>
                            </div>
                            <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 transition-colors duration-300 p-2.5 rounded-lg border border-slate-100 dark:border-slate-700/50 transition-colors duration-300/50">
@@ -326,7 +326,7 @@ export default function BillHistory() {
           <div className="bg-white dark:bg-slate-800 transition-colors duration-300 rounded-[24px] shadow-[0_10px_40px_rgba(0,0,0,0.08)] w-full max-w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] border border-slate-100 dark:border-slate-700/50 transition-colors duration-300/80">
             <div className="px-6 py-5 border-b border-slate-100 dark:border-slate-700/50 transition-colors duration-300 flex justify-between items-center bg-white dark:bg-slate-800 transition-colors duration-300 flex-shrink-0 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-bl-full pointer-events-none"></div>
-              <h3 className="text-xl font-bold text-slate-800 dark:text-white transition-colors duration-300 flex items-center gap-3 relative z-10">
+              <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300 flex items-center gap-3 relative z-10">
                 <div className="bg-gradient-to-br from-indigo-500 to-purple-600 text-white p-2 rounded-[10px] shadow-[0_4px_12px_rgba(99,102,241,0.3)]">
                   <FileText size={20} />
                 </div>
@@ -341,12 +341,12 @@ export default function BillHistory() {
               <div className="flex justify-between items-start mb-8 pb-6 border-b border-slate-100 dark:border-slate-700/50 transition-colors duration-300 shadow-sm rounded-b-xl p-4 bg-slate-50/50">
                 <div>
                   <p className="text-[10px] text-slate-400 font-black mb-1 tracking-widest uppercase">Bill To</p>
-                  <p className="font-black text-slate-800 dark:text-white transition-colors duration-300 text-xl uppercase">{selectedBill.customerName}</p>
+                  <p className="font-black text-slate-800 dark:text-slate-100 transition-colors duration-300 text-xl uppercase">{selectedBill.customerName}</p>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-500 transition-colors duration-300 mt-1">{selectedBill.customerPhone}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] text-slate-400 font-black mb-1 tracking-widest uppercase">Invoice Info</p>
-                  <p className="font-bold text-slate-800 dark:text-white transition-colors duration-300">#{selectedBill.invoiceNo}</p>
+                  <p className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300">#{selectedBill.invoiceNo}</p>
                   <p className="text-sm font-medium text-slate-500 dark:text-slate-500 transition-colors duration-300 mt-1">{selectedBill.readableDate || new Date(selectedBill.date).toLocaleDateString()}</p>
                 </div>
               </div>
@@ -359,7 +359,7 @@ export default function BillHistory() {
                 {(selectedBill?.items || []).map((item, idx) => (
                   <div key={idx} className="bg-white dark:bg-slate-800 transition-colors duration-300 p-4 rounded-[16px] shadow-[0_2px_10px_rgba(0,0,0,0.02)] border border-slate-100 dark:border-slate-700/50 transition-colors duration-300 flex items-center justify-between transition-all hover:border-indigo-100 hover:shadow-md animate-in slide-in-from-bottom-2 duration-300">
                     <div>
-                      <h4 className="font-bold text-slate-800 dark:text-white transition-colors duration-300 text-[15px] leading-tight uppercase tracking-tight">{item?.name || 'Unknown Item'}</h4>
+                      <h4 className="font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300 text-[15px] leading-tight uppercase tracking-tight">{item?.name || 'Unknown Item'}</h4>
                       <div className="mt-2 flex flex-wrap items-center gap-2">
                         <span className="text-slate-600 dark:text-slate-400 transition-colors duration-300 font-semibold text-xs bg-slate-100 px-2.5 py-1 rounded-[8px]">
                           {item?.quantity || 0} × ₹{parseFloat(item?.rate || item?.price || ((item?.amount || 0) / (item?.quantity || 1)) || 0).toFixed(2)}
@@ -367,7 +367,7 @@ export default function BillHistory() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className="font-black text-slate-800 dark:text-white transition-colors duration-300 text-lg block leading-none">₹{parseFloat(item?.amount || 0).toFixed(2)}</span>
+                      <span className="font-black text-slate-800 dark:text-slate-100 transition-colors duration-300 text-lg block leading-none">₹{parseFloat(item?.amount || 0).toFixed(2)}</span>
                     </div>
                   </div>
                 ))}

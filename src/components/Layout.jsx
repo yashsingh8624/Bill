@@ -96,7 +96,7 @@ export default function Layout() {
                     className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all font-bold group ${
                       isActive 
                         ? 'bg-green-600 text-white shadow-md shadow-green-600/20' 
-                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:text-white transition-colors duration-300 dark:hover:text-white'
+                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-800 dark:text-slate-100 transition-colors duration-300 dark:hover:text-white'
                     }`}
                   >
                     <Icon size={20} className={`${isActive ? 'text-green-100' : 'text-slate-400 dark:text-slate-500 dark:text-slate-500 transition-colors duration-300 group-hover:text-green-600 dark:group-hover:text-green-400'} transition-colors`} />
@@ -118,7 +118,7 @@ export default function Layout() {
                 <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 flex items-center justify-center font-bold text-xs">{(user.name || 'U')[0]}</div>
               )}
               <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-bold text-slate-800 dark:text-white truncate transition-colors duration-300">{user.name || 'User'}</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate transition-colors duration-300">{user.name || 'User'}</p>
                 <p className="text-[10px] text-slate-400 font-medium truncate transition-colors duration-300">{user.email}</p>
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function Layout() {
                       <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/50 text-green-600 dark:text-green-400 flex items-center justify-center font-bold text-xs">{(user.name || 'U')[0]}</div>
                     )}
                     <div className="flex-1 overflow-hidden">
-                      <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{user.name || 'User'}</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{user.name || 'User'}</p>
                       <p className="text-[10px] text-slate-400 font-medium truncate">{user.email}</p>
                     </div>
                   </div>

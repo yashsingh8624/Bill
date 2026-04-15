@@ -454,7 +454,7 @@ export default function Dashboard() {
                 {lowStockProducts.map(product => (
                   <div key={product.id} className="p-4 flex items-center justify-between bg-white dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600 rounded-2xl hover:bg-red-50/30 dark:hover:bg-red-900/20 hover:border-red-100 dark:hover:border-red-800/50 transition-all group">
                     <div>
-                      <p className="font-black text-slate-800 dark:text-white text-sm uppercase tracking-tight transition-colors duration-300">{product.name}</p>
+                      <p className="font-black text-slate-800 dark:text-slate-100 text-sm uppercase tracking-tight transition-colors duration-300">{product.name}</p>
                       <p className="text-[10px] text-slate-400 dark:text-slate-400 font-bold tracking-widest uppercase mt-0.5 transition-colors duration-300">Threshold: {product.lowStockThreshold || 5}</p>
                     </div>
                     <div className="text-right">

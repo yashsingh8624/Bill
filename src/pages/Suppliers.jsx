@@ -75,7 +75,7 @@ export default function Suppliers() {
         <input 
           type="text" 
           placeholder="Search suppliers by name or business..." 
-          className="search-input flex-1 py-1.5 focus:outline-none text-sm sm:text-base text-slate-700 dark:text-slate-100 transition-colors duration-300 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 dark:text-slate-500 transition-colors duration-300 font-bold bg-transparent pl-0"
+          className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 search-input flex-1 py-1.5 focus:outline-none text-sm sm:text-base transition-colors duration-300 dark:text-white placeholder: dark:placeholder: transition-colors duration-300 font-bold pl-0"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -88,7 +88,7 @@ export default function Suppliers() {
               <div className="bg-slate-50 dark:bg-slate-900/50 p-8 rounded-full mb-4 text-slate-300 dark:text-slate-600 dark:text-slate-400 transition-colors duration-300 border border-slate-100 dark:border-slate-700/50 transition-colors duration-300 dark:border-slate-800">
                 <Truck size={64} strokeWidth={1.5} />
               </div>
-              <p className="font-black text-slate-800 dark:text-white text-2xl transition-colors duration-300">No suppliers available</p>
+              <p className="font-black text-slate-800 dark:text-slate-100 text-2xl transition-colors duration-300">No suppliers available</p>
               <p className="text-sm mt-2 font-bold text-slate-400 dark:text-slate-500 dark:text-slate-500 transition-colors duration-300 max-w-xs transition-colors duration-300">Add your first supplier to manage purchases and track payments.</p>
             </div>
           ) : (
@@ -113,7 +113,7 @@ export default function Suppliers() {
                            {(supplier.displayName || '??').substring(0,2)}
                         </div>
                         <div className="min-w-0">
-                           <p className="font-black text-slate-800 dark:text-white text-sm sm:text-[16px] truncate transition-colors duration-300">{supplier.displayName}</p>
+                           <p className="font-black text-slate-800 dark:text-slate-100 text-sm sm:text-[16px] truncate transition-colors duration-300">{supplier.displayName}</p>
                            <p className="text-[10px] sm:text-xs font-bold text-slate-400 dark:text-slate-500 dark:text-slate-500 transition-colors duration-300 mt-0.5 sm:mt-1 flex items-center gap-1.5 truncate transition-colors duration-300">
                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0"></span>
                              {supplier.displayPhone || 'No Phone Number'}
@@ -122,7 +122,7 @@ export default function Suppliers() {
                      </td>
                      <td className="py-4 px-4 sm:py-5 sm:px-8 text-right">
                         <div className="flex flex-col items-end gap-1 sm:gap-1.5">
-                           <span className="font-black text-[15px] sm:text-[17px] text-slate-800 dark:text-white whitespace-nowrap transition-colors duration-300">{supplier.amountText}</span>
+                           <span className="font-black text-[15px] sm:text-[17px] text-slate-800 dark:text-slate-100 whitespace-nowrap transition-colors duration-300">{supplier.amountText}</span>
                            {supplier.balance > 0 ? (
                              <span className="text-[9px] sm:text-[10px] uppercase font-black tracking-widest px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-lg shadow-sm bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-400 border border-rose-200/50 dark:border-rose-800/50 whitespace-nowrap transition-colors duration-300">
                                You'll Give
