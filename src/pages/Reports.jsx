@@ -132,7 +132,10 @@ export default function Reports() {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sales Report");
-    XLSX.writeFile(wb, `Sales_Report_${timeFilter}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    const wbOut = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbOut], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   };
 
   return (
@@ -155,7 +158,7 @@ export default function Reports() {
              disabled={filteredBills.length === 0}
              className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl transition-all font-bold flex items-center gap-2 shadow-lg shadow-emerald-600/20 text-sm"
            >
-             <FileSpreadsheet size={16} /> Download Excel
+             <FileSpreadsheet size={16} /> Export Excel
            </button>
         </div>
       </div>

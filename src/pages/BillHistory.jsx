@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useBills } from '../context/BillContext';
 import { useCustomers } from '../context/PartiesContext';
-import { FileText, Search, Eye, X, ArrowUpRight, Filter, FileSpreadsheet, Calendar, Download, MessageCircle } from 'lucide-react';
+import { FileText, Search, Eye, X, ArrowUpRight, Filter, FileSpreadsheet, Calendar, ExternalLink, Share2, MessageCircle } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import { useToast } from '../context/ToastContext';
 import { useSettings } from '../context/SettingsContext';
@@ -76,7 +76,10 @@ export default function BillHistory() {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Bills");
-    XLSX.writeFile(wb, `Bills_Export_${dateFilter}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    const wbOut = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbOut], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   };
 
   return (
@@ -443,8 +446,16 @@ export default function BillHistory() {
                         const calculatedPrevBalance = calculateCustomerBalance(filteredLedger, custId, (customers || []).find(c => c.id === custId));
                         const pdfPayload = { ...selectedBill, prevBalanceIncluded: calculatedPrevBalance };
                         const { doc, fileName } = await generateInvoicePDF(pdfPayload, userSettings);
-                        doc.save(fileName);
-                        showToast('Invoice PDF Downloaded', 'success');
+                        const blob = doc.output('blob');
+                        const url = URL.createObjectURL(blob);
+                        window.open(url, '_blank');
+                        if (navigator.share) {
+                          try {
+                            const file = new File([blob], fileName, { type: 'application/pdf' });
+                            await navigator.share({ title: 'Invoice', files: [file] });
+                          } catch (shareErr) { /* user cancelled share */ }
+                        }
+                        showToast('Invoice PDF opened for preview', 'success');
                       } catch (err) {
                         console.error('PDF manual generate failed:', err);
                         showToast('Failed to generate PDF', 'error');
@@ -452,7 +463,7 @@ export default function BillHistory() {
                     }} 
                     className="px-4 py-2.5 bg-white dark:bg-slate-800 transition-colors duration-300 border border-slate-200 dark:border-slate-700 transition-colors duration-300 hover:border-purple-300 hover:bg-purple-50 text-purple-700 font-bold rounded-[12px] transition-all shadow-sm flex items-center gap-1.5 text-sm"
                   >
-                    <Download size={16} /> Download
+                    <ExternalLink size={16} /> Preview
                   </button>
                  <button onClick={() => setSelectedBill(null)} className="px-4 py-2.5 bg-gradient-to-r from-slate-800 to-slate-900 hover:from-slate-700 hover:to-slate-800 text-white font-bold rounded-[12px] transition-all shadow-sm text-sm ml-auto">
                    Close

@@ -4,7 +4,7 @@ import { useBills } from '../context/BillContext';
 import { useTransactions } from '../context/TransactionContext';
 import { useSettings } from '../context/SettingsContext';
 import { useToast } from '../context/ToastContext';
-import { Users, Search, IndianRupee, MessageCircle, ChevronRight, Plus, X, Receipt, Edit2, Trash2, Download } from 'lucide-react';
+import { Users, Search, IndianRupee, MessageCircle, ChevronRight, Plus, X, Receipt, Edit2, Trash2, ExternalLink, Share2 } from 'lucide-react';
 import { getFilteredLedger, calculateCustomerBalance } from '../utils/ledger';
 import { generateLedgerPDF } from '../utils/ledgerPdfGenerator';
 
@@ -140,13 +140,21 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
-  const handleDownloadLedger = () => {
+  const handleDownloadLedger = async () => {
     if (!currentCustomer) return;
     const totals = getCustomerTotals(currentCustomer);
     try {
       const { doc, fileName } = generateLedgerPDF(currentCustomer, ledgerEntries, totals, userSettings);
-      doc.save(fileName);
-      showToast('Ledger PDF downloaded', 'success');
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      if (navigator.share) {
+        try {
+          const file = new File([blob], fileName, { type: 'application/pdf' });
+          await navigator.share({ title: 'Ledger - ' + currentCustomer.name, files: [file] });
+        } catch (shareErr) { /* user cancelled share */ }
+      }
+      showToast('Ledger PDF opened for preview', 'success');
     } catch (e) {
       console.error(e);
       showToast('Failed to generate PDF', 'error');
@@ -264,8 +272,8 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                   onClick={handleDownloadLedger}
                   className="bg-slate-100 text-slate-700 dark:text-slate-300 dark:bg-slate-700/50 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-1.5 shadow-sm text-sm"
                 >
-                  <Download size={16} />
-                  <span className="hidden sm:inline">Download</span> PDF
+                  <ExternalLink size={16} />
+                  <span className="hidden sm:inline">Preview</span> PDF
                 </button>
                 <button 
                   onClick={openPaymentModal}

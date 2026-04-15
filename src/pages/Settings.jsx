@@ -125,7 +125,10 @@ export default function Settings() {
     const billsWs = XLSX.utils.json_to_sheet(billsData);
     XLSX.utils.book_append_sheet(wb, billsWs, "Bills");
 
-    XLSX.writeFile(wb, `${formData.businessName.replace(/\s+/g, '_')}_Master_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+    const wbOut = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbOut], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
   };
 
   const handleRestore = (e) => {

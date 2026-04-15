@@ -4,7 +4,7 @@ import { useInventory } from '../context/InventoryContext';
 import { useCustomers } from '../context/PartiesContext';
 import { useSettings } from '../context/SettingsContext';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Trash2, Save, Download, RefreshCw, Tag, MessageCircle, ArrowUpRight, X, FileText, Search as SearchIcon } from 'lucide-react';
+import { Plus, Trash2, Save, ExternalLink, Share2, RefreshCw, Tag, MessageCircle, ArrowUpRight, X, FileText, Search as SearchIcon } from 'lucide-react';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
 import { useToast } from '../context/ToastContext';
 import { calculateCustomerBalance } from '../utils/ledger';
@@ -252,8 +252,16 @@ export default function NewBill() {
         prevBalanceIncluded: calculatedPrevBalance,
         paymentMode, amountPaid, outstanding,
       }, userSettings);
-      doc.save(fileName);
-      showToast('Invoice PDF Downloaded', 'success');
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+      if (navigator.share) {
+        try {
+          const file = new File([blob], fileName, { type: 'application/pdf' });
+          await navigator.share({ title: 'Invoice ' + invoiceNo, files: [file] });
+        } catch (shareErr) { /* user cancelled share */ }
+      }
+      showToast('Invoice PDF opened for preview', 'success');
     } catch (err) {
       console.error('PDF manual generate failed:', err);
       showToast('Failed to generate PDF', 'error');
@@ -289,7 +297,7 @@ export default function NewBill() {
             disabled={items.length === 0}
             className="px-4 py-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 rounded-xl font-bold flex items-center gap-2 shadow-sm transition-all disabled:opacity-50"
           >
-            <Download size={18} /> Download Invoice
+            <ExternalLink size={18} /> Preview Invoice
           </button>
         </div>
       </div>
