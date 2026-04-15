@@ -109,18 +109,18 @@ export default function PaymentIn() {
   };
 
   return (
-    <div className="page-animate w-full px-4 sm:px-0 max-w-2xl mx-auto pb-24 space-y-6 flex flex-col pt-2 sm:pt-4">
+    <div className="page-animate w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 space-y-6 flex flex-col min-w-0 pt-2 sm:pt-4">
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-500 dark:text-slate-400 transition-colors">
              <ArrowLeft size={24} />
           </button>
           <div>
-            <h1 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+            <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
                Payment In <span className="bg-emerald-100 text-emerald-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">Collection</span>
             </h1>
-            <p className="text-sm font-bold text-slate-500">Record money received from customers</p>
+            <p className="text-sm font-bold text-slate-500 dark:text-slate-400">Record money received from customers</p>
           </div>
         </div>
       </div>
@@ -129,42 +129,42 @@ export default function PaymentIn() {
         
         {/* FORM SECTION */}
         <div className="md:col-span-3 space-y-4">
-          <div className="card p-5 sm:p-6 shadow-sm border-emerald-100">
+          <div className="card p-5 sm:p-6 shadow-sm border border-slate-100 dark:border-slate-600 bg-white dark:bg-slate-800">
             <form onSubmit={handleSubmit} className="space-y-6">
               
               {/* Receipt & Date Row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                    <div>
-                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Receipt No</label>
+                    <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Receipt No</label>
                     <div className="relative">
-                      <input type="text" value={formData.receiptNo || ''} onChange={(e) => setFormData({...formData, receiptNo: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500 outline-none font-bold text-slate-700 text-sm" placeholder="Enter receipt no" />
+                      <input type="text" value={formData.receiptNo || ''} onChange={(e) => setFormData({...formData, receiptNo: e.target.value})} className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-100 text-sm transition-all" placeholder="Enter receipt no" />
                     </div>
                   </div>
                  <div>
-                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Date</label>
-                   <input type="date" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500 outline-none font-bold text-slate-700 text-sm" />
+                   <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Date</label>
+                   <input type="date" value={formData.date} onChange={(e) => setFormData({...formData, date: e.target.value})} className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-100 text-sm transition-all" />
                  </div>
               </div>
 
               {/* Customer Search & Preview */}
               <div>
-                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
                     <span>Customer Name <span className="text-rose-500">*</span></span>
-                    {selectedCustomer && <button type="button" onClick={() => setFormData({...formData, customerId: ''})} className="text-emerald-600 hover:text-emerald-700 text-[10px]">CHANGE</button>}
+                    {selectedCustomer && <button type="button" onClick={() => setFormData({...formData, customerId: ''})} className="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 text-[10px]">CHANGE</button>}
                  </label>
                  
                  {!selectedCustomer ? (
                      <div className="space-y-2 relative">
                         <div className="relative search-wrapper">
                            <SearchIcon size={18} className="search-icon absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                           <input type="text" value={formData.customerSearch} onChange={(e) => setFormData({...formData, customerSearch: e.target.value})} className="search-clean w-full pl-11 pr-4 py-3.5 bg-white border-2 border-emerald-100 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none font-black text-slate-800 shadow-sm transition-all" placeholder="Search customer by name..." autoComplete="off" />
+                           <input type="text" value={formData.customerSearch} onChange={(e) => setFormData({...formData, customerSearch: e.target.value})} className="search-clean w-full pl-11 pr-4 py-3.5 bg-white dark:bg-slate-800 border-2 border-emerald-100 dark:border-emerald-800/50 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 outline-none font-black text-slate-800 dark:text-slate-100 shadow-sm transition-all" placeholder="Search customer by name..." autoComplete="off" />
                         </div>
                         
                         {formData.customerSearch && (
-                          <div className="max-h-52 overflow-y-auto custom-scrollbar border border-slate-200 rounded-xl bg-white shadow-xl absolute left-0 right-0 top-full mt-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+                          <div className="max-h-52 overflow-y-auto custom-scrollbar border border-slate-200 dark:border-slate-600 rounded-xl bg-white dark:bg-slate-800 shadow-xl absolute left-0 right-0 top-full mt-1 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
                              {filteredCustomers.length === 0 ? (
                                 <div className="p-4 flex flex-col items-center justify-center gap-2">
-                                   <span className="text-sm font-bold text-slate-500">Not found in database</span>
+                                   <span className="text-sm font-bold text-slate-500 dark:text-slate-500 transition-colors duration-300">Not found in database</span>
                                    <button type="button" onClick={handleCreateCustomer} disabled={isSubmitting} className="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 hover:bg-emerald-200 active:scale-95 transition-all">
                                      <Plus size={16} /> Add "{formData.customerSearch}"
                                    </button>
@@ -172,7 +172,7 @@ export default function PaymentIn() {
                              ) : (
                                 filteredCustomers.map(c => (
                                    <div key={c.id} onClick={() => setFormData({...formData, customerId: c.id, customerSearch: ''})} className="p-4 border-b border-slate-50 hover:bg-emerald-50 cursor-pointer flex items-center justify-between group last:border-0 transition-colors">
-                                      <span className="font-bold text-slate-700 group-hover:text-emerald-700">{c.name}</span>
+                                      <span className="font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 group-hover:text-emerald-700">{c.name}</span>
                                       <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded uppercase group-hover:bg-emerald-200 group-hover:text-emerald-700 transition-colors">Select</span>
                                    </div>
                                 ))
@@ -182,7 +182,7 @@ export default function PaymentIn() {
                      </div>
                  ) : (
                     <div className="flex items-center justify-between p-4 bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl shadow-lg relative overflow-hidden">
-                       <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-bl-full -z-0"></div>
+                       <div className="absolute top-0 right-0 w-32 h-32 bg-white dark:bg-slate-800 transition-colors duration-300/5 rounded-bl-full -z-0"></div>
                        <div className="relative z-10 flex flex-col">
                           <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Selected Party</span>
                           <span className="font-black text-xl text-white tracking-tight">{selectedCustomer.name}</span>
@@ -203,7 +203,7 @@ export default function PaymentIn() {
 
               {/* Amount Entry */}
               <div>
-                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Received Amount (₹) <span className="text-rose-500">*</span></label>
+                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Received Amount (₹) <span className="text-rose-500">*</span></label>
                  <div className="relative">
                     <input 
                       required 
@@ -213,12 +213,12 @@ export default function PaymentIn() {
                       value={formData.amount || ''} 
                       onChange={(e) => setFormData({...formData, amount: e.target.value})} 
                       onFocus={(e) => e.target.select()}
-                      className="w-full px-4 py-4 bg-white border-2 border-slate-200 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 font-black text-3xl text-emerald-600 placeholder-emerald-200 transition-all outline-none shadow-sm" 
+                      className="w-full px-4 py-4 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-600 rounded-xl focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 font-black text-3xl text-emerald-600 dark:text-emerald-400 placeholder-emerald-200 transition-all outline-none shadow-sm" 
                       placeholder="Enter amount" 
                     />
                  </div>
                  {formData.amount && currentBalance < 0 && (
-                   <p className="mt-2 text-xs font-bold text-slate-500">
+                   <p className="mt-2 text-xs font-bold text-slate-500 dark:text-slate-400">
                      New Balance: ₹{Math.abs(currentBalance + parseFloat(formData.amount || 0)).toLocaleString('en-IN')} 
                      {currentBalance + parseFloat(formData.amount || 0) < 0 ? ' (Due)' : ' (Adv)'}
                    </p>
@@ -227,15 +227,15 @@ export default function PaymentIn() {
 
               {/* Payment Method Tabs */}
               <div>
-                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Mode</label>
-                 <div className="flex bg-slate-100 p-1 rounded-xl">
+                 <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Payment Mode</label>
+                 <div className="flex bg-slate-100 dark:bg-slate-700 p-1 rounded-xl">
                    {['Cash', 'UPI', 'Bank'].map(method => (
                      <button
                        key={method}
                        type="button"
                        onClick={() => setFormData({...formData, paymentMethod: method})}
                        className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center justify-center gap-1.5 transition-all
-                         ${formData.paymentMethod === method ? 'bg-white text-emerald-600 shadow-sm' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200'}
+                         ${formData.paymentMethod === method ? 'bg-white dark:bg-slate-800 text-emerald-600 border border-slate-200 dark:border-slate-600 shadow-sm' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300'}
                        `}
                      >
                        {method === 'Cash' ? <Banknote size={16} /> : method === 'UPI' ? <Smartphone size={16} /> : <RupeeIcon size={16} />}
@@ -247,8 +247,8 @@ export default function PaymentIn() {
 
               {/* Notes */}
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Description</label>
-                <input type="text" value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:border-emerald-500 outline-none font-bold text-slate-700 placeholder-slate-400 text-sm" placeholder="Optional notes... e.g. Bill payment" />
+                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Description</label>
+                <input type="text" value={formData.notes} onChange={(e) => setFormData({...formData, notes: e.target.value})} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-600 rounded-xl focus:border-emerald-500 outline-none font-bold text-slate-700 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm transition-all" placeholder="Optional notes... e.g. Bill payment" />
               </div>
 
               <div className="pt-4">
@@ -263,7 +263,7 @@ export default function PaymentIn() {
 
         {/* RECENT TRANSACTIONS SIDEBAR */}
         <div className="md:col-span-2">
-           <h3 className="font-black text-slate-800 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
+           <h3 className="font-black text-slate-800 dark:text-slate-100 text-sm uppercase tracking-wider mb-4 flex items-center gap-2">
              <History size={16} /> Recent Receipts
            </h3>
            <div className="card p-0 flex flex-col divide-y divide-slate-100 max-h-[600px] overflow-y-auto custom-scrollbar">
@@ -271,13 +271,13 @@ export default function PaymentIn() {
                 <div className="p-8 text-center text-slate-400 font-bold text-xs uppercase tracking-widest">No recent entries</div>
               ) : (
                 paymentHistory.map((txn, idx) => (
-                  <div key={txn.id || idx} className="p-4 flex items-center justify-between hover:bg-slate-50 transition-colors">
+                  <div key={txn.id || idx} className="p-4 flex items-center justify-between hover:bg-slate-50 dark:bg-slate-900/50 transition-colors duration-300 transition-colors">
                      <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
                            <ArrowDownRight size={16} strokeWidth={3} />
                         </div>
                         <div className="overflow-hidden pr-2">
-                           <h4 className="font-bold text-slate-800 text-sm truncate max-w-[120px] sm:max-w-[140px]">
+                           <h4 className="font-bold text-slate-800 dark:text-white transition-colors duration-300 text-sm truncate max-w-full max-w-sm sm:max-w-full max-w-sm">
                               {txn.customer_name || customers.find(c => c.id === txn.customer_id)?.name || 'Unknown'}
                            </h4>
                            <p className="text-[10px] font-bold text-slate-400 mt-0.5">{new Date(txn.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</p>

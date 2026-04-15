@@ -155,23 +155,23 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-24 sm:pb-12 min-w-0">
+    <div className="w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 space-y-6 pb-24 sm:pb-12 min-w-0 pt-2 sm:pt-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">System Settings</h2>
-          <p className="text-slate-500 text-sm mt-1">Manage your business profile, print preferences, and database.</p>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">System Settings</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage your business profile, print preferences, and database.</p>
         </div>
       </div>
 
       {/* SECTION 1: Logo & QR Upload */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 overflow-hidden">
         <div className="p-6 md:p-8">
-          <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 mb-6">Business Logo & Payment QR</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-2 mb-6">Business Logo & Payment QR</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-8">
             {/* Logo Upload */}
             <div className="flex flex-col items-center gap-3">
-              <p className="text-sm font-bold text-slate-700 self-start">Business Logo</p>
-              <div className="w-36 h-36 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden relative group">
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-300 self-start">Business Logo</p>
+              <div className="w-36 h-36 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center overflow-hidden relative group">
                 {formData.logo ? (
                   <>
                     <img src={formData.logo} alt="Logo" className="w-full h-full object-contain p-2" />
@@ -187,13 +187,13 @@ export default function Settings() {
                 )}
                 <input type="file" accept="image/png, image/jpeg" onChange={handleLogoUpload} className="absolute inset-0 opacity-0 cursor-pointer" title="Click to upload logo" />
               </div>
-              <p className="text-[10px] text-slate-500 text-center font-medium max-w-[180px]">Square PNG/JPG under 1MB. Shows on PDF invoices.</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center font-medium max-w-[180px]">Square PNG/JPG under 1MB. Shows on PDF invoices.</p>
             </div>
 
             {/* QR Upload */}
             <div className="flex flex-col items-center gap-3">
-              <p className="text-sm font-bold text-slate-700 self-start">Payment QR Code</p>
-              <div className="w-36 h-36 rounded-xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden relative group">
+              <p className="text-sm font-bold text-slate-700 dark:text-slate-300 self-start">Payment QR Code</p>
+              <div className="w-36 h-36 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-700/50 flex items-center justify-center overflow-hidden relative group">
                 {formData.qrImage ? (
                   <>
                     <img src={formData.qrImage} alt="QR Code" className="w-full h-full object-contain p-2" />
@@ -209,100 +209,100 @@ export default function Settings() {
                 )}
                 <input type="file" accept="image/png, image/jpeg" onChange={handleQrUpload} className="absolute inset-0 opacity-0 cursor-pointer" title="Click to upload QR code" />
               </div>
-              <p className="text-[10px] text-slate-500 text-center font-medium max-w-[180px]">Upload your UPI / Payment QR. Prints on PDF bottom.</p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center font-medium max-w-[180px]">Upload your UPI / Payment QR. Prints on PDF bottom.</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* SECTION 2: Business Details Form */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 overflow-hidden">
         <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-8">
           
           <div className="space-y-4">
-            <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Business Identity</h3>
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-2">Business Identity</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Business Name *</label>
-                <input type="text" required value={formData.businessName} onChange={e => setFormData({...formData, businessName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 bg-slate-50 focus:bg-white text-slate-800 font-bold transition-all" />
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Business Name *</label>
+                <input type="text" required value={formData.businessName} onChange={e => setFormData({...formData, businessName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-bold transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Owner / Contact Name *</label>
-                <input type="text" required value={formData.ownerName} onChange={e => setFormData({...formData, ownerName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-bold transition-all" />
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Owner / Contact Name *</label>
+                <input type="text" required value={formData.ownerName} onChange={e => setFormData({...formData, ownerName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-bold transition-all" />
               </div>
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">WhatsApp Number</label>
-                <input type="text" placeholder="Include country code (e.g. 919876543210)" value={formData.ownerPhone} onChange={e => setFormData({...formData, ownerPhone: e.target.value.replace(/\D/g, '')})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium transition-all" />
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">WhatsApp Number</label>
+                <input type="text" placeholder="Include country code" value={formData.ownerPhone} onChange={e => setFormData({...formData, ownerPhone: e.target.value.replace(/\D/g, '')})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-medium transition-all" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">GST Number / Tax ID</label>
-                <input type="text" value={formData.gstNumber} onChange={e => setFormData({...formData, gstNumber: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-bold uppercase transition-all" placeholder="22AAAAA0000A1Z5" />
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">GST Number / Tax ID</label>
+                <input type="text" value={formData.gstNumber} onChange={e => setFormData({...formData, gstNumber: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-bold uppercase transition-all" placeholder="22AAAAA0000A1Z5" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Business Address (shown on invoice)</label>
-                <textarea rows={2} value={formData.businessAddress} onChange={e => setFormData({...formData, businessAddress: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium transition-all resize-none" placeholder="Shop No. 12, Market Road, City - 400001" />
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Business Address (shown on invoice)</label>
+                <textarea rows={2} value={formData.businessAddress} onChange={e => setFormData({...formData, businessAddress: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-medium transition-all resize-none" placeholder="Shop No. 12, Market Road, City - 400001" />
               </div>
             </div>
           </div>
 
           <div className="space-y-4">
-             <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Bank Details <span className="text-xs font-medium text-slate-400">(shown on PDF invoice footer)</span></h3>
+             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-2">Bank Details <span className="text-xs font-medium text-slate-400">(shown on PDF footer)</span></h3>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Bank Name</label>
-                  <input type="text" value={formData.bankName} onChange={e => setFormData({...formData, bankName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium transition-all" placeholder="State Bank of India" />
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Bank Name</label>
+                  <input type="text" value={formData.bankName} onChange={e => setFormData({...formData, bankName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500/50 text-slate-800 dark:text-slate-100 font-medium transition-all" placeholder="State Bank of India" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Account Number</label>
-                  <input type="text" value={formData.bankAccount} onChange={e => setFormData({...formData, bankAccount: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium transition-all" placeholder="1234567890" />
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Account Number</label>
+                  <input type="text" value={formData.bankAccount} onChange={e => setFormData({...formData, bankAccount: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500/50 text-slate-800 dark:text-slate-100 font-medium transition-all" placeholder="1234567890" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">IFSC Code</label>
-                  <input type="text" value={formData.bankIFSC} onChange={e => setFormData({...formData, bankIFSC: e.target.value.toUpperCase()})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-bold uppercase transition-all" placeholder="SBIN0000123" />
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">IFSC Code</label>
+                  <input type="text" value={formData.bankIFSC} onChange={e => setFormData({...formData, bankIFSC: e.target.value.toUpperCase()})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500/50 text-slate-800 dark:text-slate-100 font-bold uppercase transition-all" placeholder="SBIN0000123" />
                 </div>
                 <div className="md:col-span-3">
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Terms &amp; Conditions</label>
-                  <textarea rows={2} value={formData.termsAndConditions} onChange={e => setFormData({...formData, termsAndConditions: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium transition-all resize-none" placeholder="Goods once sold will not be returned..." />
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Terms &amp; Conditions</label>
+                  <textarea rows={2} value={formData.termsAndConditions} onChange={e => setFormData({...formData, termsAndConditions: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-indigo-500/50 text-slate-800 dark:text-slate-100 font-medium transition-all resize-none" placeholder="Goods once sold will not be returned..." />
                 </div>
              </div>
           </div>
 
           <div className="space-y-4">
-             <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">App Experience</h3>
+             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-2">App Experience</h3>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div 
                   onClick={() => setFormData({...formData, uiMode: 'simple'})}
-                  className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${formData.uiMode === 'simple' ? 'border-indigo-600 bg-indigo-50/50 ring-4 ring-indigo-500/10' : 'border-slate-100 bg-white hover:border-slate-200'}`}
+                  className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${formData.uiMode === 'simple' ? 'border-green-600 bg-green-50 dark:bg-green-900/30 ring-4 ring-green-500/10' : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-600'}`}
                 >
                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`p-2.5 rounded-xl ${formData.uiMode === 'simple' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-slate-100 text-slate-400'}`}>
+                      <div className={`p-2.5 rounded-xl ${formData.uiMode === 'simple' ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'}`}>
                          <Zap size={20} />
                       </div>
-                      <span className="font-black text-slate-800">Simple Mode</span>
+                      <span className="font-black text-slate-800 dark:text-slate-100">Simple Mode</span>
                    </div>
-                   <p className="text-sm text-slate-500 font-medium leading-relaxed">Hides GST, Profit, and complex modules. Optimized for speed and basic billing.</p>
+                   <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">Hides GST, Profit, and complex modules. Optimized for speed and basic billing.</p>
                 </div>
                 <div 
                   onClick={() => setFormData({...formData, uiMode: 'advanced'})}
-                  className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${formData.uiMode === 'advanced' ? 'border-indigo-600 bg-indigo-50/50 ring-4 ring-indigo-500/10' : 'border-slate-100 bg-white hover:border-slate-200'}`}
+                  className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${formData.uiMode === 'advanced' ? 'border-green-600 bg-green-50 dark:bg-green-900/30 ring-4 ring-green-500/10' : 'border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-600'}`}
                 >
                    <div className="flex items-center gap-3 mb-2">
-                      <div className={`p-2.5 rounded-xl ${formData.uiMode === 'advanced' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'bg-slate-100 text-slate-400'}`}>
+                      <div className={`p-2.5 rounded-xl ${formData.uiMode === 'advanced' ? 'bg-green-600 text-white shadow-lg shadow-green-600/20' : 'bg-slate-100 dark:bg-slate-700 text-slate-400'}`}>
                          <SettingsIcon size={20} />
                       </div>
-                      <span className="font-black text-slate-800">Advanced Mode</span>
+                      <span className="font-black text-slate-800 dark:text-slate-100">Advanced Mode</span>
                    </div>
-                   <p className="text-sm text-slate-500 font-medium leading-relaxed">Full business feature set. Includes GST, Profitable analysis, and Supplier management.</p>
+                   <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">Full business feature set. Includes GST, Profitable analysis, and Supplier management.</p>
                 </div>
              </div>
           </div>
 
           <div className="space-y-4">
-             <h3 className="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Billing & Printing</h3>
+             <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 border-b border-slate-100 dark:border-slate-700 pb-2">Billing & Printing</h3>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
-                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Currency Symbol</label>
-                   <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-bold">
+                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Currency Symbol</label>
+                   <select value={formData.currency} onChange={e => setFormData({...formData, currency: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-bold transition-all">
                       <option value="₹">₹ (INR)</option>
                       <option value="$">$ (USD)</option>
                       <option value="€">€ (EUR)</option>
@@ -310,19 +310,19 @@ export default function Settings() {
                    </select>
                 </div>
                 <div>
-                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Invoice Number Prefix</label>
-                   <input type="text" value={formData.invoicePrefix} onChange={e => setFormData({...formData, invoicePrefix: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-bold uppercase transition-all" placeholder="INV-" />
+                   <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Invoice Number Prefix</label>
+                   <input type="text" value={formData.invoicePrefix} onChange={e => setFormData({...formData, invoicePrefix: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-green-500/50 text-slate-800 dark:text-slate-100 font-bold uppercase transition-all" placeholder="INV-" />
                 </div>
              </div>
           </div>
 
-          <div className="pt-6 border-t border-slate-100 flex items-center justify-end gap-4">
+          <div className="pt-6 border-t border-slate-100 dark:border-slate-700 flex items-center justify-end gap-4">
             {savedStatus && (
-              <span className="text-emerald-600 flex items-center gap-1.5 font-bold text-sm animate-in fade-in">
+              <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 font-bold text-sm animate-in fade-in">
                  <CheckCircle size={18} /> Settings Applied
               </span>
             )}
-            <button type="submit" className="px-8 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2">
+            <button type="submit" className="px-8 py-3.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl shadow-lg shadow-green-600/30 transition-all flex items-center gap-2">
               <Save size={18} /> Save Preferences
             </button>
           </div>
@@ -330,19 +330,19 @@ export default function Settings() {
       </div>
 
       {/* Data Management Section */}
-      <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2 pt-4 border-t border-slate-100">
-         <Database size={20} className="text-indigo-600" /> Database Utilities
+      <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+         <Database size={20} className="text-green-600 dark:text-green-500" /> Database Utilities
       </h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-1 gap-5 mb-8">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6 hover:border-emerald-200 transition-colors group">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5 mb-8">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col sm:flex-row items-center justify-between gap-6 hover:border-emerald-200 dark:hover:border-slate-500 transition-all group">
           <div className="flex items-center gap-4">
-             <div className="bg-emerald-50 text-emerald-600 p-4 rounded-xl group-hover:scale-110 transition-transform">
+             <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-4 rounded-xl group-hover:scale-110 transition-all">
                <FileSpreadsheet size={24} />
              </div>
              <div className="text-left">
-                <h4 className="font-bold text-slate-800 text-lg mb-1">Export Master Data</h4>
-                <p className="text-sm text-slate-500 font-medium max-w-md">Download a complete Excel workbook to view all records, inventory, and history on your PC.</p>
+                <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg mb-1">Export Data</h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium max-w-md">Download a complete Excel workbook to view all records, inventory, and history.</p>
              </div>
           </div>
           <button onClick={exportAllToExcel} className="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
@@ -352,12 +352,12 @@ export default function Settings() {
       </div>
 
       {/* Logout Section */}
-      <div className="mt-8 pt-8 border-t border-slate-200">
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-rose-100 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
-           <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50 rounded-bl-full pointer-events-none opacity-50"></div>
+      <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-rose-100 dark:border-rose-900/50 flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+           <div className="absolute top-0 right-0 w-32 h-32 bg-rose-50 dark:bg-rose-900/20 rounded-bl-full pointer-events-none opacity-50"></div>
            <div className="relative z-10 text-center sm:text-left">
-             <h4 className="font-black text-rose-600 text-lg sm:text-xl">Account Security</h4>
-             <p className="text-sm font-bold text-slate-500 mt-1">End your current session completely.</p>
+             <h4 className="font-black text-rose-600 dark:text-rose-500 text-lg sm:text-xl">Account Security</h4>
+             <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mt-1">End your current session completely.</p>
            </div>
            <button 
              onClick={logout} 

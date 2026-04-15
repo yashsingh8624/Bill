@@ -62,21 +62,21 @@ export default function GlobalSearch({ isOpen, onClose }) {
       onClick={onClose}
     >
       <div 
-        className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-in slide-in-from-top-4 duration-300"
+        className="bg-white dark:bg-slate-800 transition-colors duration-300 w-full max-w-2xl rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 overflow-hidden animate-in slide-in-from-top-4 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center px-4 py-4 border-b border-slate-100 gap-3">
+        <div className="flex items-center px-4 py-4 border-b border-slate-100 dark:border-slate-700/50 transition-colors duration-300 gap-3">
           <Search className="text-slate-400" size={20} />
           <input
             ref={inputRef}
             type="text"
             placeholder="Search products, customers, or bills... (Esc to close)"
-            className="search-clean flex-1 text-lg outline-none text-slate-700 placeholder:text-slate-400 font-medium"
+            className="search-clean flex-1 text-lg outline-none text-slate-700 dark:text-slate-300 transition-colors duration-300 placeholder:text-slate-400 font-medium"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           <div className="flex items-center gap-2">
-            <kbd className="hidden sm:inline-flex h-6 items-center gap-1 rounded border border-slate-200 bg-slate-50 px-1.5 font-mono text-[10px] font-medium text-slate-500">
+            <kbd className="hidden sm:inline-flex h-6 items-center gap-1 rounded border border-slate-200 dark:border-slate-700 transition-colors duration-300 bg-slate-50 dark:bg-slate-900/50 transition-colors duration-300 px-1.5 font-mono text-[10px] font-medium text-slate-500 dark:text-slate-500 transition-colors duration-300">
               <span className="text-xs">ESC</span>
             </kbd>
             <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 transition-colors">
@@ -88,10 +88,10 @@ export default function GlobalSearch({ isOpen, onClose }) {
         <div className="max-h-[60vh] overflow-y-auto p-2 custom-scrollbar">
           {!query && (
             <div className="p-12 text-center">
-              <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
+              <div className="bg-slate-50 dark:bg-slate-900/50 transition-colors duration-300 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-300">
                 <Command size={32} />
               </div>
-              <h3 className="text-slate-600 font-bold">Quick Search</h3>
+              <h3 className="text-slate-600 dark:text-slate-400 transition-colors duration-300 font-bold">Quick Search</h3>
               <p className="text-slate-400 text-sm mt-1">Start typing to find anything in SmartBill Pro</p>
             </div>
           )}
@@ -111,12 +111,12 @@ export default function GlobalSearch({ isOpen, onClose }) {
                   onClick={() => handleSelect(`/products`)}
                   className="w-full flex items-center gap-4 px-3 py-3 hover:bg-indigo-50 rounded-xl transition-colors text-left group"
                 >
-                  <div className="bg-emerald-100 text-emerald-600 p-2 rounded-lg group-hover:bg-white transition-colors">
+                  <div className="bg-emerald-100 text-emerald-600 p-2 rounded-lg group-hover:bg-white dark:bg-slate-800 transition-colors duration-300 transition-colors">
                     <Package size={18} />
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-slate-800">{p.name}</p>
-                    <p className="text-xs text-slate-500">Stock: {p.quantity} | Price: ₹{p.sellingPrice || p.price}</p>
+                    <p className="font-bold text-slate-800 dark:text-white transition-colors duration-300">{p.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-500 transition-colors duration-300">Stock: {p.quantity} | Price: ₹{p.sellingPrice || p.price}</p>
                   </div>
                   <ArrowRight size={16} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
                 </button>
@@ -133,12 +133,12 @@ export default function GlobalSearch({ isOpen, onClose }) {
                   onClick={() => handleSelect(`/customers`)}
                   className="w-full flex items-center gap-4 px-3 py-3 hover:bg-indigo-50 rounded-xl transition-colors text-left group"
                 >
-                  <div className="bg-blue-100 text-blue-600 p-2 rounded-lg group-hover:bg-white transition-colors">
+                  <div className="bg-blue-100 text-blue-600 p-2 rounded-lg group-hover:bg-white dark:bg-slate-800 transition-colors duration-300 transition-colors">
                     <Users size={18} />
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-slate-800">{c.name}</p>
-                    <p className="text-xs text-slate-500">{c.phone || 'No phone'} | Balance: ₹{(c.balance || 0).toFixed(2)}</p>
+                    <p className="font-bold text-slate-800 dark:text-white transition-colors duration-300">{c.name}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-500 transition-colors duration-300">{c.phone || 'No phone'} | Balance: ₹{(c.balance || 0).toFixed(2)}</p>
                   </div>
                   <ArrowRight size={16} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
                 </button>
@@ -155,12 +155,12 @@ export default function GlobalSearch({ isOpen, onClose }) {
                   onClick={() => handleSelect(`/bills`)}
                   className="w-full flex items-center gap-4 px-3 py-3 hover:bg-indigo-50 rounded-xl transition-colors text-left group"
                 >
-                  <div className="bg-amber-100 text-amber-600 p-2 rounded-lg group-hover:bg-white transition-colors">
+                  <div className="bg-amber-100 text-amber-600 p-2 rounded-lg group-hover:bg-white dark:bg-slate-800 transition-colors duration-300 transition-colors">
                     <Receipt size={18} />
                   </div>
                   <div className="flex-1">
-                    <p className="font-bold text-slate-800">#{b.invoiceNo}</p>
-                    <p className="text-xs text-slate-500">{b.customerName} | ₹{(b.grandTotal || b.total).toFixed(2)}</p>
+                    <p className="font-bold text-slate-800 dark:text-white transition-colors duration-300">#{b.invoiceNo}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-500 transition-colors duration-300">{b.customerName} | ₹{(b.grandTotal || b.total).toFixed(2)}</p>
                   </div>
                   <ArrowRight size={16} className="text-slate-300 opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />
                 </button>
@@ -169,7 +169,7 @@ export default function GlobalSearch({ isOpen, onClose }) {
           )}
         </div>
 
-        <div className="bg-slate-50 px-4 py-3 border-t border-slate-100 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        <div className="bg-slate-50 dark:bg-slate-900/50 transition-colors duration-300 px-4 py-3 border-t border-slate-100 dark:border-slate-700/50 transition-colors duration-300 flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-widest">
            <div className="flex gap-4">
               <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div> Product</span>
               <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Customer</span>

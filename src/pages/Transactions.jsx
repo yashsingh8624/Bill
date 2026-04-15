@@ -95,14 +95,14 @@ export default function Transactions() {
   }, [filtered]);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-24 sm:pb-8 animate-in fade-in flex flex-col relative w-full min-w-0">
+    <div className="space-y-6 w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 sm:pb-8 pt-2 sm:pt-4 animate-in fade-in flex flex-col min-w-0">
       {/* Header */}
       <div className="flex flex-col flex-shrink-0 gap-4">
         <div>
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+          <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-3">
             Transactions
           </h2>
-          <p className="text-slate-500 text-sm mt-1 font-medium">History of all your business transactions</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">History of all your business transactions</p>
         </div>
       </div>
 
@@ -137,7 +137,7 @@ export default function Transactions() {
         ].map(f => (
           <button
             key={f.key}
-            className={`px-4 py-2 rounded-full font-bold whitespace-nowrap transition-all ${filterType === f.key ? 'bg-slate-800 text-white shadow-md' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'}`}
+            className={`px-4 py-2 rounded-full font-bold whitespace-nowrap transition-all ${filterType === f.key ? 'bg-slate-800 text-white shadow-md' : 'bg-white dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/50'}`}
             onClick={() => setFilterType(f.key)}
           >
             {f.label}
@@ -146,16 +146,16 @@ export default function Transactions() {
       </div>
 
       {/* Search */}
-      <div className="search-wrapper bg-white p-2.5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-3 px-4 flex-shrink-0 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-300">
+      <div className="search-wrapper bg-white dark:bg-slate-800 p-2.5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600 flex items-center gap-3 px-4 flex-shrink-0 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-300">
         <Search size={20} className="search-icon text-slate-400 flex-shrink-0" />
         <input
           type="text"
           placeholder="Search by party, details..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          className="search-input flex-1 py-1.5 focus:outline-none text-slate-700 placeholder:text-slate-400 font-medium bg-transparent pl-0"
+          className="search-input flex-1 py-1.5 focus:outline-none text-slate-700 dark:text-slate-100 placeholder:text-slate-400 font-medium bg-transparent pl-0"
         />
-        {searchTerm && <button onClick={() => setSearchTerm('')} className="text-slate-400 hover:text-slate-700 p-1"><X size={18} /></button>}
+        {searchTerm && <button onClick={() => setSearchTerm('')} className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 p-1"><X size={18} /></button>}
       </div>
 
       {/* Transaction Cards */}
@@ -165,7 +165,7 @@ export default function Transactions() {
               <div className="bg-slate-100 p-4 rounded-full mb-4 text-slate-300">
                  <Filter size={32} />
               </div>
-              <p className="font-bold text-slate-700 text-lg">No transactions found</p>
+              <p className="font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 text-lg">No transactions found</p>
            </div>
         ) : (
           <div className="space-y-3">
@@ -178,26 +178,26 @@ export default function Transactions() {
                 else if (txn.type === 'Payment In') icon = <ArrowDownLeft size={18} strokeWidth={3} />;
                 else if (txn.type === 'Payment Out' || txn.type === 'Expense') icon = <ArrowUpRight size={18} strokeWidth={3} />;
 
-                let colorClass = 'text-slate-500 bg-slate-50 border-slate-200';
-                if (txn.type === 'Sale') colorClass = 'text-indigo-600 bg-indigo-50 border-indigo-100';
-                else if (txn.type === 'Payment In') colorClass = 'text-emerald-600 bg-emerald-50 border-emerald-100';
-                else if (txn.type === 'Payment Out') colorClass = 'text-rose-600 bg-rose-50 border-rose-100';
-                else if (txn.type === 'Expense') colorClass = 'text-amber-600 bg-amber-50 border-amber-100';
+                 let colorClass = 'text-slate-500 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-600';
+                if (txn.type === 'Sale') colorClass = 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 border-indigo-100 dark:border-indigo-900 dark:text-indigo-400';
+                else if (txn.type === 'Payment In') colorClass = 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-100 dark:border-emerald-900 dark:text-emerald-400';
+                else if (txn.type === 'Payment Out') colorClass = 'text-rose-600 bg-rose-50 dark:bg-rose-900/30 border-rose-100 dark:border-rose-900 dark:text-rose-400';
+                else if (txn.type === 'Expense') colorClass = 'text-amber-600 bg-amber-50 dark:bg-amber-900/30 border-amber-100 dark:border-amber-900 dark:text-amber-400';
 
                 return (
-                  <div key={txn.id} className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow group">
+                  <div key={txn.id} className="bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-600 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow group">
                      <div className="flex items-center gap-4">
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm border ${colorClass}`}>
                            {icon}
                         </div>
                         <div>
-                           <p className="font-bold text-slate-800 text-[15px] leading-tight">{txn.partyName}</p>
+                           <p className="font-bold text-slate-800 dark:text-slate-100 text-[15px] leading-tight">{txn.partyName}</p>
                            <p className="text-xs text-slate-500 font-medium mt-0.5">{txn.dateFormatted}</p>
-                           {txn.description && <p className="text-[11px] text-slate-400 mt-1 max-w-[180px] truncate">{txn.description}</p>}
+                           {txn.description && <p className="text-[11px] text-slate-400 mt-1 max-w-full max-w-sm truncate">{txn.description}</p>}
                         </div>
                      </div>
                      <div className="text-right flex flex-col items-end">
-                        <p className={`font-black text-[16px] ${isIncoming ? 'text-emerald-600' : isOutgoing ? 'text-slate-800' : 'text-slate-800'}`}>
+                        <p className={`font-black text-[16px] ${isIncoming ? 'text-emerald-600 dark:text-emerald-400' : isOutgoing ? 'text-slate-800 dark:text-slate-100' : 'text-slate-800 dark:text-slate-100'}`}>
                            {isIncoming ? '+' : '-'}{fmt(txn.amount)}
                         </p>
                         <span className={`text-[9px] uppercase tracking-widest font-black px-2 py-0.5 rounded mt-1 border ${colorClass}`}>

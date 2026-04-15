@@ -154,68 +154,68 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
   };
 
   return (
-    <div className="space-y-6 flex flex-col w-full pb-24 sm:pb-6" style={{ minHeight: 'calc(100vh - 10rem)' }}>
+    <div className="space-y-6 flex flex-col w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 sm:pb-8 pt-2 sm:pt-4 min-w-0" style={{ minHeight: 'calc(100vh - 10rem)' }}>
       {!selectedCustomer ? (
         <>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-slate-800">Customer Ledger</h2>
-              <p className="text-slate-500 text-sm mt-1">Manage customer balances and payments.</p>
+              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Customer Ledger</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage customer balances and payments.</p>
             </div>
           </div>
 
-          <div className="bg-white p-2.5 rounded-xl shadow-sm border border-slate-100 flex items-center gap-3 px-4 flex-shrink-0">
+          <div className="bg-white dark:bg-slate-800 p-2.5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600 flex items-center gap-3 px-4 flex-shrink-0">
             <Search size={20} className="text-slate-400" />
             <input 
               type="text" 
               placeholder="Search by name or phone..." 
-              className="flex-1 py-2 focus:outline-none text-slate-700 placeholder:text-slate-400 font-medium"
+              className="flex-1 py-2 focus:outline-none text-slate-700 dark:text-slate-300 transition-colors duration-300 placeholder:text-slate-400 font-medium"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex-1 overflow-hidden flex flex-col min-h-0">
-            <div className="overflow-x-auto overflow-y-auto flex-1 h-full">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex-1 overflow-hidden flex flex-col min-h-0">
+            <div className="overflow-x-auto overflow-y-auto flex-1 h-full custom-scrollbar">
               {customers.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-500 p-12 text-center">
-                  <div className="bg-slate-50 p-4 rounded-full mb-4 text-slate-400">
+                <div className="h-full flex flex-col items-center justify-center text-slate-500 dark:text-slate-500 transition-colors duration-300 p-12 text-center">
+                  <div className="bg-slate-50 dark:bg-slate-900/50 transition-colors duration-300 p-4 rounded-full mb-4 text-slate-400">
                     <Users size={40} />
                   </div>
-                  <p className="font-bold text-slate-700 text-xl">No customers yet</p>
+                  <p className="font-bold text-slate-700 dark:text-slate-300 transition-colors duration-300 text-xl">No customers yet</p>
                   <p className="text-sm mt-2 font-medium">Customers are added automatically when you create a bill for them.</p>
                 </div>
               ) : (
-                <table className="w-full text-left border-collapse min-w-[600px]">
-                  <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-sm z-10 border-b border-slate-200">
-                    <tr className="text-slate-500 text-xs uppercase font-bold tracking-wider">
+                <table className="w-full text-left border-collapse min-w-full max-w-sm sm:min-w-full">
+                  <thead className="sticky top-0 bg-slate-50/95 dark:bg-slate-800/95 backdrop-blur-sm z-10 border-b border-slate-200 dark:border-slate-600">
+                    <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase font-bold tracking-wider">
                       <th className="py-4 px-6">Customer Name</th>
                       <th className="py-4 px-6">Phone Number</th>
                       <th className="py-4 px-6 text-right">Outstanding (₹)</th>
                       <th className="py-4 px-6 text-center w-24">Action</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
                     {filteredCustomers.map(customer => (
                       <tr 
                         key={customer.id} 
                         onClick={() => handleOpenCustomer(customer)}
-                        className="hover:bg-indigo-50/50 transition-colors cursor-pointer group"
+                        className="hover:bg-indigo-50/50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group"
                       >
-                         <td className="py-4 px-6 text-slate-800 font-bold flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center font-bold text-xs uppercase">
+                         <td className="py-4 px-6 text-slate-800 dark:text-slate-100 font-bold flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center font-bold text-xs uppercase">
                                {(customer.name || '??').substring(0,2)}
                             </div>
                             {customer.name || 'Unnamed Customer'}
                          </td>
-                         <td className="py-4 px-6 text-slate-600 font-medium">{customer.phone || '-'}</td>
+                         <td className="py-4 px-6 text-slate-600 dark:text-slate-400 transition-colors duration-300 font-medium">{customer.phone || '-'}</td>
                            <td className="py-4 px-6 text-right">
                              <span className={`font-black ${parseFloat(calculateCustomerBalance(ledger, customer.id, customer) || 0) > 0 ? 'text-red-500 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100' : 'text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-100'}`}>
                                ₹{parseFloat(calculateCustomerBalance(ledger, customer.id, customer) || 0).toFixed(2)}
                              </span>
                           </td>
                          <td className="py-4 px-6 text-center">
-                            <div className="flex justify-center text-slate-400 group-hover:text-indigo-600 transition-colors bg-white border border-slate-200 group-hover:border-indigo-200 rounded-lg p-1.5 shadow-sm">
+                            <div className="flex justify-center text-slate-400 group-hover:text-indigo-600 transition-colors bg-white dark:bg-slate-800 transition-colors duration-300 border border-slate-200 dark:border-slate-700 transition-colors duration-300 group-hover:border-indigo-200 rounded-lg p-1.5 shadow-sm">
                                <ChevronRight size={20} />
                             </div>
                          </td>
@@ -234,12 +234,12 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
               <div className="flex items-center gap-4">
                 <button 
                   onClick={() => setSelectedCustomer(null)}
-                  className="p-2.5 text-slate-500 bg-white hover:bg-slate-50 shadow-sm rounded-xl transition-all border border-slate-200 hover:text-slate-800"
+                  className="p-2.5 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 shadow-sm rounded-xl transition-all border border-slate-200 dark:border-slate-600 hover:text-slate-800 dark:hover:text-white"
                 >
                   <ChevronRight size={20} className="rotate-180" />
                 </button>
                 <div>
-                  <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
+                  <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3">
                     {currentCustomer.name}
                     <button onClick={() => openEditModal(currentCustomer)} className="text-slate-400 hover:text-indigo-600 transition-colors" title="Edit Customer">
                        <Edit2 size={16} />
@@ -248,7 +248,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                        <Trash2 size={16} />
                     </button>
                   </h2>
-                  <p className="text-slate-500 text-sm font-medium mt-0.5">{currentCustomer.phone}</p>
+                  <p className="text-slate-500 dark:text-slate-500 transition-colors duration-300 text-sm font-medium mt-0.5">{currentCustomer.phone}</p>
                 </div>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -262,14 +262,14 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                 </button>
                 <button 
                   onClick={handleDownloadLedger}
-                  className="bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-1.5 shadow-sm text-sm"
+                  className="bg-slate-100 text-slate-700 dark:text-slate-300 dark:bg-slate-700/50 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-600 px-3 sm:px-4 py-2 sm:py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-1.5 shadow-sm text-sm"
                 >
                   <Download size={16} />
                   <span className="hidden sm:inline">Download</span> PDF
                 </button>
                 <button 
                   onClick={openPaymentModal}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/20 text-sm"
+                  className="bg-green-600 hover:bg-green-700 text-white px-3 sm:px-5 py-2 sm:py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-1.5 shadow-lg shadow-indigo-600/20 text-sm"
                 >
                   <IndianRupee size={16} />
                   <span className="hidden sm:inline">Add</span> Payment
@@ -282,18 +282,18 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
               const { totalBilled, totalPaid, outstanding, advance, totalBills } = getCustomerTotals(currentCustomer);
               return (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                    <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Billed</p>
-                    <h3 className="text-xl sm:text-2xl font-black text-slate-800">₹{totalBilled.toFixed(2)}</h3>
+                  <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
+                    <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Billed</p>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100">₹{totalBilled.toFixed(2)}</h3>
                     <p className="text-slate-400 text-[10px] mt-1 font-semibold uppercase">Lifetime</p>
                   </div>
-                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                    <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Paid</p>
+                  <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
+                    <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Paid</p>
                     <h3 className="text-xl sm:text-2xl font-black text-indigo-600">₹{totalPaid.toFixed(2)}</h3>
                     <p className="text-slate-400 text-[10px] mt-1 font-semibold uppercase">Lifetime</p>
                   </div>
-                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                    <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Outstanding</p>
+                  <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
+                    <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Outstanding</p>
                     {advance > 0 ? (
                       <>
                         <h3 className="text-xl sm:text-2xl font-black text-emerald-500">₹0.00</h3>
@@ -306,20 +306,20 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                       </>
                     )}
                   </div>
-                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-center">
-                    <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Bills</p>
-                    <h3 className="text-xl sm:text-2xl font-black text-slate-800">{totalBills}</h3>
+                  <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
+                    <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Bills</p>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100">{totalBills}</h3>
                     <p className="text-slate-400 text-[10px] mt-1 font-semibold uppercase">Invoices</p>
                   </div>
                 </div>
               );
             })()}
 
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col w-full sm:flex-1 sm:overflow-hidden sm:min-h-0">
-               <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shadow-sm z-10 sticky top-0">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col w-full sm:flex-1 sm:overflow-hidden sm:min-h-0">
+               <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between shadow-sm z-10 sticky top-0">
                  <div className="flex items-center gap-2">
-                    <Receipt size={18} className="text-slate-500" />
-                    <h3 className="font-bold text-slate-800">Ledger Details</h3>
+                    <Receipt size={18} className="text-slate-500 dark:text-slate-400" />
+                    <h3 className="font-bold text-slate-800 dark:text-slate-100">Ledger Details</h3>
                  </div>
                </div>
                
@@ -330,8 +330,8 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                     <>
                       {/* Desktop Table View */}
                       <div className="hidden sm:block overflow-x-auto custom-scrollbar">
-                        <table className="w-full text-left border-collapse min-w-[650px]">
-                          <thead className="bg-slate-50 text-slate-500 text-xs uppercase font-bold tracking-wider sticky top-0 border-b border-slate-100 z-10">
+                        <table className="w-full text-left border-collapse min-w-full max-w-sm">
+                          <thead className="bg-slate-50 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-xs uppercase font-bold tracking-wider sticky top-0 border-b border-slate-100 dark:border-slate-700 z-10">
                             <tr>
                               <th className="py-4 px-6">Date</th>
                               <th className="py-4 px-6">Description / Invoice</th>
@@ -345,21 +345,20 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                               const debit = (txn.type === 'SALE' || txn.type === 'OPENING') ? parseFloat(txn.amount) : 0;
                               const credit = (txn.type === 'PAYMENT' || txn.type === 'ROLLOVER') ? parseFloat(txn.amount) : 0;
                               acc.balance = acc.balance + debit - credit;
-                              
                               acc.rows.push(
-                                <tr key={`${txn.type}-${txn.id}`} className="hover:bg-slate-50/80 transition-colors">
-                                   <td className="py-4 px-6 text-slate-500 font-medium text-sm whitespace-nowrap">{new Date(txn.date).toLocaleDateString()}</td>
-                                   <td className="py-4 px-6 text-slate-800 font-bold text-sm">
-                                     {txn.type === 'SALE' && <span className="text-slate-500 mr-2 border border-slate-200 bg-white px-2 py-0.5 rounded text-[10px] font-black uppercase">INV</span>}
-                                     {txn.type === 'PAYMENT' && <span className="text-emerald-600 mr-2 border border-emerald-200 bg-emerald-50 px-2 py-0.5 rounded text-[10px] font-black uppercase shadow-sm">PAY</span>}
-                                     {txn.type === 'OPENING' && <span className="text-amber-500 mr-2 border border-amber-200 bg-amber-50 px-2 py-0.5 rounded text-[10px] font-black uppercase shadow-sm">OPEN</span>}
-                                     {txn.type === 'ROLLOVER' && <span className="text-indigo-400 mr-2 border border-indigo-200 bg-indigo-50 px-2 py-0.5 rounded text-[10px] font-black uppercase">ROLL</span>}
+                                <tr key={`${txn.type}-${txn.id}`} className="hover:bg-slate-50/80 dark:hover:bg-slate-700/50 transition-colors">
+                                   <td className="py-4 px-6 text-slate-500 dark:text-slate-400 font-medium text-sm whitespace-nowrap">{new Date(txn.date).toLocaleDateString()}</td>
+                                   <td className="py-4 px-6 text-slate-800 dark:text-slate-100 font-bold text-sm">
+                                     {txn.type === 'SALE' && <span className="text-slate-500 dark:text-slate-400 mr-2 border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-700 px-2 py-0.5 rounded text-[10px] font-black uppercase">INV</span>}
+                                     {txn.type === 'PAYMENT' && <span className="text-emerald-600 dark:text-emerald-400 mr-2 border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 rounded text-[10px] font-black uppercase shadow-sm">PAY</span>}
+                                     {txn.type === 'OPENING' && <span className="text-amber-500 dark:text-amber-400 mr-2 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/30 px-2 py-0.5 rounded text-[10px] font-black uppercase shadow-sm">OPEN</span>}
+                                     {txn.type === 'ROLLOVER' && <span className="text-indigo-400 mr-2 border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded text-[10px] font-black uppercase">ROLL</span>}
                                      {txn.desc || txn.description || txn.type}
                                    </td>
-                                   <td className="py-4 px-6 text-right text-sm font-black text-slate-800 bg-red-50/10">{debit > 0 ? `₹${debit.toFixed(2)}` : '-'}</td>
-                                   <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 bg-emerald-50/10">{credit > 0 ? `₹${credit.toFixed(2)}` : '-'}</td>
-                                   <td className="py-4 px-6 text-right text-sm font-black text-indigo-600 bg-indigo-50/10">₹{acc.balance.toFixed(2)}</td>
-                                </tr>
+                                   <td className="py-4 px-6 text-right text-sm font-black text-slate-800 dark:text-slate-100 bg-red-50/10 dark:bg-red-900/5">{debit > 0 ? `₹${debit.toFixed(2)}` : '-'}</td>
+                                   <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/10 dark:bg-emerald-900/5">{credit > 0 ? `₹${credit.toFixed(2)}` : '-'}</td>
+                                   <td className="py-4 px-6 text-right text-sm font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/10 dark:bg-indigo-900/5">₹{acc.balance.toFixed(2)}</td>
+                                 </tr>
                               );
                               return acc;
                             }, { rows: [], balance: 0 }).rows}
@@ -374,16 +373,16 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                           const credit = (txn.type === 'PAYMENT' || txn.type === 'ROLLOVER') ? parseFloat(txn.amount) : 0;
                           acc.balance = acc.balance + debit - credit;
                           
-                          let badgeColor = "bg-slate-100 text-slate-600";
-                          let amountColor = "text-slate-800";
+                          let badgeColor = "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400";
+                          let amountColor = "text-slate-800 dark:text-slate-100";
                           let prefix = "";
 
-                          if (txn.type === 'SALE') { badgeColor = "bg-indigo-50 text-indigo-600 border border-indigo-100"; amountColor = "text-red-500"; prefix = "Billed: "; }
-                          if (txn.type === 'PAYMENT') { badgeColor = "bg-emerald-50 text-emerald-600 border border-emerald-100"; amountColor = "text-emerald-600"; prefix = "Paid: "; }
-                          if (txn.type === 'OPENING') { badgeColor = "bg-amber-50 text-amber-600 border border-amber-100"; amountColor = "text-amber-600"; }
+                          if (txn.type === 'SALE') { badgeColor = "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900"; amountColor = "text-red-500 dark:text-red-400"; prefix = "Billed: "; }
+                          if (txn.type === 'PAYMENT') { badgeColor = "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900"; amountColor = "text-emerald-600 dark:text-emerald-400"; prefix = "Paid: "; }
+                          if (txn.type === 'OPENING') { badgeColor = "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900"; amountColor = "text-amber-600 dark:text-amber-400"; }
 
                           acc.rows.push(
-                            <div key={`${txn.type}-${txn.id}`} className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm active:bg-slate-50 transition-colors">
+                            <div key={`${txn.type}-${txn.id}`} className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-600 rounded-xl p-4 shadow-sm active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors">
                               <div className="flex justify-between items-start mb-2">
                                 <div className="flex flex-col gap-1">
                                   <div className="flex items-center gap-2">
@@ -391,7 +390,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                                       {txn.type}
                                     </span>
                                     {(txn.desc || txn.description) && (
-                                      <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                                      <span className="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-900/50 transition-colors duration-300 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-700/50 transition-colors duration-300">
                                         #{txn.desc || txn.description}
                                       </span>
                                     )}
@@ -423,49 +422,49 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
       {/* EDIT MODAL */}
       {isEditModalOpen && selectedCustomer && (
         <div className="fixed inset-0 bg-slate-900/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 border border-slate-100">
-            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 border border-slate-100 dark:border-slate-600">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
                 <Edit2 size={18} className="text-indigo-600" /> Edit Customer
               </h3>
-              <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+              <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
                 <X size={20} />
               </button>
             </div>
             <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Customer Name</label>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Customer Name</label>
                   <input 
                     type="text" required
                     value={editForm.name}
                     onChange={(e) => setEditForm({...editForm, name: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium"
                   />
                </div>
                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Phone Number</label>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
                   <input 
                     type="text" 
                     value={editForm.phone}
                     onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-medium"
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium"
                   />
                </div>
                <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-1.5">Opening Balance</label>
+                  <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Opening Balance</label>
                   <div className="relative search-wrapper">
                     <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
                     <input 
                       type="number" step="0.01"
                       value={editForm.openingBalance}
                       onChange={(e) => setEditForm({...editForm, openingBalance: e.target.value})}
-                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 focus:bg-white text-slate-800 font-bold outline-none search-clean"
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold outline-none search-clean"
                       placeholder="0.00"
                     />
                   </div>
                </div>
                <div className="pt-4 flex gap-3">
-                 <button type="submit" className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-all text-center">
+                 <button type="submit" className="w-full py-3.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-all text-center">
                    Save Changes
                  </button>
                </div>
@@ -477,8 +476,8 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
       {/* PAYMENT MODAL */}
       {isPaymentModalOpen && selectedCustomer && (
         <div className="fixed inset-0 bg-slate-900/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 border border-slate-100">
-            <div className="px-6 py-4 border-b border-emerald-100 flex justify-between items-center bg-emerald-50">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 border border-slate-100 dark:border-slate-600">
+            <div className="px-6 py-4 border-b border-emerald-100 dark:border-emerald-900/50 flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20">
               <h3 className="text-lg font-bold text-emerald-900 flex items-center gap-2">
                 <IndianRupee size={18} className="text-emerald-600" />
                 Record Payment
@@ -488,45 +487,45 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
               </button>
             </div>
             <form onSubmit={handlePaymentSubmit} className="p-6 space-y-5">
-              <div className="bg-slate-50 border border-slate-200 p-4 rounded-xl text-center">
+              <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-600 p-4 rounded-xl text-center">
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Customer</p>
-                <p className="font-black text-slate-800 text-xl">{currentCustomer?.name}</p>
-                <div className="mt-2 text-sm bg-white border border-slate-100 inline-block px-3 py-1 rounded-lg">
-                   Due: <span className="font-black text-red-500">₹{getCustomerTotals(currentCustomer).outstanding.toFixed(2)}</span>
+                <p className="font-black text-slate-800 dark:text-slate-100 text-xl">{currentCustomer?.name}</p>
+                <div className="mt-2 text-sm bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-600 inline-block px-3 py-1 rounded-lg">
+                   Due: <span className="font-black text-red-500 dark:text-red-400">₹{getCustomerTotals(currentCustomer).outstanding.toFixed(2)}</span>
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Amount Received</label>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Amount Received</label>
                 <div className="relative search-wrapper">
                   <IndianRupee size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 search-icon" />
                   <input 
                     type="number" required min="1" step="0.01"
                     value={paymentForm.amount}
                     onChange={(e) => setPaymentForm({...paymentForm, amount: e.target.value})}
-                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 text-emerald-600 text-xl font-black shadow-inner search-clean"
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 text-xl font-black shadow-inner search-clean"
                     placeholder="0.00"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Date</label>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Date</label>
                 <input 
                   type="date" required
                   value={paymentForm.date}
                   onChange={(e) => setPaymentForm({...paymentForm, date: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/50 bg-white text-slate-700 font-medium"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-emerald-500/50 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-100 font-medium"
                 />
               </div>
               
               <div>
-                <label className="block text-sm font-bold text-slate-700 mb-1.5">Note (Optional)</label>
+                <label className="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1.5">Note (Optional)</label>
                 <input 
                   type="text" 
                   value={paymentForm.note}
                   onChange={(e) => setPaymentForm({...paymentForm, note: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-emerald-500/50 bg-slate-50 focus:bg-white text-slate-700 font-medium"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-emerald-500/50 bg-slate-50 dark:bg-slate-700/50 text-slate-700 dark:text-slate-100 font-medium"
                   placeholder="e.g. Cash payment"
                 />
               </div>

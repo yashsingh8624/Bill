@@ -173,13 +173,13 @@ export default function Dashboard() {
   const suppliersWithDues = useMemo(() => suppliers.filter(s => calculateSupplierBalance(ledger, s.id) > 0), [suppliers, ledger]);
 
   return (
-    <div className="space-y-6 w-full max-w-7xl mx-auto animate-in fade-in duration-500 px-4 sm:px-0 min-w-0">
+    <div className="space-y-6 w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 sm:pb-8 pt-2 sm:pt-4 min-w-0 page-animate">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Business Overview</h2>
-          <p className="text-slate-500 text-sm mt-1 font-medium italic">Welcome back! Your business is currently active.</p>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight transition-colors duration-300">Business Overview</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium italic transition-colors duration-300">Welcome back! Your business is currently active.</p>
         </div>
-        <Link to="/new-bill" className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-2xl transition-all font-black flex items-center justify-center gap-2 shadow-xl shadow-indigo-600/20 whitespace-nowrap group">
+        <Link to="/new-bill" className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-2xl transition-all duration-300 font-black flex items-center justify-center gap-2 shadow-xl shadow-green-600/20 whitespace-nowrap group">
           <FileText size={20} className="group-hover:scale-110 transition-transform" />
           Generate Invoice
         </Link>
@@ -187,77 +187,78 @@ export default function Dashboard() {
 
       {/* KPI Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center relative overflow-hidden group hover:shadow-md transition-shadow">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-indigo-50 rounded-full blur-xl group-hover:scale-110 transition-transform"></div>
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center relative overflow-hidden group hover:shadow-md transition-all duration-300">
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-indigo-50 dark:bg-indigo-900/20 rounded-full blur-xl group-hover:scale-110 transition-transform"></div>
           <div className="flex items-center gap-3 mb-3 relative z-10">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-inner">
               <IndianRupee size={20} />
             </div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Today's Sales</p>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest transition-colors duration-300">Today's Sales</p>
           </div>
-          <h3 className="text-3xl font-black text-slate-800 relative z-10 tracking-tighter">₹{parseFloat(stats.todaysSales || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+          <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100 relative z-10 tracking-tighter transition-colors duration-300">₹{parseFloat(stats.todaysSales || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
           <div className={`mt-3 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${parseFloat(stats.salesTrend || 0) >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
             {parseFloat(stats.salesTrend || 0) >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
             {Math.abs(parseFloat(stats.salesTrend || 0)).toFixed(1)}% from yesterday
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center relative overflow-hidden group hover:shadow-md transition-shadow">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-50 rounded-full blur-xl group-hover:scale-110 transition-transform"></div>
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center relative overflow-hidden group hover:shadow-md transition-all duration-300">
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-full blur-xl group-hover:scale-110 transition-transform"></div>
           <div className="flex items-center gap-3 mb-3 relative z-10">
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shadow-inner">
               <Calendar size={20} />
             </div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Monthly Intake</p>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest transition-colors duration-300">Monthly Intake</p>
           </div>
-          <h3 className="text-3xl font-black text-slate-800 relative z-10 tracking-tighter">₹{stats.thisMonthSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+          <h3 className="text-3xl font-black text-slate-800 dark:text-slate-100 relative z-10 tracking-tighter transition-colors duration-300">₹{stats.thisMonthSales.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
           <div className={`mt-3 flex items-center gap-1 text-[10px] font-black uppercase tracking-widest ${stats.monthTrend >= 0 ? 'text-emerald-500' : 'text-rose-500'}`}>
             {stats.monthTrend >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
             {Math.abs(stats.monthTrend).toFixed(1)}% from last month
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center relative overflow-hidden group hover:shadow-md transition-shadow">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-emerald-50 rounded-full blur-xl group-hover:scale-110 transition-transform"></div>
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 flex flex-col justify-center relative overflow-hidden group hover:shadow-md transition-all duration-300">
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-full blur-xl group-hover:scale-110 transition-transform"></div>
           <div className="flex items-center gap-3 mb-3 relative z-10">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-inner">
               <TrendingUp size={20} />
             </div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Estimated GP</p>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest transition-colors duration-300">Estimated GP</p>
           </div>
-          <h3 className="text-3xl font-black text-emerald-600 relative z-10 tracking-tighter">₹{stats.totalProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
-          <p className="text-emerald-600/60 text-[10px] mt-2 font-black uppercase tracking-widest">Lifetime Margin</p>
+          <h3 className="text-3xl font-black text-emerald-600 dark:text-emerald-500 relative z-10 tracking-tighter transition-colors duration-300">₹{stats.totalProfit.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+          <p className="text-emerald-600/60 dark:text-emerald-500/60 text-[10px] mt-2 font-black uppercase tracking-widest">Lifetime Margin</p>
         </div>
 
-        <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex flex-col justify-center relative overflow-hidden group hover:shadow-md transition-shadow">
-          <div className="absolute -right-4 -top-4 w-20 h-20 bg-amber-50 rounded-full blur-xl group-hover:scale-110 transition-transform"></div>
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center relative overflow-hidden group hover:shadow-md transition-all duration-300">
+          <div className="absolute -right-4 -top-4 w-20 h-20 bg-amber-50 dark:bg-amber-900/20 rounded-full blur-xl group-hover:scale-110 transition-transform"></div>
           <div className="flex items-center gap-3 mb-3 relative z-10">
-            <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shadow-inner">
+            <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-inner">
               <Wallet size={20} />
             </div>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">Cash In Hand</p>
+            <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest transition-colors duration-300">Cash In Hand</p>
           </div>
-          <h3 className={`text-3xl font-black relative z-10 tracking-tighter ${cashInHand >= 0 ? 'text-slate-800' : 'text-rose-600'}`}>
+          <h3 className={`text-3xl font-black relative z-10 tracking-tighter transition-colors duration-300 ${cashInHand >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-rose-600 dark:text-rose-500'}`}>
             ₹{cashInHand.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </h3>
-          <p className="text-slate-400 text-[10px] mt-2 font-black uppercase tracking-widest">Physical Cash Balance</p>
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-2 font-black uppercase tracking-widest transition-colors duration-300">Physical Cash Balance</p>
         </div>
       </div>
 
       {/* Sales Momentum Section */}
-      <div className="bg-white p-6 sm:p-8 rounded-[2.5rem] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100 relative overflow-hidden">
+      {/* Sales Momentum Section */}
+      <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[2.5rem] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100 dark:border-slate-600 relative overflow-hidden transition-colors duration-300">
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
            <div>
-             <h3 className="text-xl font-black text-slate-800 flex items-center gap-2 mb-1">
-               <TrendingUp size={24} className="text-indigo-600" /> Sales Momentum
+             <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-1 transition-colors duration-300">
+               <TrendingUp size={24} className="text-indigo-600 dark:text-indigo-400" /> Sales Momentum
              </h3>
-             <p className="text-sm text-slate-500 font-bold">Last 6 Months Performance</p>
+             <p className="text-sm text-slate-500 dark:text-slate-400 font-bold transition-colors duration-300">Last 6 Months Performance</p>
            </div>
            <div>
               <select 
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="w-full sm:w-auto px-5 py-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none shadow-sm cursor-pointer transition-colors"
+                className="w-full sm:w-auto px-5 py-2.5 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none shadow-sm cursor-pointer transition-colors duration-300"
                 style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.25rem', paddingRight: '2.5rem' }}
               >
                 {availableYears.map(year => (
@@ -267,16 +268,16 @@ export default function Dashboard() {
            </div>
         </div>
         
-        <div className="flex flex-col divide-y divide-slate-100 border border-slate-100 rounded-2xl bg-white overflow-hidden shadow-sm">
+        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl bg-white dark:bg-slate-800 overflow-hidden shadow-sm transition-colors duration-300">
           {chartData.map((d, i) => (
-            <div key={i} className="flex items-center justify-between p-4 sm:p-5 hover:bg-slate-50 transition-colors">
-               <span className="font-black text-slate-500 uppercase tracking-widest text-sm sm:text-base">{d.label}</span>
+            <div key={i} className="flex items-center justify-between p-4 sm:p-5 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+               <span className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest text-sm sm:text-base transition-colors duration-300">{d.label}</span>
                <div className="flex items-center gap-4 sm:gap-6">
-                  <span className="font-black text-slate-800 text-lg sm:text-xl tracking-tight">₹{d.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="font-black text-slate-800 dark:text-slate-100 text-lg sm:text-xl tracking-tight transition-colors duration-300">₹{d.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                   <div className="w-6 flex justify-center">
                     {d.trend === 'up' && <span className="text-green-500 font-black text-2xl leading-none">↑</span>}
                     {d.trend === 'down' && <span className="text-red-500 font-black text-2xl leading-none">↓</span>}
-                    {d.trend === 'flat' && <span className="text-slate-300 font-black text-2xl leading-none">-</span>}
+                    {d.trend === 'flat' && <span className="text-slate-300 dark:text-slate-500 font-black text-2xl leading-none transition-colors duration-300">-</span>}
                   </div>
                </div>
             </div>
@@ -334,23 +335,23 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Ledger Due Summaries - Vyapar Style */}
-        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 col-span-1 lg:col-span-2">
+        <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 col-span-1 lg:col-span-2 transition-colors duration-300">
           <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-            <Target size={16} className="text-indigo-500" /> Pending Market Exposure
+            <Target size={16} className="text-indigo-500 dark:text-indigo-400" /> Pending Market Exposure
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div 
               onClick={() => setDashboardModal('get')}
-              className="bg-emerald-50 hover:bg-emerald-100 p-6 rounded-3xl border border-emerald-100 shadow-sm cursor-pointer transition-colors group relative overflow-hidden"
+              className="bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-800/50 shadow-sm cursor-pointer transition-colors group relative overflow-hidden"
             >
-              <div className="absolute right-0 top-0 w-24 h-24 bg-emerald-100 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
-              <p className="text-emerald-700 text-xs font-black uppercase tracking-widest mb-1">
+              <div className="absolute right-0 top-0 w-24 h-24 bg-emerald-100 dark:bg-emerald-800/30 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
+              <p className="text-emerald-700 dark:text-emerald-400 text-xs font-black uppercase tracking-widest mb-1">
                 You'll Get
               </p>
-              <h4 className="text-3xl font-black text-emerald-600 tracking-tight mb-2">₹{totalCustomerDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</h4>
+              <h4 className="text-3xl font-black text-emerald-600 dark:text-emerald-500 tracking-tight mb-2">₹{totalCustomerDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</h4>
               <div className="flex items-center justify-between mt-4">
-                 <p className="text-emerald-500 text-[10px] font-bold uppercase">From {customersWithDues.length} Customers</p>
-                 <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-emerald-500 shadow-sm group-hover:translate-x-1 transition-transform">
+                 <p className="text-emerald-500 dark:text-emerald-300 text-[10px] font-bold uppercase">From {customersWithDues.length} Customers</p>
+                 <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-emerald-500 shadow-sm group-hover:translate-x-1 transition-transform">
                    <ChevronRight size={16} />
                  </div>
               </div>
@@ -358,16 +359,16 @@ export default function Dashboard() {
 
             <div 
               onClick={() => setDashboardModal('give')}
-              className="bg-rose-50 hover:bg-rose-100 p-6 rounded-3xl border border-rose-100 shadow-sm cursor-pointer transition-colors group relative overflow-hidden"
+              className="bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 p-6 rounded-3xl border border-rose-100 dark:border-rose-800/50 shadow-sm cursor-pointer transition-colors group relative overflow-hidden"
             >
-              <div className="absolute right-0 top-0 w-24 h-24 bg-rose-100 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
-              <p className="text-rose-700 text-xs font-black uppercase tracking-widest mb-1">
+              <div className="absolute right-0 top-0 w-24 h-24 bg-rose-100 dark:bg-rose-800/30 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
+              <p className="text-rose-700 dark:text-rose-400 text-xs font-black uppercase tracking-widest mb-1">
                 You'll Give
               </p>
-              <h4 className="text-3xl font-black text-rose-600 tracking-tight mb-2">₹{totalSupplierDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</h4>
+              <h4 className="text-3xl font-black text-rose-600 dark:text-rose-500 tracking-tight mb-2">₹{totalSupplierDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</h4>
               <div className="flex items-center justify-between mt-4">
-                 <p className="text-rose-500 text-[10px] font-bold uppercase">To {suppliersWithDues.length} Suppliers</p>
-                 <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-rose-500 shadow-sm group-hover:translate-x-1 transition-transform">
+                 <p className="text-rose-500 dark:text-rose-300 text-[10px] font-bold uppercase">To {suppliersWithDues.length} Suppliers</p>
+                 <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-rose-500 shadow-sm group-hover:translate-x-1 transition-transform">
                    <ChevronRight size={16} />
                  </div>
               </div>
@@ -376,21 +377,21 @@ export default function Dashboard() {
         </div>
 
         {/* Top Products */}
-        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 transition-colors duration-300">
           <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
-            <Package size={16} className="text-emerald-500" /> Best Moving Stock
+            <Package size={16} className="text-emerald-500 dark:text-emerald-400" /> Best Moving Stock
           </h3>
           <div className="space-y-4">
             {topProducts.length === 0 ? (
-              <div className="py-12 text-center text-slate-300 italic font-medium">No sales history yet.</div>
+              <div className="py-12 text-center text-slate-300 dark:text-slate-600 italic font-medium transition-colors duration-300">No sales history yet.</div>
             ) : (
               topProducts.map(([name, qty], idx) => (
                 <div key={idx} className="flex items-center justify-between group">
                   <div className="flex items-center gap-4">
-                    <span className="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-[10px] font-black text-slate-400 border border-slate-100 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-500 transition-all">{idx + 1}</span>
-                    <span className="font-black text-slate-700 text-sm uppercase tracking-tight">{name}</span>
+                    <span className="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-[10px] font-black text-slate-400 border border-slate-100 dark:border-slate-600 group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-500 transition-all">{idx + 1}</span>
+                    <span className="font-black text-slate-700 dark:text-slate-300 text-sm uppercase tracking-tight transition-colors duration-300">{name}</span>
                   </div>
-                  <span className="bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full font-black text-[10px] border border-emerald-100 uppercase tracking-widest shadow-sm">{qty} Units</span>
+                  <span className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-3 py-1 rounded-full font-black text-[10px] border border-emerald-100 dark:border-emerald-800/50 uppercase tracking-widest shadow-sm transition-colors duration-300">{qty} Units</span>
                 </div>
               ))
             )}
@@ -400,28 +401,28 @@ export default function Dashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Activity */}
-        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+        <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 transition-colors duration-300">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <FileText size={16} className="text-blue-500" /> Recent Transactions
+              <FileText size={16} className="text-blue-500 dark:text-blue-400" /> Recent Transactions
             </h3>
-            <Link to="/bills" className="text-[10px] font-black uppercase text-indigo-600 hover:text-indigo-700 tracking-widest flex items-center gap-1 group">
+            <Link to="/bills" className="text-[10px] font-black uppercase text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 tracking-widest flex items-center gap-1 group transition-colors">
               View All <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
           <div className="space-y-4">
             {recentBills.length === 0 ? (
-              <div className="py-12 text-center text-slate-300 italic font-medium">Ready for your first sale!</div>
+              <div className="py-12 text-center text-slate-300 dark:text-slate-600 italic font-medium transition-colors duration-300">Ready for your first sale!</div>
             ) : (
               recentBills.map((bill, idx) => (
-                <div key={idx} className="flex items-center justify-between p-4 rounded-2xl border border-slate-50 hover:bg-slate-50 transition-colors group">
-                  <div>
-                    <p className="font-black text-slate-800 text-sm">#{bill.invoiceNo}</p>
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">{bill.customerName}</p>
+                <div key={idx} className="flex items-center justify-between p-4 rounded-2xl border border-slate-50 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">
+                  <div className="min-w-0 flex-1">
+                    <p className="font-black text-slate-800 dark:text-slate-100 text-sm transition-colors duration-300 text-ellipsis overflow-hidden">#{bill.invoiceNo}</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-ellipsis overflow-hidden white-space-nowrap">{(bill.customerName || 'Unknown')}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="font-black text-slate-800 tracking-tighter">₹{(bill.grandTotal || bill.total || 0).toFixed(2)}</p>
-                    <p className="text-[10px] text-slate-400 font-medium">{(bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A'))}</p>
+                  <div className="text-right flex-shrink-0">
+                    <p className="font-black text-slate-800 dark:text-slate-100 tracking-tighter transition-colors duration-300">₹{(bill.grandTotal || bill.total || 0).toFixed(2)}</p>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium transition-colors duration-300">{(bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A'))}</p>
                   </div>
                 </div>
               ))
@@ -430,31 +431,31 @@ export default function Dashboard() {
         </div>
 
         {/* Inventory Watchlist */}
-        <div id="low-stock-section" className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden flex flex-col">
-          <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-red-50/20">
-            <h3 className="text-xs font-black text-red-600 uppercase tracking-widest flex items-center gap-2">
+        <div id="low-stock-section" className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 overflow-hidden flex flex-col transition-colors duration-300">
+          <div className="p-8 border-b border-slate-50 dark:border-slate-700/50 flex items-center justify-between bg-red-50/20 dark:bg-red-900/10">
+            <h3 className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest flex items-center gap-2">
               <AlertTriangle size={16} className="text-red-500" /> Stock Watchlist
             </h3>
-            <Link to="/products" className="text-[10px] font-black uppercase text-slate-600 hover:text-slate-800 bg-white border border-slate-200 px-3 py-1.5 rounded-xl shadow-sm transition-colors">
+            <Link to="/products" className="text-[10px] font-black uppercase text-slate-600 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-3 py-1.5 rounded-xl shadow-sm transition-colors">
               Inventory App
             </Link>
           </div>
           <div className="overflow-y-auto max-h-[350px] p-6 custom-scrollbar">
             {lowStockProducts.length === 0 ? (
               <div className="py-12 text-center flex flex-col items-center">
-                <div className="bg-emerald-50 p-4 rounded-full mb-4 border border-emerald-100 shadow-sm">
-                  <Package size={32} className="text-emerald-500" />
+                <div className="bg-emerald-50 dark:bg-emerald-900/30 p-4 rounded-full mb-4 border border-emerald-100 dark:border-emerald-800/50 shadow-sm transition-colors duration-300">
+                  <Package size={32} className="text-emerald-500 dark:text-emerald-400" />
                 </div>
-                <p className="font-black text-slate-700 text-lg uppercase tracking-tight">Inventory Optimized</p>
-                <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">No refilling required</p>
+                <p className="font-black text-slate-700 dark:text-slate-300 text-lg uppercase tracking-tight transition-colors duration-300">Inventory Optimized</p>
+                <p className="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-widest mt-1 transition-colors duration-300">No refilling required</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {lowStockProducts.map(product => (
-                  <div key={product.id} className="p-4 flex items-center justify-between bg-white border border-slate-100 rounded-2xl hover:bg-red-50/30 hover:border-red-100 transition-all group">
+                  <div key={product.id} className="p-4 flex items-center justify-between bg-white dark:bg-slate-700/50 border border-slate-100 dark:border-slate-600 rounded-2xl hover:bg-red-50/30 dark:hover:bg-red-900/20 hover:border-red-100 dark:hover:border-red-800/50 transition-all group">
                     <div>
-                      <p className="font-black text-slate-800 text-sm uppercase tracking-tight">{product.name}</p>
-                      <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">Threshold: {product.lowStockThreshold || 5}</p>
+                      <p className="font-black text-slate-800 dark:text-white text-sm uppercase tracking-tight transition-colors duration-300">{product.name}</p>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-400 font-bold tracking-widest uppercase mt-0.5 transition-colors duration-300">Threshold: {product.lowStockThreshold || 5}</p>
                     </div>
                     <div className="text-right">
                       <span className="bg-red-500 text-white px-3 py-1 rounded-lg text-xs font-black shadow-md shadow-red-500/20">

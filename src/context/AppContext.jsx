@@ -1,5 +1,6 @@
 import React from 'react';
 import { AuthProvider } from './AuthContext';
+import { ThemeProvider } from './ThemeContext';
 import { SettingsProvider, useSettings } from './SettingsContext';
 import { InventoryProvider, useInventory } from './InventoryContext';
 import { PartiesProvider, useCustomers, useSuppliers } from './PartiesContext';
@@ -10,23 +11,25 @@ import { ExpenseProvider, useExpenses } from './ExpenseContext';
 
 export const AppProvider = ({ children }) => {
   return (
-    <AuthProvider>
-      <AuditProvider>
-        <SettingsProvider>
-          <PartiesProvider>
-            <InventoryProvider>
-              <BillProvider>
-                <ExpenseProvider>
-                  <TransactionProvider>
-                    {children}
-                  </TransactionProvider>
-                </ExpenseProvider>
-              </BillProvider>
-            </InventoryProvider>
-          </PartiesProvider>
-        </SettingsProvider>
-      </AuditProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AuditProvider>
+          <SettingsProvider>
+            <PartiesProvider>
+              <InventoryProvider>
+                <BillProvider>
+                  <ExpenseProvider>
+                    <TransactionProvider>
+                      {children}
+                    </TransactionProvider>
+                  </ExpenseProvider>
+                </BillProvider>
+              </InventoryProvider>
+            </PartiesProvider>
+          </SettingsProvider>
+        </AuditProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

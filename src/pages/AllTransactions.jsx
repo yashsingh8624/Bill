@@ -138,21 +138,21 @@ export default function AllTransactions() {
   };
 
   return (
-    <div className="page-animate max-w-4xl mx-auto pb-24 sm:pb-10 space-y-6 flex flex-col pt-2 sm:pt-4 min-w-0">
+    <div className="page-animate w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 sm:pb-10 space-y-6 flex flex-col pt-2 sm:pt-4 min-w-0">
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+          <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
              <ArrowLeft size={24} />
           </button>
           <div className="flex-1">
-            <h1 className="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+            <h1 className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
                All Transactions 
                <span className="bg-indigo-100 text-indigo-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider">
                  {useFirebase ? 'Live' : 'Feed'}
                </span>
             </h1>
-            <p className="text-sm font-bold text-slate-500">Chronological history of Sales and Payments</p>
+            <p className="text-sm font-bold text-slate-500 dark:text-slate-400">Chronological history of Sales and Payments</p>
           </div>
           <button 
             onClick={handleRefresh}
@@ -166,7 +166,7 @@ export default function AllTransactions() {
       </div>
 
       {/* Main List */}
-      <div className="card p-0 flex flex-col shadow-sm border-slate-200">
+      <div className="card p-0 flex flex-col shadow-sm border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800">
          {loading ? (
            <div className="p-12 flex flex-col items-center justify-center">
              <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4"></div>
@@ -174,10 +174,10 @@ export default function AllTransactions() {
            </div>
          ) : transactions.length === 0 ? (
            <div className="p-16 flex flex-col items-center justify-center text-center">
-             <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4 text-slate-300">
+             <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4 text-slate-300 dark:text-slate-500">
                <Activity size={32} />
              </div>
-             <h3 className="text-base font-black text-slate-700 mb-1">No Transactions Yet</h3>
+             <h3 className="text-base font-black text-slate-700 dark:text-slate-100 mb-1">No Transactions Yet</h3>
              <p className="text-sm font-bold text-slate-400">Your sales and payments will appear here.</p>
            </div>
          ) : (
@@ -207,15 +207,15 @@ export default function AllTransactions() {
                  displayType = txn.type || 'Sale';
                  iconColor = 'text-indigo-700';
                  bgColor = 'bg-gradient-to-br from-indigo-100 to-blue-200 border-indigo-200';
-                 textColor = 'text-slate-800';
+                 textColor = 'text-slate-800 dark:text-slate-100';
                  Icon = <ShoppingCart strokeWidth={2.5} size={20} />;
                  sign = ''; 
                }
 
                 const partyName = getPartyName(txn);
 
-                return (
-                 <div key={txn.id || idx} className="p-4 sm:p-5 flex items-center justify-between hover:bg-slate-50 transition-colors cursor-default">
+                 return (
+                 <div key={txn.id || idx} className="p-4 sm:p-5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-default border-b border-slate-100 dark:border-slate-700/50 last:border-0">
                     
                     {/* Left: Icon & Details */}
                      <div className="flex items-center gap-4">
@@ -224,12 +224,14 @@ export default function AllTransactions() {
                        </div>
                        
                        <div className="flex flex-col">
-                         <h3 className="font-black text-slate-800 text-base tracking-tight truncate max-w-[160px] sm:max-w-full">
-                           {partyName} – <span className="font-bold opacity-90">{displayType}</span>
+                         <h3 className="font-black text-slate-800 dark:text-slate-100 text-base tracking-tight truncate max-w-full max-w-sm sm:max-w-full border-b-0 space-x-1">
+                           <span>{partyName}</span>
+                           <span className="font-medium text-slate-400 dark:text-slate-500">–</span>
+                           <span className="font-bold opacity-90">{displayType}</span>
                          </h3>
                          <div className="flex items-center gap-2 mt-0.5">
                            {txn.invoice_id && (
-                             <span className="text-[10px] font-black text-slate-500 bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded">
+                             <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-1.5 py-0.5 rounded">
                                #{txn.invoice_id}
                              </span>
                            )}

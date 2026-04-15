@@ -11,7 +11,7 @@ export default function Toast({ message, type, onClose }) {
       <span className="font-bold text-sm tracking-tight">{message}</span>
       <button 
         onClick={onClose}
-        className="ml-2 p-1 hover:bg-white/20 rounded-lg transition-colors"
+        className="ml-2 p-1 hover:bg-white dark:bg-slate-800 transition-colors duration-300/20 rounded-lg transition-colors"
       >
         <X size={16} />
       </button>

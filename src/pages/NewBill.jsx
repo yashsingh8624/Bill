@@ -265,11 +265,11 @@ export default function NewBill() {
     .slice(0, 5);
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 min-w-0 pt-2 sm:pt-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-slate-800">Quick Billing</h2>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Quick Billing</h2>
           <div className="flex items-center gap-3 mt-2">
             <span className="bg-indigo-100 text-indigo-800 text-sm font-bold px-3 py-1.5 rounded-lg flex items-center gap-1 shadow-sm">
               <Tag size={14} /> {invoiceNo}
@@ -278,7 +278,7 @@ export default function NewBill() {
               type="date" 
               readOnly
               value={date} 
-              className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 bg-slate-50 shadow-inner select-none outline-none" 
+              className="border border-slate-200 dark:border-slate-600 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900 shadow-inner select-none outline-none" 
               title="System Date" 
             />
           </div>
@@ -299,20 +299,20 @@ export default function NewBill() {
         <div className="lg:col-span-2 space-y-6">
 
           {/* Customer section */}
-          <div className="bg-white p-6 rounded-[20px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100/50 relative">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-[20px] shadow-sm border border-slate-100 dark:border-slate-600 relative">
             <div className="flex justify-between items-center mb-4">
-               <h3 className="text-lg font-bold text-slate-800 tracking-tight">Customer Details</h3>
+               <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 tracking-tight">Customer Details</h3>
             </div>
 
             {/* Recent customer pills — only show when NOT typing */}
             {recentCustomers.length > 0 && !customerName && (
               <div className="mb-4 flex flex-wrap gap-2">
-                <span className="text-xs text-slate-500 font-bold py-1 uppercase tracking-wider">Recent:</span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-bold py-1 uppercase tracking-wider">Recent:</span>
                 {recentCustomers.map(c => (
                   <button
                     key={c.id} type="button"
                     onClick={() => { setSelectedCustomerId(c.id); setCustomerName(c.name); setCustomerPhone(c.phone || ''); }}
-                    className="text-xs px-3 py-1.5 rounded-[8px] bg-slate-50 text-slate-600 hover:bg-purple-50 hover:text-purple-700 font-bold transition-all"
+                    className="text-xs px-3 py-1.5 rounded-[8px] bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 hover:bg-purple-50 hover:text-purple-700 font-bold transition-all"
                   >
                     {c.name}
                   </button>
@@ -322,7 +322,7 @@ export default function NewBill() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
-                <label className="block text-sm font-medium text-slate-700 mb-1">Customer Name *</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Customer Name *</label>
                 <div className="relative search-wrapper">
                   <SearchIcon size={18} className="search-icon absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                   <input
@@ -330,7 +330,7 @@ export default function NewBill() {
                     id="customer-name-input"
                     value={customerName || ''}
                     onChange={e => { setCustomerName(e.target.value); setSelectedCustomerId(''); }}
-                    className="search-clean w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 text-sm font-bold"
+                    className="search-clean w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-indigo-500/50 text-sm font-bold text-slate-800 dark:text-slate-100"
                     placeholder="Type to search customers..."
                     autoComplete="off"
                   />
@@ -342,7 +342,7 @@ export default function NewBill() {
                     (c.name || '').toLowerCase().includes(customerName.toLowerCase())
                   ).slice(0, 8);
                   return filtered.length > 0 ? (
-                    <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-52 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-xl shadow-xl z-50 max-h-52 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-top-2 duration-200">
                       {filtered.map(c => (
                         <div
                           key={c.id}
@@ -354,7 +354,7 @@ export default function NewBill() {
                           className="px-4 py-3 hover:bg-indigo-50 cursor-pointer flex items-center justify-between group border-b border-slate-50 last:border-0 transition-colors"
                         >
                           <div>
-                            <span className="font-bold text-slate-800 text-sm group-hover:text-indigo-700">{c.name}</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-100 text-sm group-hover:text-indigo-700">{c.name}</span>
                             {c.phone && <span className="text-xs text-slate-400 ml-2">{c.phone}</span>}
                           </div>
                           <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded uppercase group-hover:bg-indigo-200 group-hover:text-indigo-700 transition-colors">Select</span>
@@ -365,12 +365,12 @@ export default function NewBill() {
                 })()}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Phone Number</label>
                 <input
                   type="text"
                   value={customerPhone || ''}
                   onChange={e => setCustomerPhone(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 text-sm font-bold"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-indigo-500/50 text-sm font-bold text-slate-800 dark:text-slate-100"
                   placeholder="Enter phone number"
                 />
               </div>
@@ -378,8 +378,8 @@ export default function NewBill() {
           </div>
 
           {/* Add Item Form */}
-          <div className="bg-white p-6 rounded-[20px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100/50">
-            <h3 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-[20px] shadow-sm border border-slate-100 dark:border-slate-600">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4 flex items-center gap-2">
               <div className="bg-indigo-50 text-indigo-600 p-1.5 rounded-lg">
                 <Tag size={18} />
               </div>
@@ -393,7 +393,7 @@ export default function NewBill() {
               {/* Row 1: Name */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-12">
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Item Name *</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Item Name *</label>
                 <div className="relative search-wrapper">
                     <SearchIcon size={16} className="search-icon absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
                     <input
@@ -402,7 +402,7 @@ export default function NewBill() {
                       type="text" required
                       value={itemForm.name}
                       onChange={handleItemNameChange}
-                      className="search-clean w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 text-sm bg-white"
+                      className="search-clean w-full pl-9 pr-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 text-sm bg-white dark:bg-slate-900/50 text-slate-800 dark:text-slate-100"
                       placeholder="Type to search..."
                       autoComplete="off"
                     />
@@ -413,46 +413,46 @@ export default function NewBill() {
               {/* Row 2: Rate, Qty, GST%, Discount, Add */}
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3 items-end">
                 <div className="md:col-span-3">
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Rate (₹) *</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Rate (₹) *</label>
                   <input
                     type="number" required min="0" step="0.01"
                     value={itemForm.rate || ''}
                     onChange={e => setItemForm(p => ({ ...p, rate: e.target.value }))}
                     onFocus={(e) => e.target.select()}
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 text-sm font-bold"
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-indigo-500/50 text-sm font-bold text-slate-800 dark:text-slate-100"
                     placeholder="Enter rate"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Qty *</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Qty *</label>
                   <input
                     type="number" required min="1"
                     value={itemForm.qty}
                     onChange={e => setItemForm(p => ({ ...p, qty: e.target.value }))}
                     onFocus={(e) => e.target.select()}
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 text-sm"
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-indigo-500/50 text-sm font-bold text-slate-800 dark:text-slate-100"
                   />
                 </div>
                 {userSettings?.uiMode === 'advanced' && (
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-500 mb-1">GST %</label>
+                    <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">GST %</label>
                     <select
                       value={itemForm.gstRate}
                       onChange={e => setItemForm(p => ({ ...p, gstRate: e.target.value }))}
-                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 text-sm bg-white"
+                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 text-sm bg-white dark:bg-slate-900/50 text-slate-800 dark:text-slate-100"
                     >
                       {GST_RATES.map(r => <option key={r} value={r}>{r}%</option>)}
                     </select>
                   </div>
                 )}
                 <div className={userSettings?.uiMode === 'advanced' ? "md:col-span-2" : "md:col-span-4"}>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1">Discount %</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 mb-1">Discount %</label>
                   <input
                     type="number" min="0" max="100" step="0.1"
                     value={itemForm.discount || ''}
                     onChange={e => setItemForm(p => ({ ...p, discount: e.target.value }))}
                     onFocus={(e) => e.target.select()}
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500/50 text-sm"
+                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-900/50 focus:ring-2 focus:ring-indigo-500/50 text-sm font-bold text-slate-800 dark:text-slate-100"
                     placeholder="0%"
                   />
                 </div>
@@ -466,9 +466,9 @@ export default function NewBill() {
           </div>
 
           {/* Items Table */}
-          <div className="bg-white rounded-[20px] shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-slate-100/50 overflow-hidden">
-            <div className="p-5 border-b border-slate-50 flex justify-between items-center bg-white">
-              <h3 className="text-lg font-bold text-slate-800 tracking-tight flex items-center gap-2">
+          <div className="bg-white dark:bg-slate-800 rounded-[20px] shadow-sm border border-slate-100 dark:border-slate-600 overflow-hidden">
+            <div className="p-5 border-b border-slate-50 dark:border-slate-700 flex justify-between items-center bg-white dark:bg-slate-800">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-2">
                 <span className="bg-indigo-600 text-white text-xs font-black px-2 py-0.5 rounded-md">{items.length}</span>
                 Bill Items
               </h3>
@@ -477,9 +477,9 @@ export default function NewBill() {
               <div className="p-10 text-center text-slate-400 font-medium">No items added yet.</div>
             ) : (
               <div className="overflow-x-auto w-full">
-                <table className="w-full text-left border-collapse min-w-[500px]">
+                <table className="w-full text-left border-collapse min-w-full max-w-sm">
                   <thead>
-                    <tr className="bg-slate-50 border-y border-slate-100/80 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    <tr className="bg-slate-50 dark:bg-slate-900 border-y border-slate-100 dark:border-slate-700 text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                       <th className="p-4 py-3 pl-5">Item</th>
                       <th className="p-4 py-3 text-center">Qty</th>
                       <th className="p-4 py-3 text-right">Rate</th>
@@ -488,19 +488,19 @@ export default function NewBill() {
                       <th className="w-12 text-center"></th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100/50">
+                  <tbody className="divide-y divide-slate-100/50 dark:divide-slate-700">
                     {items.map((item, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/50 transition-colors animate-in fade-in duration-200">
+                      <tr key={idx} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition-colors animate-in fade-in duration-200">
                         <td className="p-4 pl-5">
-                          <h4 className="font-bold text-slate-800 text-[14px] leading-tight">{item.name}</h4>
+                          <h4 className="font-bold text-slate-800 dark:text-slate-100 text-[14px] leading-tight">{item.name}</h4>
                         </td>
                         <td className="p-4">
                           <div className="inline-flex items-center justify-center w-full">
-                            <span className="text-slate-700 font-bold bg-slate-100 rounded-md px-2 py-0.5 text-sm">{item.quantity}</span>
+                            <span className="text-slate-700 dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-700 rounded-md px-2 py-0.5 text-sm">{item.quantity}</span>
                           </div>
                         </td>
                         <td className="p-4 text-right">
-                          <span className="font-semibold text-slate-700 text-sm">₹{item.rate.toFixed(2)}</span>
+                          <span className="font-semibold text-slate-700 dark:text-slate-300 text-sm">₹{item.rate.toFixed(2)}</span>
                         </td>
                         <td className="p-4 text-[10px] font-bold text-slate-400 uppercase text-right tracking-wider">
                           <div className="flex flex-col items-end gap-0.5">
@@ -509,11 +509,11 @@ export default function NewBill() {
                             {item.discount === 0 && (userSettings?.uiMode !== 'advanced' || item.gstRate === 0) && <span>-</span>}
                           </div>
                         </td>
-                        <td className="p-4 pr-5 text-right">
-                          <span className="font-black text-slate-800 text-md">₹{item.amount.toFixed(2)}</span>
+                        <td className="p-4 pt-5 pr-5 text-right w-[100px] flex items-center justify-end">
+                          <span className="font-black text-slate-800 dark:text-slate-100 text-md">₹{item.amount.toFixed(2)}</span>
                         </td>
                         <td className="p-4 text-center pr-2">
-                          <button onClick={() => removeItem(idx)} className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors outline-none focus:ring-2 focus:ring-red-200">
+                          <button type="button" onClick={(e) => { e.preventDefault(); removeItem(idx); }} className="p-2 text-slate-300 dark:text-slate-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl transition-colors outline-none focus:ring-2 focus:ring-red-200">
                             <Trash2 size={16} />
                           </button>
                         </td>
@@ -531,24 +531,24 @@ export default function NewBill() {
         <div className="lg:col-span-1 space-y-6">
 
           {/* Payment Mode */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Payment Mode</h3>
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600">
+            <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-4">Payment Mode</h3>
             <div className="grid grid-cols-3 gap-2 mb-4">
               {['Cash', 'UPI', 'Credit'].map(mode => (
                 <button
                   key={mode} type="button"
                   onClick={() => { setPaymentMode(mode); if (mode === 'Credit') setAmountPaidInput(0); }}
-                  className={`py-2 text-sm font-medium rounded-lg border transition-all ${paymentMode === mode ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+                  className={`py-2 text-sm font-medium rounded-lg border transition-all ${paymentMode === mode ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm' : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
                 >
                   {mode}
                 </button>
               ))}
             </div>
-            <div className="space-y-3 p-3 bg-slate-50 rounded-xl border border-slate-100">
+            <div className="space-y-3 p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700">
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-600 font-medium">Received (₹)</span>
+                <span className="text-slate-600 dark:text-slate-400 font-medium">Received (₹)</span>
                 {paymentMode === 'Credit' ? (
-                  <input type="number" value={0} readOnly className="w-24 px-2 py-1 text-right bg-transparent text-slate-800 font-bold" />
+                  <input type="number" value={0} readOnly className="w-24 px-2 py-1 text-right bg-transparent text-slate-800 dark:text-slate-100 font-bold" />
                 ) : (
                   <input
                     type="number" min="0" step="0.01"
@@ -556,13 +556,13 @@ export default function NewBill() {
                     onChange={e => setAmountPaidInput(e.target.value)}
                     onFocus={(e) => e.target.select()}
                     placeholder="Enter amount"
-                    className="w-32 px-2 py-1.5 text-right bg-white border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 font-bold shadow-inner"
+                    className="w-32 px-2 py-1.5 text-right bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 outline-none rounded-md focus:ring-2 focus:ring-indigo-500 font-bold shadow-inner"
                   />
                 )}
               </div>
               <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-600 font-medium">Due Balance</span>
-                <span className={`font-bold ${outstanding > 0 ? 'text-red-500' : 'text-emerald-500'}`}>₹{outstanding.toFixed(2)}</span>
+                <span className="text-slate-600 dark:text-slate-400 font-medium">Due Balance</span>
+                <span className={`font-bold ${outstanding > 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-500 dark:text-emerald-400'}`}>₹{outstanding.toFixed(2)}</span>
               </div>
             </div>
           </div>
@@ -644,7 +644,7 @@ export default function NewBill() {
       {showSuccessOverlay && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-indigo-600/95 backdrop-blur-xl animate-in fade-in duration-300">
           <div className="text-center animate-in zoom-in-95 duration-300 p-8 max-w-sm w-full">
-            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
+            <div className="w-24 h-24 bg-white dark:bg-slate-800 transition-colors duration-300 rounded-full flex items-center justify-center mx-auto mb-6 shadow-2xl">
               <Save size={48} className="text-indigo-600 animate-bounce" />
             </div>
             <h2 className="text-4xl font-black text-white tracking-tight mb-2">BILL SAVED!</h2>

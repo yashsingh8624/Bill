@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-[#f5f7fb] text-slate-800 font-sans;
+    @apply bg-[#f5f7fb] dark:bg-slate-900 text-slate-800 dark:text-white font-sans transition-colors duration-300;
     -webkit-tap-highlight-color: transparent;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

@@ -17,7 +17,7 @@ export default function QuickActionFAB() {
       </button>
       
       {/* Label Text */}
-      <span className={`text-[10px] font-bold tracking-tight ${location.pathname === '/new-bill' ? 'text-purple-600 font-black' : 'text-slate-500'}`}>
+      <span className={`text-[10px] font-bold tracking-tight ${location.pathname === '/new-bill' ? 'text-purple-600 font-black' : 'text-slate-500 dark:text-slate-500 transition-colors duration-300'}`}>
          New Bill
       </span>
     </div>
