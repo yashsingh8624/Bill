@@ -1,94 +1,93 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { useGoogleLogin, googleLogout } from '@react-oauth/google';
-import { signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
-import { auth, googleProvider } from '../firebase';
-import { loadGapiClient, setGapiToken, saveAccessToken, getAccessToken, clearAccessToken, SCOPES } from '../utils/googleApi';
-import { runUserSetup, isSetupComplete, getUserSpreadsheetId, getUserFolderId } from '../utils/setupService';
-import { ensureAllTransactionsSheet } from '../utils/sheetsService';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  onAuthStateChanged,
+  updateProfile
+} from 'firebase/auth';
+import { auth } from '../firebase';
 import { initializeUserDoc } from '../utils/firestoreService';
-
-const USE_FIREBASE = import.meta.env.VITE_USE_FIREBASE === 'true';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [accessToken, setAccessToken] = useState(null);
-  const [spreadsheetId, setSpreadsheetId] = useState(null);
-  const [folderId, setFolderId] = useState(null);
+  const [firebaseUid, setFirebaseUid] = useState(null);
   const [status, setStatus] = useState('initializing');
   const [error, setError] = useState(null);
-  const [isOffline, setIsOffline] = useState(false);
-  const [useFirebase, setUseFirebase] = useState(USE_FIREBASE);
-  const [firebaseUid, setFirebaseUid] = useState(null);
-  const setupRunning = useRef(false);
+  const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup' | 'forgot'
+  const [feedbackMessage, setFeedbackMessage] = useState(null); // { text, type: 'success' | 'error' }
 
-  // ============= GOOGLE SHEETS SETUP (backup) =============
+  // ============= CLEAR FEEDBACK =============
+  const clearFeedback = useCallback(() => {
+    setFeedbackMessage(null);
+  }, []);
 
-  const fetchUserInfo = async (token) => {
-    try {
-      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error('Failed to fetch user info');
-      const data = await res.json();
-      return {
-        email: data.email,
-        name: data.name,
-        picture: data.picture,
-        id: data.sub
-      };
-    } catch (err) {
-      console.error('Error fetching user info:', err);
-      return null;
-    }
-  };
-
-  const runSheetsSetup = useCallback(async (userInfo, token) => {
-    try {
-      await loadGapiClient();
-      setGapiToken(token);
-
-      if (isSetupComplete(userInfo.email)) {
-        const sheetId = getUserSpreadsheetId(userInfo.email);
-        const driveFolderId = getUserFolderId(userInfo.email);
-        setSpreadsheetId(sheetId);
-        setFolderId(driveFolderId);
-        
-        try {
-          await ensureAllTransactionsSheet(sheetId);
-        } catch (e) {
-          console.error("Migration check failed", e);
-        }
-      } else {
-        const result = await runUserSetup(userInfo.email);
-        setSpreadsheetId(result.spreadsheetId);
-        setFolderId(result.folderId);
-      }
-    } catch (err) {
-      console.error('Sheets setup failed (non-critical with Firebase):', err);
-      // If Firebase is primary, sheets failure is non-critical
-      if (!useFirebase) throw err;
-    }
-  }, [useFirebase]);
-
-  // ============= FIREBASE AUTH =============
-
-  const handleFirebaseLogin = useCallback(async () => {
+  // ============= SIGNUP =============
+  const signup = useCallback(async (name, email, password) => {
     try {
       setStatus('authenticating');
-      console.log('[Auth] 🔑 Starting Firebase login...');
-      const result = await signInWithPopup(auth, googleProvider);
+      setError(null);
+      clearFeedback();
+
+      console.log('[Auth] 🔑 Creating account for:', email);
+      const result = await createUserWithEmailAndPassword(auth, email, password);
       const firebaseUser = result.user;
-      
-      console.log('[Auth] ✅ Firebase login SUCCESS');
-      console.log('[Auth] uid:', firebaseUser.uid);
-      console.log('[Auth] email:', firebaseUser.email);
-      console.log('[Auth] auth.currentUser:', auth.currentUser?.uid);
+
+      // Set display name
+      await updateProfile(firebaseUser, { displayName: name });
+
+      console.log('[Auth] ✅ Account created, uid:', firebaseUser.uid);
 
       const userInfo = {
         email: firebaseUser.email,
-        name: firebaseUser.displayName,
+        name: name,
+        picture: null,
+        id: firebaseUser.uid
+      };
+
+      setFirebaseUid(firebaseUser.uid);
+      setUser(userInfo);
+      localStorage.setItem('smartbill_user', JSON.stringify(userInfo));
+      localStorage.setItem('lastEmail', email);
+
+      // Initialize user document in Firestore
+      console.log('[Auth] Initializing Firestore user doc...');
+      await initializeUserDoc(firebaseUser.uid, userInfo);
+      console.log('[Auth] ✅ User doc initialized');
+
+      setFeedbackMessage({ text: 'Account created successfully! Welcome aboard 🎉', type: 'success' });
+      setStatus('ready');
+    } catch (err) {
+      console.error('[Auth] Signup error:', err);
+      let msg = 'Signup failed. Please try again.';
+      if (err.code === 'auth/email-already-in-use') msg = 'This email is already registered. Please login instead.';
+      else if (err.code === 'auth/weak-password') msg = 'Password must be at least 6 characters.';
+      else if (err.code === 'auth/invalid-email') msg = 'Please enter a valid email address.';
+      setError(msg);
+      setFeedbackMessage({ text: msg, type: 'error' });
+      setStatus('login_required');
+    }
+  }, [clearFeedback]);
+
+  // ============= LOGIN =============
+  const login = useCallback(async (email, password) => {
+    try {
+      setStatus('authenticating');
+      setError(null);
+      clearFeedback();
+
+      console.log('[Auth] 🔑 Signing in:', email);
+      const result = await signInWithEmailAndPassword(auth, email, password);
+      const firebaseUser = result.user;
+
+      console.log('[Auth] ✅ Login SUCCESS, uid:', firebaseUser.uid);
+
+      const userInfo = {
+        email: firebaseUser.email,
+        name: firebaseUser.displayName || email.split('@')[0],
         picture: firebaseUser.photoURL,
         id: firebaseUser.uid
       };
@@ -96,262 +95,124 @@ export const AuthProvider = ({ children }) => {
       setFirebaseUid(firebaseUser.uid);
       setUser(userInfo);
       localStorage.setItem('smartbill_user', JSON.stringify(userInfo));
+      localStorage.setItem('lastEmail', email);
 
-      // Initialize user document in Firestore
-      console.log('[Auth] Initializing Firestore user doc...');
+      // Update lastLogin in Firestore
       await initializeUserDoc(firebaseUser.uid, userInfo);
-      console.log('[Auth] ✅ User doc initialized');
 
-      // Try to get Google OAuth token for Sheets backup
-      const credential = result._tokenResponse;
-      if (credential?.oauthAccessToken) {
-        const oauthToken = credential.oauthAccessToken;
-        saveAccessToken(oauthToken, 3600);
-        setAccessToken(oauthToken);
-        
-        // Background: set up Google Sheets as backup
-        try {
-          await runSheetsSetup(userInfo, oauthToken);
-        } catch (err) {
-          console.warn('[Firebase Primary] Sheets backup setup failed, continuing with Firebase only:', err.message);
-        }
-      } else {
-        console.warn('[Firebase Primary] No OAuth token from Firebase login — Sheets backup unavailable');
-      }
-
-      setIsOffline(false);
+      setFeedbackMessage({ text: 'Login successful! Welcome back 👋', type: 'success' });
       setStatus('ready');
-      console.log('[Auth] ✅ Status set to READY. auth.currentUser:', auth.currentUser?.uid);
     } catch (err) {
-      console.error('Firebase login error:', err);
-      if (err.code === 'auth/popup-closed-by-user') {
-        setError('Login popup was closed. Please try again.');
-      } else if (err.code === 'auth/cancelled-popup-request') {
-        // Ignore duplicate popup requests
-      } else {
-        setError('Login failed: ' + (err.message || 'Unknown error'));
-      }
-      setStatus('error');
+      console.error('[Auth] Login error:', err);
+      let msg = 'Login failed. Please try again.';
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') msg = 'No account found with this email, or wrong password.';
+      else if (err.code === 'auth/wrong-password') msg = 'Incorrect password. Please try again.';
+      else if (err.code === 'auth/invalid-email') msg = 'Please enter a valid email address.';
+      else if (err.code === 'auth/too-many-requests') msg = 'Too many failed attempts. Please wait a moment and try again.';
+      setError(msg);
+      setFeedbackMessage({ text: msg, type: 'error' });
+      setStatus('login_required');
     }
-  }, [runSheetsSetup]);
+  }, [clearFeedback]);
 
-  // ============= LEGACY GOOGLE OAUTH (fallback) =============
-
-  const handleLegacyLoginSuccess = useCallback(async (tokenResponse) => {
-    const token = tokenResponse.access_token;
-    const expiresIn = tokenResponse.expires_in || 3600;
-    
-    saveAccessToken(token, expiresIn);
-    setAccessToken(token);
-    setGapiToken(token);
-
-    const userInfo = await fetchUserInfo(token);
-    if (!userInfo) {
-      setError('Could not retrieve user information');
-      setStatus('error');
-      return;
-    }
-
-    setUser(userInfo);
-    localStorage.setItem('smartbill_user', JSON.stringify(userInfo));
-
-    if (setupRunning.current) return;
-    setupRunning.current = true;
+  // ============= FORGOT PASSWORD =============
+  const forgotPassword = useCallback(async (email) => {
     try {
-      setStatus('setting_up');
-      await runSheetsSetup(userInfo, token);
-      setIsOffline(false);
-      setStatus('ready');
+      setError(null);
+      clearFeedback();
+
+      console.log('[Auth] 📧 Sending password reset to:', email);
+      await sendPasswordResetEmail(auth, email);
+
+      setFeedbackMessage({ text: 'Password reset link sent to your email ✉️', type: 'success' });
+      return true;
     } catch (err) {
-      console.error('Setup failed:', err);
-      if (err.message === 'AUTH_EXPIRED') {
-        setStatus('login_required');
-        clearAccessToken();
-      } else {
-        setError('Setup failed: ' + (err.message || 'Unknown error'));
-        setStatus('error');
-      }
-    } finally {
-      setupRunning.current = false;
+      console.error('[Auth] Forgot password error:', err);
+      let msg = 'Failed to send reset email.';
+      if (err.code === 'auth/user-not-found') msg = 'No account found with this email.';
+      else if (err.code === 'auth/invalid-email') msg = 'Please enter a valid email address.';
+      setError(msg);
+      setFeedbackMessage({ text: msg, type: 'error' });
+      return false;
     }
-  }, [runSheetsSetup]);
+  }, [clearFeedback]);
 
-  const triggerLegacyLogin = useGoogleLogin({
-    onSuccess: handleLegacyLoginSuccess,
-    onError: (err) => {
-      console.error('Legacy login error:', err);
-      setError('Google login failed. Use "Continue Offline" to use the app with local storage instead.');
-      setStatus('error');
-    },
-    scope: SCOPES,
-    flow: 'implicit'
-  });
-
-  // ============= OFFLINE MODE =============
-
-  const enterOfflineMode = useCallback(() => {
-    setUser({ name: 'Offline User', email: 'offline@local', picture: null, id: 'local' });
-    setSpreadsheetId('LOCAL_MODE');
-    setFolderId(null);
-    setAccessToken(null);
-    setIsOffline(true);
-    setError(null);
-    setStatus('ready');
-    localStorage.setItem('smartbill_offline_mode', 'true');
+  // ============= LOGOUT =============
+  const logout = useCallback(async () => {
+    try {
+      console.log('[Auth] 🚪 Signing out...');
+      await signOut(auth);
+      setFirebaseUid(null);
+      setUser(null);
+      localStorage.removeItem('smartbill_user');
+      localStorage.removeItem('smartbill_offline_mode');
+      setStatus('login_required');
+      setAuthMode('login');
+      setFeedbackMessage({ text: 'Logged out successfully 👋', type: 'success' });
+      console.log('[Auth] ✅ Signed out');
+    } catch (err) {
+      console.error('[Auth] Logout error:', err);
+    }
   }, []);
 
-  // ============= AUTO-LOGIN ON MOUNT =============
-
+  // ============= AUTH STATE LISTENER =============
   useEffect(() => {
-    if (useFirebase) {
-      console.log('[Auth] 🔄 Setting up onAuthStateChanged listener...');
-      // Firebase auth state listener
-      const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-        console.log('[Auth] onAuthStateChanged fired. user:', firebaseUser ? firebaseUser.uid : 'NULL');
-        if (firebaseUser) {
-          const userInfo = {
-            email: firebaseUser.email,
-            name: firebaseUser.displayName,
-            picture: firebaseUser.photoURL,
-            id: firebaseUser.uid
-          };
-          
-          setFirebaseUid(firebaseUser.uid);
-          setUser(userInfo);
-          localStorage.setItem('smartbill_user', JSON.stringify(userInfo));
-          console.log('[Auth] ✅ auth.currentUser after onAuthStateChanged:', auth.currentUser?.uid);
+    console.log('[Auth] 🔄 Setting up onAuthStateChanged listener...');
 
-          // Try sheets backup with saved token
-          const existingToken = getAccessToken();
-          if (existingToken) {
-            setAccessToken(existingToken);
-            try {
-              await runSheetsSetup(userInfo, existingToken);
-            } catch (e) {
-              console.warn('[Auto-login] Sheets backup unavailable');
-            }
-          }
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log('[Auth] onAuthStateChanged fired. user:', firebaseUser ? firebaseUser.uid : 'NULL');
 
-          setIsOffline(false);
-          setStatus('ready');
-          console.log('[Auth] ✅ Status set to READY (from onAuthStateChanged)');
-        } else {
-          // Check offline mode
-          if (localStorage.getItem('smartbill_offline_mode') === 'true') {
-            enterOfflineMode();
-            return;
-          }
-          setStatus('login_required');
-        }
-      });
+      if (firebaseUser) {
+        const userInfo = {
+          email: firebaseUser.email,
+          name: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+          picture: firebaseUser.photoURL,
+          id: firebaseUser.uid
+        };
 
-      return () => unsubscribe();
-    } else {
-      // Legacy: existing Google OAuth auto-login
-      const init = async () => {
-        if (localStorage.getItem('smartbill_offline_mode') === 'true') {
-          enterOfflineMode();
-          return;
-        }
-
-        const existingToken = getAccessToken();
-        const savedUser = localStorage.getItem('smartbill_user');
-
-        if (existingToken && savedUser) {
-          try {
-            const userInfo = JSON.parse(savedUser);
-            setUser(userInfo);
-            setAccessToken(existingToken);
-            setStatus('authenticating');
-            
-            await loadGapiClient();
-            setGapiToken(existingToken);
-
-            const freshUser = await fetchUserInfo(existingToken);
-            if (freshUser) {
-              setUser(freshUser);
-              if (!setupRunning.current) {
-                setupRunning.current = true;
-                try {
-                  setStatus('setting_up');
-                  await runSheetsSetup(freshUser, existingToken);
-                  setIsOffline(false);
-                  setStatus('ready');
-                } catch (err) {
-                  console.error('Setup failed:', err);
-                  setStatus('error');
-                  setError('Setup failed: ' + err.message);
-                } finally {
-                  setupRunning.current = false;
-                }
-              }
-              return;
-            }
-          } catch (err) {
-            console.error('Token validation failed:', err);
-          }
-        }
-
+        setFirebaseUid(firebaseUser.uid);
+        setUser(userInfo);
+        localStorage.setItem('smartbill_user', JSON.stringify(userInfo));
+        setStatus('ready');
+        console.log('[Auth] ✅ Status set to READY (from onAuthStateChanged)');
+      } else {
+        // Not logged in
         setStatus('login_required');
-      };
+      }
+    });
 
-      init();
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    return () => unsubscribe();
+  }, []);
 
-  // ============= PUBLIC API =============
-
-  const login = () => {
+  // ============= RETRY =============
+  const retry = useCallback(() => {
     setError(null);
-    if (useFirebase) {
-      handleFirebaseLogin();
-    } else {
-      setStatus('authenticating');
-      triggerLegacyLogin();
-    }
-  };
-
-  const logout = () => {
-    if (useFirebase) {
-      signOut(auth).catch(console.error);
-      // Firebase Auth handles cleanup on signOut
-      setFirebaseUid(null);
-    }
-    if (!isOffline) {
-      googleLogout();
-    }
-    clearAccessToken();
-    localStorage.removeItem('smartbill_user');
-    localStorage.removeItem('smartbill_offline_mode');
-    setUser(null);
-    setAccessToken(null);
-    setSpreadsheetId(null);
-    setFolderId(null);
-    setIsOffline(false);
+    clearFeedback();
     setStatus('login_required');
-  };
-
-  const retry = () => {
-    setError(null);
-    setStatus('login_required');
-  };
+  }, [clearFeedback]);
 
   return (
     <AuthContext.Provider value={{
       user,
-      accessToken,
-      spreadsheetId,
-      folderId,
+      firebaseUid,
       status,
       error,
-      isOffline,
-      useFirebase,
-      firebaseUid,
+      authMode,
+      feedbackMessage,
+      setAuthMode,
       login,
+      signup,
       logout,
+      forgotPassword,
       retry,
-      enterOfflineMode,
-      isReady: status === 'ready'
+      clearFeedback,
+      isReady: status === 'ready',
+      // Legacy compatibility — always Firebase now
+      useFirebase: true,
+      isOffline: false,
+      accessToken: null,
+      spreadsheetId: null,
+      folderId: null,
     }}>
       {children}
     </AuthContext.Provider>

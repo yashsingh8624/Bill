@@ -9,7 +9,7 @@ import { useToast } from '../context/ToastContext';
 import * as XLSX from 'xlsx';
 import { exportBackup, restoreBackup } from '../utils/storage';
 import { useAuth } from '../context/AuthContext';
-import { clearAllSheetData } from '../utils/sheetsService';
+
 
 export default function Settings() {
   const { userSettings, updateSettings } = useSettings();
