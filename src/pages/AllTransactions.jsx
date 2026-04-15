@@ -138,7 +138,7 @@ export default function AllTransactions() {
   };
 
   return (
-    <div className="page-animate max-w-4xl mx-auto pb-10 space-y-6 flex flex-col pt-2 sm:pt-4">
+    <div className="page-animate max-w-4xl mx-auto pb-24 sm:pb-10 space-y-6 flex flex-col pt-2 sm:pt-4 min-w-0">
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-3">

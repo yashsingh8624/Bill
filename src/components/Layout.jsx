@@ -45,9 +45,9 @@ export default function Layout() {
   }, []);
 
   return (
-    <div className="flex h-screen bg-[#f5f7fb] overflow-hidden font-sans w-full max-w-full">
+    <div className="flex min-h-screen bg-[#f5f7fb] font-sans w-full max-w-full">
       {/* Sidebar Desktop */}
-      <aside className="hidden lg:flex flex-col w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200 shadow-sm z-20">
+      <aside className="hidden lg:flex flex-col w-72 bg-white/80 backdrop-blur-xl border-r border-slate-200 shadow-sm z-20 h-screen sticky top-0">
         <div className="h-20 flex items-center px-6 border-b border-slate-100 gap-4">
           {userSettings?.logo ? (
              <img src={userSettings.logo} alt="Logo" className="w-10 h-10 object-contain rounded-lg shadow-sm border border-slate-100 bg-white" />
@@ -195,8 +195,8 @@ export default function Layout() {
         </nav>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto w-full h-full custom-scrollbar pb-20 lg:pb-0">
-          <div className="mx-auto max-w-[1400px] w-full px-4 sm:p-6 lg:p-8 pt-4 pb-0 relative">
+        <main className="flex-1 overflow-y-auto w-full custom-scrollbar pb-20 lg:pb-0">
+          <div className="mx-auto max-w-[1400px] w-full px-3 sm:px-6 lg:px-8 pt-4 pb-6 relative">
             <Outlet />
           </div>
         </main>

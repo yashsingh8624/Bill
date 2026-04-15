@@ -411,7 +411,7 @@ export default function NewBill() {
               </div>
 
               {/* Row 2: Rate, Qty, GST%, Discount, Add */}
-              <div className="grid grid-cols-2 md:grid-cols-12 gap-3 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-12 gap-3 items-end">
                 <div className="md:col-span-3">
                   <label className="block text-xs font-semibold text-slate-500 mb-1">Rate (₹) *</label>
                   <input

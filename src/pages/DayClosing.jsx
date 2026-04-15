@@ -63,7 +63,7 @@ export default function DayClosing() {
   const pastReports = dailyReports.filter(r => r.date !== today || isClosed);
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12">
+    <div className="max-w-4xl mx-auto space-y-6 pb-24 sm:pb-12 min-w-0">
       {/* Header */}
       <div className="flex justify-between items-end flex-wrap gap-3">
         <div>

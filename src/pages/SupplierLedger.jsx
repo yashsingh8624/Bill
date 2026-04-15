@@ -542,7 +542,7 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Inv No</label>
                   <input type="text" value={invoiceForm.invoiceNo} onChange={(e) => setInvoiceForm({...invoiceForm, invoiceNo: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-amber-500/50 bg-white text-slate-800 font-medium" placeholder="#123" />

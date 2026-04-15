@@ -141,7 +141,6 @@ export default function BillHistory() {
             </div>
           ) : (
             <div className="space-y-8">
-            <>
                {(!searchTerm && dateFilter === 'ALL' && filteredBills.length > 5) && (
                  <div className="bg-white rounded-[16px] shadow-[0_4px_24px_rgba(0,0,0,0.04)] border border-slate-100/50 min-w-0">
                     <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">

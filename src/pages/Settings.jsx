@@ -155,7 +155,7 @@ export default function Settings() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-12">
+    <div className="max-w-4xl mx-auto space-y-6 pb-24 sm:pb-12 min-w-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800 tracking-tight">System Settings</h2>

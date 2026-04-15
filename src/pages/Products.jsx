@@ -191,7 +191,7 @@ export default function Products() {
                   placeholder="e.g. Cotton Shirt"
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-slate-700 mb-1.5">Purchase Price</label>
                   <input 

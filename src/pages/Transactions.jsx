@@ -95,7 +95,7 @@ export default function Transactions() {
   }, [filtered]);
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-8 animate-in fade-in h-[calc(100vh-8rem)] flex flex-col relative w-full overflow-hidden">
+    <div className="space-y-6 max-w-4xl mx-auto pb-24 sm:pb-8 animate-in fade-in flex flex-col relative w-full min-w-0">
       {/* Header */}
       <div className="flex flex-col flex-shrink-0 gap-4">
         <div>
