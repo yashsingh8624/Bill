@@ -1,4 +1,4 @@
-// src/pages/SupplierLedger.jsx
+ // src/pages/SupplierLedger.jsx
 import React, { useState, useMemo } from 'react';
 import { useSuppliers } from '../context/PartiesContext';
 import { useSettings } from '../context/SettingsContext';
