@@ -1,3 +1,4 @@
+// src/pages/SupplierLedger.jsx
 import React, { useState, useMemo } from 'react';
 import { useSuppliers } from '../context/PartiesContext';
 import { useSettings } from '../context/SettingsContext';
@@ -50,7 +51,7 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
 
   const handleOpenSupplier = (supplier) => {
     setSelectedSupplier(supplier);
-    setEditForm({ name: supplier.name, phone: supplier.phone || '', businessName: supplier.businessName || '', openingBalance: supplier.openingBalance || supplier.previous_balance || 0 });
+    setEditForm({ name: supplier.name || '', phone: supplier.phone || '', businessName: supplier.businessName || '', openingBalance: supplier.openingBalance || supplier.previous_balance || '' });
   };
 
   const handleAddSupplier = async (e) => {
@@ -115,147 +116,13 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
     
     let message = '';
     if (amount > 0) {
-       message = `Dear ${currentSupplier.name},\nWe have an outstanding balance of ₹${amount.toFixed(2)} with you. Please share your UPI or Bank details to clear the payment.\n- ${userSettings.businessName}`;
+       message = `Dear ${currentSupplier.name},\nWe have an outstanding balance of â‚¹${amount.toFixed(2)} with you. Please share your UPI or Bank details to clear the payment.\n- ${userSettings.businessName}`;
     } else {
        message = `Dear ${currentSupplier.name},\nThis is to notify regarding our transactions.\n- ${userSettings.businessName}`;
     }
     const url = `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
     window.open(url, '_blank');
   };
-
-  return (
-    <div className="space-y-6 flex flex-col w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 sm:pb-8 pt-2 sm:pt-4 min-w-0" style={{ minHeight: 'calc(100vh - 10rem)' }}>
-      {!selectedSupplier ? (
-        <>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Party / Supplier Ledger</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Manage suppliers, track purchases, and payments.</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={refreshLedger}
-                disabled={ledgerLoading}
-                className="bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 px-4 py-2.5 rounded-xl transition-colors font-bold flex items-center justify-center gap-2 shadow-sm whitespace-nowrap disabled:opacity-50"
-              >
-                <RefreshCcw size={16} className={ledgerLoading ? "animate-spin" : ""} />
-                <span className="hidden sm:inline">{ledgerLoading ? 'Refreshing...' : 'Refresh'}</span>
-              </button>
-              <button 
-                onClick={() => setIsAddSupplierModalOpen(true)}
-                className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl transition-colors font-bold flex items-center justify-center gap-2 shadow-sm whitespace-nowrap"
-              >
-                <Plus size={18} /> Add Supplier
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 p-2.5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600 flex items-center gap-3 px-4 flex-shrink-0">
-            <Search size={20} className="text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search by name or business..." 
-              className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 flex-1 py-2 focus:outline-none placeholder: font-medium"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex-1 overflow-hidden flex flex-col min-h-0">
-            <div className="overflow-x-auto overflow-y-auto flex-1 h-full custom-scrollbar">
-              {suppliers.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-500 p-12 text-center">
-                  <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-full mb-4 text-slate-400">
-                    <Truck size={40} />
-                  </div>
-                  <p className="font-bold text-slate-700 dark:text-slate-300 text-xl">No suppliers added yet</p>
-                  <p className="text-sm mt-2 font-medium mb-5 text-slate-500 dark:text-slate-400">Add your party/vendor details to track stock invoices.</p>
-                  <button onClick={() => setIsAddSupplierModalOpen(true)} className="text-indigo-600 font-bold hover:text-indigo-700 dark:hover:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-5 py-2.5 rounded-xl transition-colors">Add First Supplier</button>
-                </div>
-              ) : (
-                <table className="w-full text-left border-collapse min-w-full max-w-sm sm:min-w-full">
-                  <thead className="sticky top-0 bg-slate-50/95 dark:bg-slate-800/95 backdrop-blur-sm z-10 border-b border-slate-200 dark:border-slate-600">
-                    <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase font-bold tracking-wider">
-                      <th className="py-4 px-6">Supplier & Business</th>
-                      <th className="py-4 px-6">Phone Number</th>
-                      <th className="py-4 px-6 text-right">Amount To Pay (₹)</th>
-                      <th className="py-4 px-6 text-center w-24">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                    {filteredSuppliers.map(supplier => (
-                      <tr 
-                        key={supplier.id} 
-                        onClick={() => handleOpenSupplier(supplier)}
-                        className="hover:bg-indigo-50/50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer group"
-                      >
-                         <td className="py-4 px-6 flex items-center gap-3">
-                           <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400 flex items-center justify-center font-bold text-xs uppercase">
-                              {(supplier.name || '??').substring(0,2)}
-                           </div>
-                           <div>
-                             <div className="font-bold text-slate-800 dark:text-slate-100">{supplier.name || 'Unnamed Supplier'}</div>
-                             <div className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-0.5">{supplier.businessName || 'No business'}</div>
-                           </div>
-                         </td>
-                         <td className="py-4 px-6 text-slate-600 dark:text-slate-400 font-medium">{supplier.phone || '-'}</td>
-                         <td className="py-4 px-6 text-right">
-                            <span className={`font-black ${parseFloat(calculateSupplierBalance(ledger, supplier.id, supplier) || 0) > 0 ? 'text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-3 py-1.5 rounded-lg border border-amber-100 dark:border-amber-900' : 'text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600'}`}>
-                              ₹{parseFloat(calculateSupplierBalance(ledger, supplier.id, supplier) || 0).toFixed(2)}
-                            </span>
-                         </td>
-                         <td className="py-4 px-6 text-center">
-                            <div className="flex justify-center text-slate-400 group-hover:text-indigo-600 transition-colors">
-                               <ChevronRight size={20} />
-                            </div>
-                         </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
-          </div>
-        </>
-      ) : (
-        currentSupplier && (
-          <div className="flex flex-col space-y-6 animate-in slide-in-from-right-4 duration-300 w-full pb-24">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 flex-shrink-0">
-              <div className="flex items-center gap-4">
-                <button 
-                  onClick={() => setSelectedSupplier(null)}
-                  className="p-2.5 text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/50 shadow-sm rounded-xl transition-all border border-slate-200 dark:border-slate-600 hover:text-slate-800 dark:hover:text-white"
-                >
-                  <ChevronRight size={20} className="rotate-180" />
-                </button>
-                <div>
-                  <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3">
-                    {currentSupplier.name}
-                    <button onClick={() => {
-                        setEditForm({ name: currentSupplier.name, phone: currentSupplier.phone, businessName: currentSupplier.businessName });
-                        setIsEditModalOpen(true);
-                      }} className="text-slate-400 hover:text-indigo-600 transition-colors" title="Edit Supplier">
-                       <Edit2 size={16} />
-                    </button>
-                    <button onClick={handleDelete} className="text-slate-400 hover:text-red-600 transition-colors" title="Delete Supplier">
-                       <Trash2 size={16} />
-                    </button>
-                  </h2>
-                  <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-0.5">{currentSupplier.businessName} {currentSupplier.phone && `| ${currentSupplier.phone}`}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <button 
-                  onClick={handleSendWhatsApp}
-                  disabled={!currentSupplier.phone}
-                  className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 border border-emerald-200 dark:border-emerald-800 px-3 py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-1.5 shadow-sm text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <MessageCircle size={16} /> WA Msg
-                </button>
-                <button 
-                  onClick={() => {
-                    setInvoiceForm({ invoiceNo: '', amount: '', date: new Date().toISOString().split('T')[0], note: '' });
-                    setIsInvoiceModalOpen(true);
                   }}
                   className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 hover:bg-amber-200 dark:hover:bg-amber-900/50 border border-amber-200 dark:border-amber-800 px-4 py-2.5 rounded-xl transition-all font-bold flex items-center justify-center gap-1.5 shadow-sm text-sm"
                 >
@@ -278,12 +145,12 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
                 const norm = String(t||'').toLowerCase().replace(/\s+/g, "_");
                 return norm === 'payment_made' || norm === 'payment_out';
               };
-              const totalBilled = supplierTxns.filter(t => t && (String(t.type).toLowerCase() === 'purchase' || String(t.type).toLowerCase() === 'supplier_opening')).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
-              const totalGiven = supplierTxns.filter(t => t && isPaymentOut(t.type)).reduce((s, e) => s + parseFloat(e.amount || 0), 0);
+              const totalBilled = supplierTxns.filter(t => t && String(t.type).toLowerCase() === 'purchase').reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
+              const totalGiven = supplierTxns.filter(t => t && isPaymentOut(t.type)).reduce((s, e) => s + (parseFloat(e.amount) || 0), 0);
               
               // NEW Correct Logic for Outstanding:
-              const openingBalance = parseFloat(currentSupplier.openingBalance || currentSupplier.previous_balance || 0);
-              const calculatedOutstanding = openingBalance + totalBilled - totalGiven;
+              const openingBalance = parseFloat(currentSupplier.openingBalance || currentSupplier.previous_balance) || 0;
+              const calculatedOutstanding = (openingBalance || 0) + (totalBilled || 0) - (totalGiven || 0);
               const outstanding = calculatedOutstanding > 0 ? calculatedOutstanding : 0;
               const advance = calculatedOutstanding < 0 ? Math.abs(calculatedOutstanding) : 0;
               const totalBills = supplierTxns.filter(t => t && String(t.type).toLowerCase() === 'purchase').length;
@@ -291,24 +158,24 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
                   <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
                     <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Billed</p>
-                    <h3 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100">₹{totalBilled.toFixed(2)}</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100">â‚¹{totalBilled.toFixed(2)}</h3>
                     <p className="text-slate-400 text-[10px] mt-1 font-semibold uppercase">Lifetime</p>
                   </div>
                   <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
                     <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Given</p>
-                    <h3 className="text-xl sm:text-2xl font-black text-indigo-600">₹{totalGiven.toFixed(2)}</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-indigo-600">â‚¹{totalGiven.toFixed(2)}</h3>
                     <p className="text-slate-400 text-[10px] mt-1 font-semibold uppercase">Payment Out</p>
                   </div>
                   <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
                     <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Outstanding</p>
                     {advance > 0 ? (
                       <>
-                        <h3 className="text-xl sm:text-2xl font-black text-emerald-500">₹0.00</h3>
-                        <p className="text-emerald-500 text-[10px] mt-1 font-black uppercase">Advance: ₹{advance.toFixed(2)}</p>
+                        <h3 className="text-xl sm:text-2xl font-black text-emerald-500">â‚¹0.00</h3>
+                        <p className="text-emerald-500 text-[10px] mt-1 font-black uppercase">Advance: â‚¹{advance.toFixed(2)}</p>
                       </>
                     ) : (
                       <>
-                        <h3 className={`text-xl sm:text-2xl font-black ${outstanding > 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-500 dark:text-emerald-400'}`}>₹{outstanding.toFixed(2)}</h3>
+                        <h3 className={`text-xl sm:text-2xl font-black ${outstanding > 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-500 dark:text-emerald-400'}`}>â‚¹{outstanding.toFixed(2)}</h3>
                         <p className={`text-[10px] mt-1 font-semibold uppercase ${outstanding > 0 ? 'text-red-400 dark:text-red-500' : 'text-emerald-400 dark:text-emerald-500'}`}>{outstanding > 0 ? 'To Pay' : 'Fully Cleared'}</p>
                       </>
                     )}
@@ -365,9 +232,9 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
                                      )}
                                      {txn.desc || txn.description || (isPayment ? 'Payment Made' : 'Purchase')}
                                    </td>
-                                   <td className="py-4 px-6 text-right text-sm font-black text-slate-800 dark:text-slate-100 bg-amber-50/10 dark:bg-amber-900/5">{debit > 0 ? `₹${debit.toFixed(2)}` : '-'}</td>
-                                   <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/10 dark:bg-emerald-900/5">{credit > 0 ? `₹${credit.toFixed(2)}` : '-'}</td>
-                                   <td className="py-4 px-6 text-right text-sm font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/10 dark:bg-indigo-900/5">₹{acc.balance.toFixed(2)}</td>
+                                   <td className="py-4 px-6 text-right text-sm font-black text-slate-800 dark:text-slate-100 bg-amber-50/10 dark:bg-amber-900/5">{debit > 0 ? `â‚¹${debit.toFixed(2)}` : '-'}</td>
+                                   <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/10 dark:bg-emerald-900/5">{credit > 0 ? `â‚¹${credit.toFixed(2)}` : '-'}</td>
+                                   <td className="py-4 px-6 text-right text-sm font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/10 dark:bg-indigo-900/5">â‚¹{acc.balance.toFixed(2)}</td>
                                 </tr>
                                 );
                                 return acc;
@@ -407,10 +274,10 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
                                 </div>
                                 <div className="text-right">
                                   <div className={`text-lg font-black tracking-tight ${amountColor}`}>
-                                    {prefix}₹{parseFloat(txn.amount || 0).toFixed(2)}
+                                    {prefix}â‚¹{parseFloat(txn.amount || 0).toFixed(2)}
                                   </div>
                                   <div className="text-[10px] font-bold text-slate-400 mt-0.5">
-                                    Balance: ₹{acc.balance.toFixed(2)}
+                                    Balance: â‚¹{acc.balance.toFixed(2)}
                                   </div>
                                 </div>
                               </div>
@@ -426,8 +293,7 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
           </div>
         )
       )}
-
-      {/* EDIT MODAL */}
+ {/* EDIT MODAL */}
       {isEditModalOpen && selectedSupplier && (
         <div className="fixed inset-0 bg-slate-900/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-100 dark:border-slate-600 animate-in zoom-in-95">
@@ -577,7 +443,7 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">To Supplier</p>
                 <p className="font-black text-slate-800 dark:text-slate-100 transition-colors duration-300 text-xl">{currentSupplier?.name}</p>
                 <div className="mt-2 text-sm bg-white dark:bg-slate-800 transition-colors duration-300 border border-slate-100 dark:border-slate-700/50 transition-colors duration-300 inline-block px-3 py-1 rounded-lg">
-                   Pending: <span className="font-black text-amber-500">₹{currentSupplierBalance.toFixed(2)}</span>
+                   Pending: <span className="font-black text-amber-500">â‚¹{currentSupplierBalance.toFixed(2)}</span>
                 </div>
               </div>
               <div>
@@ -609,5 +475,5 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
         </div>
       )}
     </div>
-  );
+);
 }
