@@ -8,7 +8,6 @@ const isVoided = (entry) => {
 // Formula: SUM(SALE) - SUM(PAYMENT + ROLLOVER) + openingBalance
 export const calculateCustomerBalance = (ledger, customerId, customer = null) => {
   if (!customerId || !Array.isArray(ledger)) return 0;
-
   let balance = ledger
     .filter(e => e && String(e.customer_id) === String(customerId) && !isVoided(e))
     .reduce((sum, e) => {
