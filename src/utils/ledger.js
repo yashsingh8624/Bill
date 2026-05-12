@@ -1,4 +1,4 @@
- // Helper: Check if entry is voided (handles both boolean and string 'TRUE')
+// Helper: Check if entry is voided (handles both boolean and string 'TRUE')
 const isVoided = (entry) => {
   if (!entry) return true;
   return entry.is_void === true || entry.is_void === 'TRUE';
@@ -8,6 +8,7 @@ const isVoided = (entry) => {
 // Formula: SUM(SALE) - SUM(PAYMENT + ROLLOVER) + openingBalance
 export const calculateCustomerBalance = (ledger, customerId, customer = null) => {
   if (!customerId || !Array.isArray(ledger)) return 0;
+
   let balance = ledger
     .filter(e => e && String(e.customer_id) === String(customerId) && !isVoided(e))
     .reduce((sum, e) => {
