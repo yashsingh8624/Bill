@@ -44,7 +44,6 @@ export default function PaymentOut() {
   };
 
   return (
-  return (
     <div className="page-animate w-full px-4 sm:px-8 max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl pb-24 space-y-6 flex flex-col min-w-0 pt-2 sm:pt-4" style={{ minHeight: 'calc(100vh - 10rem)' }}>
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center gap-3">
