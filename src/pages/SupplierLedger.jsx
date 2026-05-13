@@ -177,7 +177,7 @@ const handleEditSubmit = (e) => {
                     <tr className="text-slate-500 dark:text-slate-400 text-xs uppercase font-bold tracking-wider">
                       <th className="py-4 px-6">Supplier & Business</th>
                       <th className="py-4 px-6">Phone Number</th>
-                      <th className="py-4 px-6 text-right">Amount To Pay (â‚¹)</th>
+                      <th className="py-4 px-6 text-right">Amount To Pay (₹)</th>
                       <th className="py-4 px-6 text-center w-24">Action</th>
                     </tr>
                   </thead>
@@ -200,7 +200,7 @@ const handleEditSubmit = (e) => {
                          <td className="py-4 px-6 text-slate-600 dark:text-slate-400 font-medium">{supplier.phone || '-'}</td>
                          <td className="py-4 px-6 text-right">
                             <span className={`font-black ${parseFloat(calculateSupplierBalance(ledger, supplier.id, supplier) || 0) > 0 ? 'text-amber-600 dark:text-amber-500 bg-amber-50 dark:bg-amber-900/30 px-3 py-1.5 rounded-lg border border-amber-100 dark:border-amber-900' : 'text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-600'}`}>
-                              â‚¹{parseFloat(calculateSupplierBalance(ledger, supplier.id, supplier) || 0).toFixed(2)}
+                              ₹{parseFloat(calculateSupplierBalance(ledger, supplier.id, supplier) || 0).toFixed(2)}
                             </span>
                          </td>
                          <td className="py-4 px-6 text-center">
