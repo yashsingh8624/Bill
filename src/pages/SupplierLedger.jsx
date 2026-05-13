@@ -114,7 +114,7 @@ const handleEditSubmit = (e) => {
     
     let message = '';
     if (amount > 0) {
-       message = `Dear ${currentSupplier.name},\nWe have an outstanding balance of â‚¹${amount.toFixed(2)} with you. Please share your UPI or Bank details to clear the payment.\n- ${userSettings.businessName}`;
+       message = `Dear ${currentSupplier.name},\nWe have an outstanding balance of ₹${amount.toFixed(2)} with you. Please share your UPI or Bank details to clear the payment.\n- ${userSettings.businessName}`;
     } else {
        message = `Dear ${currentSupplier.name},\nThis is to notify regarding our transactions.\n- ${userSettings.businessName}`;
     }
@@ -289,7 +289,7 @@ const handleEditSubmit = (e) => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 flex-shrink-0">
                   <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
                     <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Billed</p>
-                    <h3 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100">â‚¹{totalBilled.toFixed(2)}</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-slate-100">₹{totalBilled.toFixed(2)}</h3>
                     <p className="text-slate-400 text-[10px] mt-1 font-semibold uppercase">Lifetime</p>
                   </div>
                   <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
@@ -301,12 +301,12 @@ const handleEditSubmit = (e) => {
                     <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Outstanding</p>
                     {advance > 0 ? (
                       <>
-                        <h3 className="text-xl sm:text-2xl font-black text-emerald-500">â‚¹0.00</h3>
-                        <p className="text-emerald-500 text-[10px] mt-1 font-black uppercase">Advance: â‚¹{advance.toFixed(2)}</p>
+                        <h3 className="text-xl sm:text-2xl font-black text-emerald-500">₹0.00</h3>
+                        <p className="text-emerald-500 text-[10px] mt-1 font-black uppercase">Advance: ₹{advance.toFixed(2)}</p>
                       </>
                     ) : (
                       <>
-                        <h3 className={`text-xl sm:text-2xl font-black ${outstanding > 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-500 dark:text-emerald-400'}`}>â‚¹{outstanding.toFixed(2)}</h3>
+                        <h3 className={`text-xl sm:text-2xl font-black ${outstanding > 0 ? 'text-red-500 dark:text-red-400' : 'text-emerald-500 dark:text-emerald-400'}`}>₹{outstanding.toFixed(2)}</h3>
                         <p className={`text-[10px] mt-1 font-semibold uppercase ${outstanding > 0 ? 'text-red-400 dark:text-red-500' : 'text-emerald-400 dark:text-emerald-500'}`}>{outstanding > 0 ? 'To Pay' : 'Fully Cleared'}</p>
                       </>
                     )}
@@ -362,8 +362,8 @@ const handleEditSubmit = (e) => {
                                      )}
                                      {txn.desc || txn.description || (isPayment ? 'Payment Made' : 'Purchase')}
                                    </td>
-                                   <td className="py-4 px-6 text-right text-sm font-black text-slate-800 dark:text-slate-100 bg-amber-50/10 dark:bg-amber-900/5">{debit > 0 ? `â‚¹${debit.toFixed(2)}` : '-'}</td>
-                                   <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/10 dark:bg-emerald-900/5">{credit > 0 ? `â‚¹${credit.toFixed(2)}` : '-'}</td>
+                                   <td className="py-4 px-6 text-right text-sm font-black text-slate-800 dark:text-slate-100 bg-amber-50/10 dark:bg-amber-900/5">{debit > 0 ? `₹${debit.toFixed(2)}` : '-'}</td>
+                                   <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/10 dark:bg-emerald-900/5">{credit > 0 ? `₹${credit.toFixed(2)}` : '-'}</td>
                                    <td className="py-4 px-6 text-right text-sm font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/10 dark:bg-indigo-900/5">â‚¹{acc.balance.toFixed(2)}</td>
                                 </tr>
                                 );
@@ -404,10 +404,10 @@ const handleEditSubmit = (e) => {
                                 </div>
                                 <div className="text-right">
                                   <div className={`text-lg font-black tracking-tight ${amountColor}`}>
-                                    {prefix}â‚¹{parseFloat(txn.amount || 0).toFixed(2)}
+                                    {prefix}₹{parseFloat(txn.amount || 0).toFixed(2)}
                                   </div>
                                   <div className="text-[10px] font-bold text-slate-400 mt-0.5">
-                                    Balance: â‚¹{acc.balance.toFixed(2)}
+                                    Balance: ₹{acc.balance.toFixed(2)}
                                   </div>
                                 </div>
                               </div>
