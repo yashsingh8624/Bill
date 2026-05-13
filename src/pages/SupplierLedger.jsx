@@ -336,3 +336,4 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
       )}
     </div>
   );
+}
