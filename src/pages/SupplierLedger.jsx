@@ -75,8 +75,7 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
        setIsSubmitting(false);
     }
   };
-
-  const handleEditSubmit = (e) => {
+const handleEditSubmit = (e) => {
     e.preventDefault();
     if (!selectedSupplier) return;
     const updData = { ...editForm, previous_balance: editForm.openingBalance, openingBalance: editForm.openingBalance };
@@ -160,6 +159,16 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+<div className="bg-white dark:bg-slate-800 p-2.5 rounded-xl shadow-sm border border-slate-100 dark:border-slate-600 flex items-center gap-3 px-4 flex-shrink-0">
+            <Search size={20} className="text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Search by name or business..." 
+              className="bg-slate-50 dark:bg-slate-700 text-slate-800 dark:text-slate-100 flex-1 py-2 focus:outline-none placeholder: font-medium"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex-1 overflow-hidden flex flex-col min-h-0">
             <div className="overflow-x-auto overflow-y-auto flex-1 h-full custom-scrollbar">
@@ -217,7 +226,191 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
             </div>
           </div>
         </>
-duration-300 focus:ring-amber-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-700 dark:text-slate-300 transition-colors duration-300 font-medium" placeholder="E.g. Received new stock" />
+      ) : (
+                                );
+                                return acc;
+                              }, { rows: [], balance: 0 }).rows}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Mobile Card View */}
+                      <div className="block sm:hidden p-4 space-y-3">
+                        {supplierTxns.reduce((acc, txn) => {
+                          const isPayment = String(txn.type||'').toLowerCase().includes('payment');
+                          const debit = !isPayment ? parseFloat(txn.amount || 0) : 0;
+                          const credit = isPayment ? parseFloat(txn.amount || 0) : 0;
+                          acc.balance = acc.balance + debit - credit;
+                          
+                          let badgeColor = isPayment ? "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900" : "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-900";
+                          let amountColor = isPayment ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400";
+                          let prefix = isPayment ? "Paid: " : "Billed: ";
+                          let typeLabel = isPayment ? "PAYMENT OUT" : txn.type;
+
+                          acc.rows.push(
+                            <div key={`${txn.id || txn.type}-${acc.rows.length}`} className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-600 rounded-xl p-4 mb-3 shadow-sm active:bg-slate-50 dark:active:bg-slate-700/50 transition-colors">
+                              <div className="flex justify-between items-start mb-2">
+                                <div className="flex flex-col gap-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${badgeColor}`}>
+                                      {typeLabel}
+                                    </span>
+                                    {(txn.desc || txn.description) && (
+                                      <span className="text-[10px] font-bold text-slate-400 bg-slate-50 dark:bg-slate-900/50 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-700">
+                                        #{txn.desc || txn.description}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{new Date(txn.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                                </div>
+                                <div className="text-right">
+                                  <div className={`text-lg font-black tracking-tight ${amountColor}`}>
+                                    {prefix}â‚¹{parseFloat(txn.amount || 0).toFixed(2)}
+                                  </div>
+                                  <div className="text-[10px] font-bold text-slate-400 mt-0.5">
+                                    Balance: â‚¹{acc.balance.toFixed(2)}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                          return acc;
+                        }, { rows: [], balance: 0 }).rows.reverse()}
+                      </div>
+                    </>
+                 )}
+               </div>
+            </div>
+          </div>
+        )
+      )}
+{/* EDIT MODAL */}
+      {isEditModalOpen && selectedSupplier && (
+        <div className="fixed inset-0 bg-slate-900/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-100 dark:border-slate-600 animate-in zoom-in-95">
+            <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
+              <h3 className="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                <Edit2 size={18} className="text-indigo-600" /> Edit Supplier
+              </h3>
+              <button onClick={() => setIsEditModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"><X size={20} /></button>
+            </div>
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+               <div>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Supplier Name</label>
+                  <input type="text" required value={editForm.name} onChange={(e) => setEditForm({...editForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium" />
+               </div>
+               <div>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Business / Company</label>
+                  <input type="text" value={editForm.businessName} onChange={(e) => setEditForm({...editForm, businessName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium" />
+               </div>
+               <div>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Phone Number</label>
+                  <input type="text" value={editForm.phone} onChange={(e) => setEditForm({...editForm, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium" />
+               </div>
+               <div>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Opening Balance</label>
+                  <div className="relative search-wrapper">
+                    <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
+                    <input 
+                      type="number" step="0.01" 
+                      value={editForm.openingBalance} 
+                      onChange={(e) => setEditForm({...editForm, openingBalance: e.target.value})} 
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold outline-none search-clean" 
+                      placeholder="0.00"
+                    />
+                  </div>
+               </div>
+               <div className="pt-4"><button type="submit" className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-colors">Save Changes</button></div>
+            </form>
+          </div>
+        </div>
+      )}
+{/* ADD SUPPLIER MODAL */}
+      {isAddSupplierModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-slate-800 transition-colors duration-300 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-slate-100 dark:border-slate-700/50 transition-colors duration-300">
+            <div className="px-6 py-4 border-b border-indigo-100 flex justify-between items-center bg-indigo-50">
+              <h3 className="text-lg font-bold text-indigo-900 flex items-center gap-2"><Truck size={18} className="text-indigo-600" /> Add New Supplier</h3>
+              <button onClick={() => setIsAddSupplierModalOpen(false)} className="text-indigo-400 hover:text-indigo-600 p-1.5 rounded-lg hover:bg-indigo-100 transition-colors"><X size={20} /></button>
+            </div>
+            <form onSubmit={handleAddSupplier} className="p-6 space-y-4">
+              <div>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Supplier Name</label>
+                <input type="text" required value={supplierForm.name} onChange={(e) => setSupplierForm({...supplierForm, name: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-medium text-slate-800 dark:text-slate-100 transition-colors duration-300" placeholder="John Doe" />
+              </div>
+              <div>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Business Name</label>
+                <input type="text" value={supplierForm.businessName} onChange={(e) => setSupplierForm({...supplierForm, businessName: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-medium text-slate-800 dark:text-slate-100 transition-colors duration-300" placeholder="Acme Logistics Ltd." />
+              </div>
+              <div>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Phone Number</label>
+                <input type="text" value={supplierForm.phone} onChange={(e) => setSupplierForm({...supplierForm, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-medium text-slate-800 dark:text-slate-100 transition-colors duration-300" placeholder="9876543210" />
+              </div>
+              <div>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Opening Balance</label>
+                <div className="relative search-wrapper">
+                  <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
+                  <input 
+                    type="number" step="0.01" 
+                    value={supplierForm.openingBalance} 
+                    onChange={(e) => setSupplierForm({...supplierForm, openingBalance: e.target.value})} 
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:ring-indigo-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 font-bold text-slate-800 dark:text-slate-100 transition-colors duration-300 outline-none search-clean" 
+                    placeholder="0.00" 
+                  />
+                </div>
+              </div>
+              <div className="pt-4 flex gap-3">
+                <button type="button" onClick={() => setIsAddSupplierModalOpen(false)} className="px-5 py-3 text-slate-600 dark:text-slate-400 transition-colors duration-300 font-bold hover:bg-slate-100 rounded-xl transition-colors w-full">Cancel</button>
+                <button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                  className="w-full py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl shadow-md transition-colors shadow-indigo-600/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                  ) : 'Add'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* RECORD PURCHASE/INVOICE MODAL */}
+      {isInvoiceModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 z-[100] flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
+          <div className="bg-white dark:bg-slate-800 transition-colors duration-300 rounded-2xl shadow-xl w-full max-w-sm overflow-hidden border border-slate-100 dark:border-slate-700/50 transition-colors duration-300">
+            <div className="px-6 py-4 border-b border-amber-100 flex justify-between items-center bg-amber-50">
+              <h3 className="text-lg font-bold text-amber-900 flex items-center gap-2"><PackageOpen size={18} className="text-amber-600" /> Record Purchase Bill</h3>
+              <button onClick={() => setIsInvoiceModalOpen(false)} className="text-amber-400 hover:text-amber-600"><X size={20} /></button>
+            </div>
+            <form onSubmit={handleInvoiceSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Invoice Amount</label>
+                <div className="relative search-wrapper">
+                  <IndianRupee size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-600 search-icon" />
+                  <input 
+                    type="number" required min="1" step="0.01" 
+                    value={invoiceForm.amount} 
+                    onChange={(e) => setInvoiceForm({...invoiceForm, amount: e.target.value})} 
+                    className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-2 focus:outline-none focus:ring-amber-500/50 focus:border-amber-500 bg-white dark:bg-slate-800 transition-colors duration-300 font-black text-amber-600 text-xl shadow-inner search-clean" 
+                    placeholder="0.00" 
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Inv No</label>
+                  <input type="text" value={invoiceForm.invoiceNo} onChange={(e) => setInvoiceForm({...invoiceForm, invoiceNo: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-amber-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-800 dark:text-slate-100 transition-colors duration-300 font-medium" placeholder="#123" />
+                </div>
+                <div>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Date</label>
+                  <input type="date" required value={invoiceForm.date} onChange={(e) => setInvoiceForm({...invoiceForm, date: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-amber-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-800 dark:text-slate-100 transition-colors duration-300 font-medium" />
+                </div>
+              </div>
+              <div>
+                <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold transition-colors duration-300 mb-1.5">Notes</label>
+                <input type="text" value={invoiceForm.note} onChange={(e) => setInvoiceForm({...invoiceForm, note: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors duration-300 focus:ring-amber-500/50 bg-white dark:bg-slate-800 transition-colors duration-300 text-slate-700 dark:text-slate-300 transition-colors duration-300 font-medium" placeholder="E.g. Received new stock" />
               </div>
               <div className="pt-4">
                 <button type="submit" className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-white font-bold rounded-xl shadow-md transition-colors shadow-amber-500/30 text-lg">Save Purchase Bill</button>
