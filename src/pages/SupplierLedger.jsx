@@ -294,7 +294,7 @@ const handleEditSubmit = (e) => {
                   </div>
                   <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
                     <p className="text-slate-500 dark:text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1 sm:mb-2">Total Given</p>
-                    <h3 className="text-xl sm:text-2xl font-black text-indigo-600">â‚¹{totalGiven.toFixed(2)}</h3>
+                    <h3 className="text-xl sm:text-2xl font-black text-indigo-600">₹{totalGiven.toFixed(2)}</h3>
                     <p className="text-slate-400 text-[10px] mt-1 font-semibold uppercase">Payment Out</p>
                   </div>
                   <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col justify-center">
@@ -364,7 +364,7 @@ const handleEditSubmit = (e) => {
                                    </td>
                                    <td className="py-4 px-6 text-right text-sm font-black text-slate-800 dark:text-slate-100 bg-amber-50/10 dark:bg-amber-900/5">{debit > 0 ? `₹${debit.toFixed(2)}` : '-'}</td>
                                    <td className="py-4 px-6 text-right text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50/10 dark:bg-emerald-900/5">{credit > 0 ? `₹${credit.toFixed(2)}` : '-'}</td>
-                                   <td className="py-4 px-6 text-right text-sm font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/10 dark:bg-indigo-900/5">â‚¹{acc.balance.toFixed(2)}</td>
+                                   <td className="py-4 px-6 text-right text-sm font-black text-indigo-600 dark:text-indigo-400 bg-indigo-50/10 dark:bg-indigo-900/5">₹{acc.balance.toFixed(2)}</td>
                                 </tr>
                                 );
                                 return acc;
