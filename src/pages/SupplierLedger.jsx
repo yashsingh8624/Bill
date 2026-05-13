@@ -572,7 +572,7 @@ const handleEditSubmit = (e) => {
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">To Supplier</p>
                 <p className="font-black text-slate-800 dark:text-slate-100 transition-colors duration-300 text-xl">{currentSupplier?.name}</p>
                 <div className="mt-2 text-sm bg-white dark:bg-slate-800 transition-colors duration-300 border border-slate-100 dark:border-slate-700/50 transition-colors duration-300 inline-block px-3 py-1 rounded-lg">
-                   Pending: <span className="font-black text-amber-500">â‚¹{currentSupplierBalance.toFixed(2)}</span>
+                   Pending: <span className="font-black text-amber-500">₹{currentSupplierBalance.toFixed(2)}</span>
                 </div>
               </div>
               <div>
