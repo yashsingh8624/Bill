@@ -184,7 +184,7 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700/50">
-                    {filteredSuppliers.map(supplier => (
+                    {filteredSuppliers.map(supplier => ( 
                       <tr 
                         key={supplier.id} 
                         onClick={() => handleOpenSupplier(supplier)}
