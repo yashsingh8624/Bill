@@ -219,24 +219,24 @@ export default function AllTransactions() {
                     {/* Left: Icon & Details */}
                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border ${bgColor} ${iconColor}`}> 
-                          {Icon}
+                            {Icon}
                        </div>
                        
-                       <div className="flex flex-col">
-                         <h3 className="font-black text-slate-800 dark:text-slate-100 text-base tracking-tight truncate max-w-full max-w-sm sm:max-w-full border-b-0 space-x-1">
-                           <span>{partyName}</span>
-                           <span className="font-medium text-slate-400 dark:text-slate-500">–</span>
-                           <span className="font-bold opacity-90">{displayType}</span>
+                       <div className="flex flex-col flex-1 min-w-0">
+                         <h3 className="font-black text-slate-800 dark:text-slate-100 text-[15px] sm:text-base tracking-tight border-b-0 flex items-center w-full min-w-0 gap-1 overflow-hidden">
+                           <span className="truncate flex-1 min-w-0">{partyName}</span>
+                           <span className="font-medium text-slate-400 dark:text-slate-500 shrink-0">–</span>
+                           <span className="font-bold opacity-90 shrink-0">{displayType}</span>
                          </h3>
-                         <div className="flex items-center gap-2 mt-0.5">
+                         <div className="flex items-center flex-wrap gap-1.5 mt-0.5 min-w-0 w-full overflow-hidden">
                            {txn.invoice_id && (
-                             <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-1.5 py-0.5 rounded">
+                             <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-1.5 py-0.5 rounded shrink-0">
                                #{txn.invoice_id}
                              </span>
                            )}
-                           <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
-                             <Clock size={10} />
-                             {new Date(txn.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}
+                           <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400 shrink-0 truncate">
+                             <Clock size={10} className="shrink-0" />
+                             <span className="truncate">{new Date(txn.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                            </span>
                          </div>
                        </div>
@@ -245,5 +245,8 @@ export default function AllTransactions() {
                    {/* Right: Amount */}
                     <div className="text-right flex flex-col justify-center shrink-0 whitespace-nowrap">
                        <div className={`font-black text-base sm:text-lg flex items-baseline justify-end gap-0.5 tracking-tight ${textColor}`}>
-   
-   
+                         <span className="text-[11px] sm:text-[12px] font-bold opacity-80">{sign}₹</span>
+                         {parseFloat(txn.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                       </div>
+                    </div>
+                 </div>
