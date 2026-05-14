@@ -473,12 +473,12 @@ export default function Dashboard() {
       {/* Dashboard Modal */}
       {dashboardModal && (
         <div className="fixed inset-0 bg-slate-900/60 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg border border-slate-100 flex flex-col max-h-[85vh] animate-in slide-in-from-bottom-4 sm:zoom-in-95">
+          <div className="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg border border-slate-100 dark:border-slate-700 flex flex-col max-h-[85vh] animate-in slide-in-from-bottom-4 sm:zoom-in-95">
             <div className={`px-6 py-4 flex justify-between items-center ${dashboardModal === 'get' ? 'bg-emerald-50 border-b border-emerald-100' : 'bg-rose-50 border-b border-rose-100'}`}>
               <h3 className={`text-lg font-black flex items-center gap-2 ${dashboardModal === 'get' ? 'text-emerald-800' : 'text-rose-800'}`}>
                 {dashboardModal === 'get' ? "You'll Get" : "You'll Give"}
               </h3>
-              <button onClick={() => setDashboardModal(null)} className="text-slate-400 hover:text-slate-700 p-1 bg-white/50 rounded-full hover:bg-white transition-colors">
+              <button onClick={() => setDashboardModal(null)} className="text-slate-400 hover:text-slate-700 p-1 bg-white/50 dark:bg-slate-700/50 rounded-full hover:bg-white dark:hover:bg-slate-700 transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -497,7 +497,7 @@ export default function Dashboard() {
                     const lastTxnDate = txns.length > 0 ? new Date(txns[0].date).toLocaleDateString() : 'N/A';
                     
                     return (
-                      <li key={entity.id} className="p-4 bg-white hover:bg-slate-50 flex justify-between items-center">
+                      <li key={entity.id} className="p-4 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 flex justify-between items-center">
                         <div>
                           <p className="font-bold text-slate-800">{entity.name || entity.businessName}</p>
                           <p className="text-xs text-slate-400 font-medium mt-0.5">Last interaction: {lastTxnDate}</p>
