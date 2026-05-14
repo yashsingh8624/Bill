@@ -287,7 +287,7 @@ export default function Dashboard() {
 
       {/* Cloud Storage Section */}
       {!isOffline && (
-        <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
+        <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-32 h-32 bg-blue-50 rounded-full blur-2xl group-hover:scale-110 transition-transform pointer-events-none"></div>
           <div className="relative z-10">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
