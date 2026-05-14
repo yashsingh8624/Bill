@@ -25,14 +25,14 @@
   }
 
   /* Base input globals for clean UI — scoped to standalone inputs, NOT search bars */
-  input[type="number"], input[type="date"], select {
-    @apply rounded-[12px] border border-slate-200 bg-white px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none;
+  input[type="number"], input[type="date"], select, textarea {
+    @apply bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-[12px] border px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] transition-all focus:border-indigo-500 hover:border-slate-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none;
   }
 
   /* Standalone text inputs get global styles, but NOT when inside search wrappers */
   input[type="text"]:not(.search-input):not(.search-clean) {
-    @apply rounded-[12px] border border-slate-200 bg-white px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] transition-all focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none;
-  }
+    @apply bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-100 rounded-[12px] border px-4 py-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.05)] transition-all focus:border-indigo-500 hover:border-slate-300 dark:hover:border-slate-600 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none;
+}
 
   /* Clean search inputs get no default padding/shadow to prevent icon overlap */
   input.search-input, input.search-clean {
