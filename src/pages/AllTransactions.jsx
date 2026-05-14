@@ -243,7 +243,7 @@ export default function AllTransactions() {
                        </div>
                     </div>
 
-                    {/* Right: Amount */}
+                   {/* Right: Amount */}
                     <div className="text-right flex flex-col justify-center flex-shrink-0 whitespace-nowrap">
                        <div className={`font-black text-base sm:text-lg flex items-baseline justify-end gap-0.5 tracking-tight ${textColor}`}>
                          <span className="text-[11px] sm:text-[12px] font-bold opacity-80 shrink-0">{sign}₹</span>
