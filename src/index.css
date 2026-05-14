@@ -149,10 +149,7 @@ button {
 
 /* ===== Card utility ===== */
 .card {
-  background: white;
-  border-radius: 1rem;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  @apply bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-[1rem] shadow-sm;
 }
 
 /* Root element sizing */
