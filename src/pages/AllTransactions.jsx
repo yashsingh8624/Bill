@@ -250,3 +250,6 @@ export default function AllTransactions() {
                           <span className="shrink-0">{parseFloat(txn.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                         </div>
                      </div>
+               
+   
+   
