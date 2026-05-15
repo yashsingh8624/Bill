@@ -1,17 +1,18 @@
 import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useSettings } from '../context/SettingsContext';
 import { useInventory } from '../context/InventoryContext';
 import { useCustomers, useSuppliers } from '../context/PartiesContext';
 import { useBills } from '../context/BillContext';
 import { useAudit } from '../context/AuditContext';
-import { Save, CheckCircle, Download, Upload, Database, FileSpreadsheet, Image as ImageIcon, Zap, Settings as SettingsIcon, LogOut } from 'lucide-react';
+import { Save, CheckCircle, Download, Upload, Database, FileSpreadsheet, Image as ImageIcon, Zap, Settings as SettingsIcon, LogOut, Landmark } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
-import * as XLSX from 'xlsx';
 import { exportBackup, restoreBackup } from '../utils/storage';
 import { useAuth } from '../context/AuthContext';
 
 
 export default function Settings() {
+  const navigate = useNavigate();
   const { userSettings, updateSettings } = useSettings();
   const { products } = useInventory();
   const { customers } = useCustomers();
