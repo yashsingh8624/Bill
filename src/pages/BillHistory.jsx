@@ -38,19 +38,7 @@ export default function BillHistory() {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
     
-    const yesterday = new Date();
-    const filteredBills = getFilteredBills();
-
-  return (
-    <div className="space-y-6 flex flex-col w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 sm:pb-8 pt-2 sm:pt-4 page-animate min-w-0" style={{ minHeight: 'calc(100vh - 10rem)' }}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Bill History</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">View and manage past invoices.</p>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-shrink-0">
+const yesterday = new Date();
     yesterday.setDate(now.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
     
@@ -67,8 +55,22 @@ export default function BillHistory() {
     return filtered;
   };
 
-  
+  const filteredBills = getFilteredBills();
+
+  return (
+    <div className="space-y-6 flex flex-col w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 sm:pb-8 pt-2 sm:pt-4 page-animate min-w-0" style={{ minHeight: 'calc(100vh - 10rem)' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Bill History</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">View and manage past invoices.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-shrink-0">
         <div className="md:col-span-2 bg-white dark:bg-slate-800 p-2 rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-100 dark:border-slate-600 flex items-center gap-3 px-4 transition-all focus-within:ring-2 focus-within:ring-purple-400/20 focus-within:border-purple-300">
+
+  
+        
           <Search size={20} className="text-purple-400" />
           <input 
             type="text" 
