@@ -41,6 +41,7 @@ const AppRoutes = () => {
         <Route path="add-party" element={<AddParty />} />
         <Route path="add-item" element={<AddItem />} />
         <Route path="day-closing" element={<DayClosing />} />
+        <Route path="cash-bank" element={<CashBank />} />
         <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
