@@ -40,6 +40,18 @@ export default function BillHistory() {
     const todayStr = now.toISOString().split('T')[0];
     
     const yesterday = new Date();
+    const filteredBills = getFilteredBills();
+
+  return (
+    <div className="space-y-6 flex flex-col w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 sm:pb-8 pt-2 sm:pt-4 page-animate min-w-0" style={{ minHeight: 'calc(100vh - 10rem)' }}>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Bill History</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">View and manage past invoices.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-shrink-0">
     yesterday.setDate(now.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
     
@@ -56,79 +68,7 @@ export default function BillHistory() {
     return filtered;
   };
 
-  const filteredBills = getFilteredBills();
-
-  const handleExportExcel = () => {
-    const data = filteredBills.map(b => ({
-      'Invoice No': b.invoiceNo,
-      'Date': b.readableDate || new Date(b.date).toLocaleDateString(),
-      'Customer': b.customerName,
-      'Total Amount': Array.isArray(b.items) && b.items.length > 0 
-        ? b.items.reduce((s, i) => s + (parseFloat(i.amount) || 0), 0) 
-        : ((parseFloat(b.subTotal) || 0) + (parseFloat(b.cgst) || 0) + (parseFloat(b.sgst) || 0)),
-      'Paid': b.amountPaid || 0,
-      'Outstanding': b.outstanding || 0,
-      'Mode': b.paymentMode,
-      'Month': b.month || (new Date(b.date).getMonth() + 1),
-      'Year': b.year || new Date(b.date).getFullYear()
-    }));
-
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Bills");
-    const wbOut = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([wbOut], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const fileName = `Bill_History_${new Date().toISOString().split('T')[0]}.xlsx`;
-
-    try {
-      const file = new File([blob], fileName, { type: blob.type });
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({
-          files: [file],
-          title: fileName,
-          text: 'Here is the exported Excel data from SmartBill.'
-        }).catch((e) => console.log('Share canceled or failed:', e));
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 100);
-      }
-    } catch (err) {
-      console.error('Export error:', err);
-      // Fallback
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-    }
-  };
-
-  return (
-    <div className="space-y-6 flex flex-col w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 sm:pb-8 pt-2 sm:pt-4 page-animate min-w-0" style={{ minHeight: 'calc(100vh - 10rem)' }}>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight">Bill History</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 font-medium">View and manage past invoices.</p>
-        </div>
-        <button 
-          onClick={handleExportExcel}
-          disabled={filteredBills.length === 0}
-          className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-5 py-2.5 rounded-[12px] transition-all font-bold flex items-center justify-center gap-2 shadow-[0_4px_12px_rgba(16,185,129,0.3)] hover:shadow-[0_6px_16px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0"
-        >
-          <FileSpreadsheet size={18} /> Export Excel
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 flex-shrink-0">
+  
         <div className="md:col-span-2 bg-white dark:bg-slate-800 p-2 rounded-[12px] shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-100 dark:border-slate-600 flex items-center gap-3 px-4 transition-all focus-within:ring-2 focus-within:ring-purple-400/20 focus-within:border-purple-300">
           <Search size={20} className="text-purple-400" />
           <input 
