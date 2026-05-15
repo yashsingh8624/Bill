@@ -363,24 +363,24 @@ export default function Settings() {
         </form>
       </div>
 
-      {/* Data Management Section */}
+      {/* Cash & Bank Section */}
       <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2 pt-4 border-t border-slate-100 dark:border-slate-800">
-         <Database size={20} className="text-green-600 dark:text-green-500" /> Database Utilities
+         <Landmark size={20} className="text-blue-600 dark:text-blue-500" /> Cash & Bank Overview
       </h3>
       
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-5 mb-8">
-        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col sm:flex-row items-center justify-between gap-6 hover:border-emerald-200 dark:hover:border-slate-500 transition-all group">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-600 flex flex-col sm:flex-row items-center justify-between gap-6 hover:border-blue-200 dark:hover:border-slate-500 transition-all group">
           <div className="flex items-center gap-4">
-             <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-4 rounded-xl group-hover:scale-110 transition-all">
-               <FileSpreadsheet size={24} />
+             <div className="bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-4 rounded-xl group-hover:scale-110 transition-all">
+               <Landmark size={24} />
              </div>
              <div className="text-left">
-                <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg mb-1">Export Data</h4>
-                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium max-w-md">Download a complete Excel workbook to view all records, inventory, and history.</p>
+                <h4 className="font-bold text-slate-800 dark:text-slate-100 text-lg mb-1">Cash & Bank Overview</h4>
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium max-w-md">Track cash flow, UPI collections, bank balance, and payment activity in one place.</p>
              </div>
           </div>
-          <button onClick={exportAllToExcel} className="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
-            <FileSpreadsheet size={18} /> Export .XLSX
+          <button onClick={() => navigate('/cash-bank')} className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+            <Landmark size={18} /> Open Overview
           </button>
         </div>
       </div>
