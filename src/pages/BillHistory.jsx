@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useBills } from '../context/BillContext';
 import { useCustomers } from '../context/PartiesContext';
-import { FileText, Search, Eye, X, ArrowUpRight, Filter, FileSpreadsheet, Calendar, ExternalLink, Share2, MessageCircle } from 'lucide-react';
-import * as XLSX from 'xlsx';
+import { FileText, Search, Eye, X, ArrowUpRight, Filter, Calendar, ExternalLink, Share2, MessageCircle } from 'lucide-react';
 import { useToast } from '../context/ToastContext';
 import { useSettings } from '../context/SettingsContext';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
