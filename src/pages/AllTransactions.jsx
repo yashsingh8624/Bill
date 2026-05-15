@@ -243,10 +243,18 @@ export default function AllTransactions() {
                     </div>
 
                    {/* Right: Amount */}
-                    <div className="text-right flex flex-col justify-center shrink-0 whitespace-nowrap">
-                       <div className={`font-black text-base sm:text-lg flex items-baseline justify-end gap-0.5 tracking-tight ${textColor}`}>
-                         <span className="text-[11px] sm:text-[12px] font-bold opacity-80">{sign}₹</span>
-                         {parseFloat(txn.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    <div className="text-right flex flex-col justify-center shrink-0 max-w-[40%] sm:max-w-none pl-1">
+                       <div className={`font-black text-[15px] sm:text-lg flex items-baseline justify-end gap-0.5 tracking-tight flex-wrap sm:flex-nowrap ${textColor}`}>
+                         <span className="text-[11px] sm:text-[12px] font-bold opacity-80 shrink-0 pt-[1px]">{sign}₹</span>
+                         <span className="break-all sm:break-normal">{parseFloat(txn.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                        </div>
                     </div>
                  </div>
+               );
+             })}
+           </div>
+         )}
+      </div>
+    </div>
+  );
+}
