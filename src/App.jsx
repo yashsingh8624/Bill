@@ -21,6 +21,7 @@ import Customers from './pages/Customers';
 import Suppliers from './pages/Suppliers';
 import AddParty from './pages/AddParty';
 import AddItem from './pages/AddItem';
+import CashBank from './pages/CashBank';
 
 const AppRoutes = () => {
   return (
