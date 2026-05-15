@@ -6,7 +6,7 @@ import { useToast } from '../context/ToastContext';
 import { useSettings } from '../context/SettingsContext';
 import { generateInvoicePDF } from '../utils/pdfGenerator';
 import { calculateCustomerBalance } from '../utils/ledger';
-import { getWhatsAppLink } from '../utils/whatsapp';
+import { getWhatsAppLink } from '../utils/whatsapp'; 
 
 export default function BillHistory() {
   const billsRes = useBills() || {};
