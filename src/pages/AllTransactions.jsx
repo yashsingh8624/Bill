@@ -217,38 +217,43 @@ export default function AllTransactions() {
                  return (
                  <div key={txn.id || idx} className="p-4 sm:p-5 flex items-center justify-between gap-2 sm:gap-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-default border-b border-slate-100 dark:border-slate-700/50 last:border-0">
                {/* Left: Icon & Details */}
-                     <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0 pr-2">
-                       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border ${bgColor} ${iconColor}`}> 
+                     <div className="flex items-start sm:items-center gap-3 sm:gap-4 flex-1 min-w-0 pr-2">
+                       <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 shadow-sm border mt-0.5 sm:mt-0 ${bgColor} ${iconColor}`}> 
                             {Icon}
                        </div>
                        
                        <div className="flex flex-col flex-1 min-w-0">
-                         <h3 className="font-black text-slate-800 dark:text-slate-100 text-[15px] sm:text-base tracking-tight truncate w-full">
+                         <h3 className="font-black text-slate-800 dark:text-slate-100 text-[14px] sm:text-base tracking-tight leading-snug w-full break-words">
                            {partyName}
                          </h3>
-                         <div className="flex items-center flex-wrap gap-1.5 mt-0.5 min-w-0 w-full text-[11px] font-bold text-slate-500 dark:text-slate-400">
-                           <span className="shrink-0 text-slate-600 dark:text-slate-300">{displayType}</span>
-                           <span className="opacity-50 shrink-0">•</span>
-                           <span className="flex items-center gap-1 shrink-0 truncate">
+                         <div className="flex flex-wrap items-center gap-1.5 mt-1 sm:mt-0.5 min-w-0 w-full text-[10px] sm:text-[11px] font-bold text-slate-500 dark:text-slate-400">
+                           <span className="shrink-0 text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-700/50 px-1.5 py-0.5 rounded">{displayType}</span>
+                           <span className="flex items-center gap-1 shrink-0 whitespace-nowrap bg-slate-100 dark:bg-slate-700/50 px-1.5 py-0.5 rounded">
                              <Clock size={10} className="shrink-0" />
-                             <span className="truncate">{new Date(txn.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                             <span>{new Date(txn.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                            </span>
                            {txn.invoice_id && (
-                             <>
-                               <span className="opacity-50 shrink-0 hidden sm:inline">•</span>
-                               <span className="bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-1.5 py-[1px] rounded text-[9px] uppercase tracking-wider shrink-0 mt-0.5 sm:mt-0">
-                                 #{txn.invoice_id}
-                               </span>
-                             </>
+                             <span className="bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider shrink-0 break-all max-w-full">
+                               #{txn.invoice_id}
+                             </span>
                            )}
                          </div>
                        </div>
                     </div>
 
                    {/* Right: Amount */}
-                    <div className="text-right flex flex-col justify-center shrink-0 pl-2 border-l border-slate-100 dark:border-slate-700/50 sm:border-0 sm:pl-0 sm:max-w-none">
+                    <div className="text-right flex flex-col justify-start sm:justify-center shrink-0 pl-2">
                        <div className={`font-black text-[15px] sm:text-lg flex items-baseline justify-end gap-0.5 tracking-tight whitespace-nowrap ${textColor}`}>
                          <span className="text-[11px] sm:text-[12px] font-bold opacity-80 shrink-0 pt-[1px]">{sign}₹</span>
                          <span>{parseFloat(txn.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                        </div>
                     </div>
+                 </div>
+               );
+             })}
+           </div>
+         )}
+      </div>
+    </div>
+  );
+}
