@@ -250,7 +250,3 @@ export default function AllTransactions() {
                        </div>
                     </div>
                  </div>
-                  
-         
-                   
-         
