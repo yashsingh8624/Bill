@@ -251,5 +251,4 @@ export default function AllTransactions() {
                          <span className="text-[11px] sm:text-[12px] font-bold opacity-80 shrink-0 pt-[1px]">{sign}₹</span>
                          <span>{parseFloat(txn.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                        </div>
-                    </div>    
-              
+                    </div>
