@@ -216,8 +216,7 @@ export default function AllTransactions() {
 
                  return (
                  <div key={txn.id || idx} className="p-4 sm:p-5 flex items-center justify-between gap-2 sm:gap-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-default border-b border-slate-100 dark:border-slate-700/50 last:border-0">
-                   
-              {/* Left: Icon & Details */}
+               {/* Left: Icon & Details */}
                      <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0 pr-2">
                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm border ${bgColor} ${iconColor}`}> 
                             {Icon}
@@ -252,8 +251,5 @@ export default function AllTransactions() {
                          <span className="text-[11px] sm:text-[12px] font-bold opacity-80 shrink-0 pt-[1px]">{sign}₹</span>
                          <span>{parseFloat(txn.amount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                        </div>
-                    </div>
+                    </div>    
               
-                 
-                   
-                       
