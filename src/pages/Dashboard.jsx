@@ -99,51 +99,50 @@ export default function Dashboard() {
     const currentYear = new Date().getFullYear();
     return [currentYear, currentYear - 1, currentYear - 2, currentYear - 3, currentYear - 4];
   }, []);
-
-  // Monthly Chart Data (Last 6 months with trends based on selected year)
-  const chartData = useMemo(() => {
-    const months = [];
-    const currentYear = new Date().getFullYear();
-    // If selected year is current year, show till current month. Else show till December (index 11).
-    const endMonth = selectedYear === currentYear ? new Date().getMonth() : 11;
-
-    // Fetch 7 months to calculate the trend for the oldest displayed month
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(selectedYear, endMonth - i, 1);
-      months.push({
-        label: d.toLocaleString('default', { month: 'short' }),
-        key: d.toISOString().slice(0, 7),
-        value: 0
-      });
-    }
+  // Analytics Chart Data (All 12 months for the selected year)
+  const analyticsData = useMemo(() => {
+    const months = Array.from({ length: 12 }, (_, i) => {
+      const date = new Date(selectedYear, i, 1);
+      return {
+        name: date.toLocaleString('default', { month: 'short' }),
+        monthKey: `${selectedYear}-${String(i + 1).padStart(2, '0')}`,
+        sales: 0
+      };
+    });
 
     bills.filter(b => !b.isDeleted).forEach(b => {
-      const mKey = b.date?.slice(0, 7);
-      const month = months.find(m => m.key === mKey);
-      if (month) {
+      if (!b.date) return;
+      const mKey = b.date.slice(0, 7); // YYYY-MM
+      const monthIndex = months.findIndex(m => m.monthKey === mKey);
+      if (monthIndex !== -1) {
         const amt = Array.isArray(b.items) && b.items.length > 0
           ? b.items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0)
           : (parseFloat(b.subTotal) || 0) + (parseFloat(b.cgst) || 0) + (parseFloat(b.sgst) || 0);
-        month.value += amt;
+        months[monthIndex].sales += amt;
       }
     });
 
-    const displayMonths = [];
-    for (let i = 1; i <= 6; i++) {
-        const current = months[i];
-        const prev = months[i-1];
-        let trend = 'flat';
-        if (current.value > prev.value) trend = 'up';
-        if (current.value < prev.value) trend = 'down';
-        
-        displayMonths.push({
-            ...current,
-            trend
-        });
-    }
-
-    return displayMonths;
+    return months;
   }, [bills, selectedYear]);
+
+  const salesGrowth = useMemo(() => {
+    const currentMonthIndex = new Date().getMonth();
+    const isCurrentYear = selectedYear === new Date().getFullYear();
+    const currMonthData = isCurrentYear ? analyticsData[currentMonthIndex] : analyticsData[11];
+    const prevMonthData = isCurrentYear 
+      ? (currentMonthIndex > 0 ? analyticsData[currentMonthIndex - 1] : { sales: 0 }) 
+      : analyticsData[10];
+
+    const currSales = currMonthData?.sales || 0;
+    const prevSales = prevMonthData?.sales || 0;
+    
+    if (prevSales === 0) return { trend: 'up', percentage: currSales > 0 ? 100 : 0 };
+    const diff = currSales - prevSales;
+    return {
+      trend: diff >= 0 ? 'up' : 'down',
+      percentage: Math.abs((diff / prevSales) * 100).toFixed(1)
+    };
+  }, [analyticsData, selectedYear]);
 
   const totalCustomerDue = useMemo(() => 
     customers.reduce((sum, c) => sum + parseFloat(calculateCustomerBalance(ledger, c?.id, c) || 0), 0)
