@@ -235,8 +235,8 @@ export default function CashBank() {
                             <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100">
                                 {tx.title}
                             </td>
-                            <td className="py-4 px-6 text-sm text-slate-500">
-                                {tx.reference}
+                            <td className="py-4 px-6 text-sm text-slate-500 capitalize">
+                                {tx.activity} • {tx.paymentMode}
                             </td>
                             <td className={`py-4 px-6 text-right font-black ${tx.type === 'IN' ? 'text-emerald-600' : 'text-red-500'}`}>
                                 {tx.type === 'IN' ? '+' : '-'}₹{tx.amount.toFixed(2)}
