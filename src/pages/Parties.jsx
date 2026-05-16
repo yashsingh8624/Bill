@@ -102,6 +102,24 @@ export default function Parties() {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-3 px-2 sm:px-0">
+        <button 
+          onClick={() => setActiveFilter(activeFilter === 'receivable' ? 'all' : 'receivable')}
+          className={`flex flex-col p-4 rounded-2xl border transition-all text-left relative overflow-hidden ${activeFilter === 'receivable' ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500/50 dark:border-emerald-500/50 shadow-md shadow-emerald-500/10 scale-[1.02]' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 hover:border-emerald-300 dark:hover:border-emerald-700/50 hover:shadow-sm'}`}
+        >
+          <div className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 mb-1">You'll Get</div>
+          <div className="text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400">₹{totals.get.toFixed(2)}</div>
+        </button>
+
+        <button 
+          onClick={() => setActiveFilter(activeFilter === 'payable' ? 'all' : 'payable')}
+          className={`flex flex-col p-4 rounded-2xl border transition-all text-left relative overflow-hidden ${activeFilter === 'payable' ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-500/50 dark:border-rose-500/50 shadow-md shadow-rose-500/10 scale-[1.02]' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 hover:border-rose-300 dark:hover:border-rose-700/50 hover:shadow-sm'}`}
+        >
+          <div className="text-xs sm:text-sm font-bold text-slate-500 dark:text-slate-400 mb-1">You'll Give</div>
+          <div className="text-lg sm:text-2xl font-black text-rose-600 dark:text-rose-400">₹{totals.give.toFixed(2)}</div>
+        </button>
+      </div>
+
       <div className="mx-2 sm:mx-0 search-wrapper bg-white dark:bg-slate-800 p-2 sm:p-2.5 rounded-xl shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-slate-100 dark:border-slate-600 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 flex-shrink-0 transition-all focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:border-indigo-300">
         <Search size={18} className="search-icon text-slate-400 flex-shrink-0 sm:w-5 sm:h-5" />
         <input 
