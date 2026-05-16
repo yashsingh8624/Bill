@@ -5,6 +5,7 @@ import { useCustomers, useSuppliers } from '../context/PartiesContext';
 import { IndianRupee, TrendingUp, AlertTriangle, FileText, ArrowRight, Target, Users, Package, Calendar, ChevronRight, ArrowUpRight, ArrowDownRight, Cloud, FolderOpen, FileSpreadsheet, Loader2, Wallet, History, X, Banknote, ArrowDown } from 'lucide-react';
 import { useExpenses } from '../context/ExpenseContext';
 import { Link, useNavigate } from 'react-router-dom';
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 import { calculateCustomerBalance, calculateSupplierBalance } from '../utils/ledger';
 import { useAuth } from '../context/AuthContext';
 import { useState } from 'react';
