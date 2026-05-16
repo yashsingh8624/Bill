@@ -1,82 +1,89 @@
 import React, { useState, useMemo } from 'react';
 import { useBills } from '../context/BillContext';
 import { useExpenses } from '../context/ExpenseContext';
-import { Landmark, ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, Filter } from 'lucide-react';
+import { useParties } from '../context/PartiesContext';
+import { Landmark, ArrowUpRight, ArrowDownRight, TrendingUp, Calendar, Filter, Smartphone, Banknote, Building2 } from 'lucide-react';
 
 export default function CashBank() {
-  const { bills } = useBills() || { bills: [] };
-  const { expenses } = useExpenses() || { expenses: [] };
+  const { bills = [], ledger = [] } = useBills() || {};
+  const { expenses = [] } = useExpenses() || {};
+  const { customers = [], suppliers = [] } = useParties() || {};
   const validBills = Array.isArray(bills) ? bills : [];
   const validExpenses = Array.isArray(expenses) ? expenses : [];
+  const validLedger = Array.isArray(ledger) ? ledger : [];
   
   const [dateFilter, setDateFilter] = useState('ALL');
+  const [modeFilter, setModeFilter] = useState('ALL');
 
-  const {
-    filteredBills,
-    filteredExpenses
-  } = useMemo(() => {
-    let b = validBills.filter(bill => !bill.isDeleted);
-    let e = validExpenses;
+  const allTransactions = useMemo(() => {
+    const txs = [];
+    validBills.filter(b => !b.isDeleted).forEach(bill => {
+      const amt = parseFloat(bill.amountPaid || bill.paidAmount || 0);
+      if (amt > 0) Object.assign(txs[txs.length] = {
+        id: `b-${bill.id}`, date: bill.date, type: 'IN', title: bill.customerName || 'Customer', reference: `#${bill.invoiceNo}`, amount: amt, paymentMode: (bill.paymentMode || 'Cash').toLowerCase(), activity: 'Sale'
+      });
+    });
+    validExpenses.forEach(exp => {
+      const amt = parseFloat(exp.amount || 0);
+      if (amt > 0) Object.assign(txs[txs.length] = {
+        id: `e-${exp.id}`, date: exp.date, type: 'OUT', title: exp.name || 'Expense', reference: exp.category || '', amount: amt, paymentMode: (exp.payment_mode || exp.paymentMode || 'Cash').toLowerCase(), activity: exp.category || 'Expense'
+      });
+    });
+    validLedger.filter(e => !e.is_void && !e.invoice_id).forEach(entry => {
+      if (entry.type === 'SALE' || entry.type === 'PURCHASE') return;
+      const amt = parseFloat(entry.amount || 0);
+      if (amt <= 0 || !entry.date) return;
+      
+      let pMode = entry.paymentMode ? entry.paymentMode.toLowerCase() : 'cash';
+      const match = (entry.description || '').match(/^\[(.*?)\]/);
+      if (match) pMode = match[1].toLowerCase().trim();
+      
+      let title = entry.party_name;
+      if (!title || title === 'Unknown') {
+          const p = [...customers, ...suppliers].find(x => String(x.id) === String(entry.party_id || entry.customer_id || entry.supplier_id));
+          if (p) title = p.name || p.businessName;
+      }
+      const type = (entry.type === 'PAYMENT' || entry.type === 'PAYMENT_IN' || entry.type === 'ROLLOVER') ? 'IN' : 'OUT';
+      Object.assign(txs[txs.length] = { id: `l-${entry.id}`, date: entry.date, type, title: title || 'Unknown', reference: entry.description || '', amount: amt, paymentMode: pMode, activity: type === 'IN' ? 'Payment In' : 'Payment Out' });
+    });
+    return txs.sort((a, b) => new Date(b.date) - new Date(a.date));
+  }, [validBills, validExpenses, validLedger, customers, suppliers]);
+
+  const { transactions, balances, totalCollected, totalExpenses, netCashFlow } = useMemo(() => {
+    let bal = { cash: 0, bank: 0, upi: 0 };
+    let collectedStr = 0, expStr = 0;
     
+    allTransactions.forEach(t => {
+      const amt = t.type === 'IN' ? t.amount : -t.amount;
+      if (t.paymentMode === 'upi') bal.upi += amt;
+      else if (['bank', 'online', 'transfer'].includes(t.paymentMode)) bal.bank += amt;
+      else bal.cash += amt;
+      
+      if (t.type === 'IN') collectedStr += t.amount;
+      else expStr += t.amount;
+    });
+
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
-    const yesterday = new Date();
-    yesterday.setDate(now.getDate() - 1);
+    const yesterday = new Date(); yesterday.setDate(now.getDate() - 1);
     const yesterdayStr = yesterday.toISOString().split('T')[0];
     const thisMonthStr = todayStr.slice(0, 7);
 
-    if (dateFilter === 'TODAY') {
-      b = b.filter(bill => bill.date && bill.date.startsWith(todayStr));
-      e = e.filter(exp => exp.date && exp.date.startsWith(todayStr));
-    } else if (dateFilter === 'YESTERDAY') {
-      b = b.filter(bill => bill.date && bill.date.startsWith(yesterdayStr));
-      e = e.filter(exp => exp.date && exp.date.startsWith(yesterdayStr));
-    } else if (dateFilter === 'MONTH') {
-      b = b.filter(bill => bill.date && bill.date.startsWith(thisMonthStr));
-      e = e.filter(exp => exp.date && exp.date.startsWith(thisMonthStr));
-    }
-    
-    return { filteredBills: b, filteredExpenses: e };
-  }, [validBills, validExpenses, dateFilter]);
-
-  const totalCollected = filteredBills.reduce((acc, bill) => acc + (parseFloat(bill.amountPaid || bill.paidAmount || 0) || 0), 0);
-  const totalExpenses = filteredExpenses.reduce((acc, exp) => acc + (parseFloat(exp.amount) || 0), 0);
-  const netCashFlow = totalCollected - totalExpenses;
-
-  // Compile Transactions
-  const transactions = useMemo(() => {
-    const txs = [];
-    filteredBills.forEach(bill => {
-      const amt = parseFloat(bill.amountPaid || bill.paidAmount || 0);
-      if (amt > 0) {
-        txs.push({
-          id: `bill-${bill.id || Math.random()}`,
-          date: bill.date,
-          type: 'IN',
-          title: `Payment from ${bill.customerName || 'Customer'}`,
-          reference: `#${bill.invoiceNo || 'N/A'}`,
-          amount: amt
-        });
+    let txs = allTransactions.filter(t => {
+      if (dateFilter === 'TODAY' && !(t.date && t.date.startsWith(todayStr))) return false;
+      if (dateFilter === 'YESTERDAY' && !(t.date && t.date.startsWith(yesterdayStr))) return false;
+      if (dateFilter === 'MONTH' && !(t.date && t.date.startsWith(thisMonthStr))) return false;
+      
+      if (modeFilter !== 'ALL') {
+        const smode = t.paymentMode.toLowerCase();
+        if (modeFilter === 'CASH' && smode !== 'cash') return false;
+        if (modeFilter === 'UPI' && smode !== 'upi') return false;
+        if (modeFilter === 'BANK' && !['bank', 'online', 'transfer'].includes(smode)) return false;
       }
+      return true;
     });
-
-    filteredExpenses.forEach(exp => {
-      const amt = parseFloat(exp.amount || 0);
-      if (amt > 0) {
-        txs.push({
-          id: `exp-${exp.id || Math.random()}`,
-          date: exp.date,
-          type: 'OUT',
-          title: `Expense: ${exp.category || 'General'}`,
-          reference: exp.name || 'N/A',
-          amount: amt
-        });
-      }
-    });
-
-    // Sort by date descending
-    return txs.sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [filteredBills, filteredExpenses]);
+    return { transactions: txs, balances: bal, totalCollected: collectedStr, totalExpenses: expStr, netCashFlow: collectedStr - expStr };
+  }, [allTransactions, dateFilter, modeFilter]);
 
   return (
     <div className="space-y-6 flex flex-col w-full max-w-sm mx-auto md:max-w-2xl lg:max-w-4xl xl:max-w-6xl px-4 sm:px-8 pb-24 sm:pb-8 pt-2 sm:pt-4 page-animate min-w-0">
