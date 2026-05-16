@@ -13,6 +13,7 @@ export default function Parties() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedParty, setSelectedParty] = useState(null); // { type: 'customer'|'supplier', party: object }
+  const [activeFilter, setActiveFilter] = useState('all'); // 'all' | 'receivable' | 'payable'
 
   const parties = useMemo(() => {
     const list = [];
