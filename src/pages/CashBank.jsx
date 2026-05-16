@@ -98,23 +98,42 @@ export default function CashBank() {
         </div>
       </div>
 
-      {/* Date Filter */}
-      <div className="flex bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 w-full md:w-auto overflow-x-auto custom-scrollbar">
-          {[
-            { id: 'ALL', label: 'All Time', icon: Calendar },
-            { id: 'TODAY', label: 'Today', icon: Filter },
-            { id: 'YESTERDAY', label: 'Yesterday', icon: Filter },
-            { id: 'MONTH', label: 'This Month', icon: Filter }
-          ].map(f => (
-            <button
-              key={f.id}
-              onClick={() => setDateFilter(f.id)}
-              className={`flex-1 min-w-[100px] py-2 px-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${dateFilter === f.id ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-800/50' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
-            >
-              <f.icon size={16} />
-              {f.label}
-            </button>
-          ))}
+{/* Date & Mode Filters */}
+      <div className="flex flex-col md:flex-row gap-3">
+        <div className="flex bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 w-full md:w-auto overflow-x-auto custom-scrollbar">
+            {[
+              { id: 'ALL', label: 'All Time', icon: Calendar },
+              { id: 'TODAY', label: 'Today', icon: Filter },
+              { id: 'YESTERDAY', label: 'Yesterday', icon: Filter },
+              { id: 'MONTH', label: 'This Month', icon: Filter }
+            ].map(f => (
+              <button
+                key={f.id}
+                onClick={() => setDateFilter(f.id)}
+                className={`flex-1 min-w-[100px] py-2 px-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${dateFilter === f.id ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-800/50' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+              >
+                <f.icon size={16} />
+                {f.label}
+              </button>
+            ))}
+        </div>
+
+        <div className="flex bg-white dark:bg-slate-800 p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 w-full md:w-auto overflow-x-auto custom-scrollbar">
+            {[
+              { id: 'ALL', label: 'All Modes' },
+              { id: 'CASH', label: 'Cash' },
+              { id: 'BANK', label: 'Bank' },
+              { id: 'UPI', label: 'UPI' }
+            ].map(f => (
+              <button
+                key={f.id}
+                onClick={() => setModeFilter(f.id)}
+                className={`flex-1 min-w-[80px] py-2 px-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center ${modeFilter === f.id ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-100 dark:border-indigo-800/50' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'}`}
+              >
+                {f.label}
+              </button>
+            ))}
+        </div>
       </div>
 
       {/* Overview Cards */}
@@ -123,11 +142,11 @@ export default function CashBank() {
           <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-bl-full opacity-50 group-hover:scale-110 transition-transform"></div>
           <div className="relative z-10">
             <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-4">
-              <TrendingUp size={24} />
+              <Banknote size={24} />
             </div>
-            <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-1">Net Cash Flow</p>
-            <h3 className={`text-2xl font-black ${netCashFlow >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-red-600 dark:text-red-400'}`}>
-              ₹{Math.abs(netCashFlow).toFixed(2)} {netCashFlow < 0 && '(Negative)'}
+            <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-1">Cash in Hand</p>
+            <h3 className={`text-2xl font-black ${balances.cash >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-red-600 dark:text-red-400'}`}>
+              ₹{Math.abs(balances.cash).toFixed(2)} {balances.cash < 0 && '(Negative)'}
             </h3>
           </div>
         </div>
@@ -136,24 +155,24 @@ export default function CashBank() {
           <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-50 dark:bg-emerald-900/20 rounded-bl-full opacity-50 group-hover:scale-110 transition-transform"></div>
           <div className="relative z-10">
             <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl flex items-center justify-center mb-4">
-              <ArrowUpRight size={24} />
+              <Building2 size={24} />
             </div>
-            <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-1">Total In (Collected)</p>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100">
-              ₹{totalCollected.toFixed(2)}
+            <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-1">Bank Balance</p>
+            <h3 className={`text-2xl font-black ${balances.bank >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-red-600 dark:text-red-400'}`}>
+              ₹{Math.abs(balances.bank).toFixed(2)} {balances.bank < 0 && '(Negative)'}
             </h3>
           </div>
         </div>
 
         <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-red-50 dark:bg-red-900/20 rounded-bl-full opacity-50 group-hover:scale-110 transition-transform"></div>
+          <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-bl-full opacity-50 group-hover:scale-110 transition-transform"></div>
           <div className="relative z-10">
-            <div className="w-12 h-12 bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-xl flex items-center justify-center mb-4">
-              <ArrowDownRight size={24} />
+            <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl flex items-center justify-center mb-4">
+              <Smartphone size={24} />
             </div>
-            <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-1">Total Out (Expenses)</p>
-            <h3 className="text-2xl font-black text-slate-800 dark:text-slate-100">
-              ₹{totalExpenses.toFixed(2)}
+            <p className="text-sm font-bold text-slate-500 dark:text-slate-400 mb-1">UPI Collections</p>
+            <h3 className={`text-2xl font-black ${balances.upi >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-red-600 dark:text-red-400'}`}>
+              ₹{Math.abs(balances.upi).toFixed(2)} {balances.upi < 0 && '(Negative)'}
             </h3>
           </div>
         </div>
