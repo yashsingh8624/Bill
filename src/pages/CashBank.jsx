@@ -194,7 +194,7 @@ export default function CashBank() {
                             </div>
                             <div>
                                 <h4 className="font-bold text-sm text-slate-800 dark:text-slate-100">{tx.title}</h4>
-                                <p className="text-xs text-slate-500">{new Date(tx.date).toLocaleDateString()}</p>
+                                <p className="text-xs text-slate-500 capitalize">{tx.activity} • {tx.paymentMode} • {new Date(tx.date).toLocaleDateString()}</p>
                             </div>
                         </div>
                         <span className={`font-black ${tx.type === 'IN' ? 'text-emerald-600' : 'text-red-500'}`}>
