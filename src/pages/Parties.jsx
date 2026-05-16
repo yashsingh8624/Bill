@@ -56,14 +56,33 @@ export default function Parties() {
     return list.sort((a, b) => a.displayName.localeCompare(b.displayName));
   }, [customers, suppliers, ledger]);
 
+  const totals = useMemo(() => {
+    let get = 0;
+    let give = 0;
+    parties.forEach(p => {
+      if (p.balance > 0) {
+        if (!p.showRed) get += p.balance;
+        else give += p.balance;
+      }
+    });
+    return { get, give };
+  }, [parties]);
+
   const filteredParties = useMemo(() => {
-    if (!searchTerm) return parties;
+    let list = parties;
+    if (activeFilter === 'receivable') {
+      list = list.filter(p => !p.showRed && p.balance > 0);
+    } else if (activeFilter === 'payable') {
+      list = list.filter(p => p.showRed && p.balance > 0);
+    }
+
+    if (!searchTerm) return list;
     const lowerQ = searchTerm.toLowerCase();
-    return parties.filter(p => 
+    return list.filter(p => 
       p.displayName.toLowerCase().includes(lowerQ) || 
       p.displayPhone.includes(lowerQ)
     );
-  }, [parties, searchTerm]);
+  }, [parties, searchTerm, activeFilter]);
 
   // If a party is selected, render their respective ledger component
   if (selectedParty) {
