@@ -44,10 +44,28 @@ export default function SupplierLedger({ overrideSupplier = null, onBack = null 
     )
   );
 
-  const currentSupplier = selectedSupplier ? suppliers.find(s => s && s.id === selectedSupplier.id) : null;
-  const supplierTxns = currentSupplier ? (getFilteredLedger(ledger, currentSupplier.id, 'supplier') || []) : [];
-  const currentSupplierBalance = currentSupplier ? parseFloat(calculateSupplierBalance(ledger, currentSupplier.id, currentSupplier) || 0) : 0;
+const currentSupplier = selectedSupplier ? suppliers.find(s => s && s.id === selectedSupplier.id) : null;
+  
+  const rawSupplierTxns = currentSupplier ? (getFilteredLedger(ledger, currentSupplier.id, 'supplier') || []) : [];
+  const supplierTxns = [...rawSupplierTxns];
+  
+  if (currentSupplier) {
+    const openingBal = parseFloat(currentSupplier.openingBalance || currentSupplier.previous_balance || 0);
+    if (openingBal > 0) {
+      const hasOpeningEntry = supplierTxns.some(e => String(e.type).toUpperCase().includes('OPENING'));
+      if (!hasOpeningEntry) {
+        supplierTxns.unshift({
+          id: `opening-${currentSupplier.id}`,
+          date: currentSupplier.created_at || currentSupplier.createdAt || new Date('2000-01-01').toISOString(),
+          type: 'SUPPLIER_OPENING',
+          amount: String(openingBal),
+          description: 'Opening Balance'
+        });
+      }
+    }
+  }
 
+  const currentSupplierBalance = currentSupplier ? parseFloat(calculateSupplierBalance(ledger, currentSupplier.id, currentSupplier) || 0) : 0;
   const handleOpenSupplier = (supplier) => {
     setSelectedSupplier(supplier);
     setEditForm({ name: supplier.name || '', phone: supplier.phone || '', businessName: supplier.businessName || '', openingBalance: supplier.openingBalance || supplier.previous_balance || '' });
