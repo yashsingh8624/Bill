@@ -275,7 +275,8 @@ export default function Dashboard() {
 
       {/* Cloud Storage Section */}
       {!isOffline && (
-        <div className="bg-white dark:bg-slate-<h3 className={`text-3xl font-black relative z-10 tracking-tighter transition-colors duration-300 ${cashInHand >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-rose-600 dark:text-rose-500'}`}>
+        <div className="bg-white dark:bg-slate-
+          <h3 className={`text-3xl font-black relative z-10 tracking-tighter transition-colors duration-300 ${cashInHand >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-rose-600 dark:text-rose-500'}`}>
             ₹{cashInHand.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </h3>
           <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-2 font-black uppercase tracking-widest transition-colors duration-300">Physical Cash Balance</p>
