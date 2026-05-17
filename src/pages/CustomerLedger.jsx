@@ -104,7 +104,8 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
     setIsEditModalOpen(false);
   };
 
-  const currentBalance = currentCustomer ? calculateCustomerBalance(ledger, currentCustomer.id, currentCustomer) : 0;  const getCustomerTotals = (customer) => {
+  const currentBalance = currentCustomer ? calculateCustomerBalance(ledger, currentCustomer.id, currentCustomer) : 0;  
+  const getCustomerTotals = (customer) => {
     if (!customer || !customer.id) return { totalBilled: 0, totalPaid: 0, outstanding: 0, advance: 0, totalBills: 0, openingBalance: 0 };
     
     const entries = getFilteredLedger(ledger, customer.id, 'customer') || [];
