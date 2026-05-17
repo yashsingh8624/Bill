@@ -476,6 +476,19 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
                     className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium"
                   />
                </div>
+               <div>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Opening Balance</label>
+                  <div className="relative search-wrapper">
+                    <IndianRupee size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 search-icon" />
+                    <input 
+                      type="number" step="0.01"
+                      value={editForm.openingBalance}
+                      onChange={(e) => setEditForm({...editForm, openingBalance: e.target.value})}
+                      className="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold outline-none search-clean"
+                      placeholder="0.00"
+                    />
+                  </div>
+               </div>
                <div className="pt-4 flex gap-3">
                  <button type="submit" className="w-full py-3.5 bg-green-600 hover:bg-green-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-all text-center">
                    Save Changes
