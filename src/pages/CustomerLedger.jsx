@@ -96,10 +96,15 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
     setIsEditModalOpen(true);
   };
 
+  const openEditModal = (customer) => {
+    setEditForm({ name: customer.name, phone: customer.phone, openingBalance: customer.openingBalance || customer.previous_balance || 0 });
+    setIsEditModalOpen(true);
+  };
+
   const handleEditSubmit = (e) => {
     e.preventDefault();
     if (!selectedCustomer) return;
-    const updData = { ...editForm };
+    const updData = { ...editForm, previous_balance: editForm.openingBalance };
     updateCustomer(selectedCustomer.id, updData);
     setIsEditModalOpen(false);
   };
