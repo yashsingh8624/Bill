@@ -68,7 +68,7 @@ const currentSupplier = selectedSupplier ? suppliers.find(s => s && s.id === sel
   const currentSupplierBalance = currentSupplier ? parseFloat(calculateSupplierBalance(ledger, currentSupplier.id, currentSupplier) || 0) : 0;
   const handleOpenSupplier = (supplier) => {
     setSelectedSupplier(supplier);
-    setEditForm({ name: supplier.name || '', phone: supplier.phone || '', businessName: supplier.businessName || '', openingBalance: supplier.openingBalance || supplier.previous_balance || '' });
+    setEditForm({ name: supplier.name || '', phone: supplier.phone || '', businessName: supplier.businessName || '' });
   };
 
   const handleAddSupplier = async (e) => {
