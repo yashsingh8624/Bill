@@ -249,7 +249,7 @@ const handleEditSubmit = (e) => {
                   <h2 className="text-2xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-3">
                     {currentSupplier.name}
                     <button onClick={() => {
-                        setEditForm({ name: currentSupplier.name || '', phone: currentSupplier.phone || '', businessName: currentSupplier.businessName || '', openingBalance: currentSupplier.openingBalance || currentSupplier.previous_balance || '' });
+                        setEditForm({ name: currentSupplier.name || '', phone: currentSupplier.phone || '', businessName: currentSupplier.businessName || '' });
                         setIsEditModalOpen(true);
                       }} className="text-slate-400 hover:text-indigo-600 transition-colors" title="Edit Supplier">
                        <Edit2 size={16} />
