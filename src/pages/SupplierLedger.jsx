@@ -96,7 +96,7 @@ const currentSupplier = selectedSupplier ? suppliers.find(s => s && s.id === sel
 const handleEditSubmit = (e) => {
     e.preventDefault();
     if (!selectedSupplier) return;
-    const updData = { ...editForm, previous_balance: editForm.openingBalance, openingBalance: editForm.openingBalance };
+    const updData = { ...editForm };
     updateSupplier(selectedSupplier.id, updData);
     setIsEditModalOpen(false);
   };
