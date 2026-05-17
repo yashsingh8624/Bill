@@ -87,24 +87,11 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
     ? customers.find(c => c.id === selectedCustomer.id) 
     : null;
 
-  const rawLedgerEntries = currentCustomer 
+  const ledgerEntries = currentCustomer 
     ? getFilteredLedger(ledger, currentCustomer.id, 'customer') 
     : [];
-    
-  const ledgerEntries = [...rawLedgerEntries];
-  if (currentCustomer) {
-    const openingBal = parseFloat(currentCustomer.openingBalance || currentCustomer.previous_balance || 0);
-    if (openingBal > 0) {
-      const hasOpeningEntry = ledgerEntries.some(e => String(e.type).toUpperCase() === 'OPENING');
-      if (!hasOpeningEntry) {
-        ledgerEntries.unshift({
-          id: `opening-${currentCustomer.id}`,
-          date: currentCustomer.created_at || currentCustomer.createdAt || new Date('2000-01-01').toISOString(),
-          type: 'OPENING',
-          amount: String(openingBal),
-          description: 'Opening Balance'
-        });
- const openEditModal = (customer) => {
+
+  const openEditModal = (customer) => {
     setEditForm({ name: customer.name, phone: customer.phone });
     setIsEditModalOpen(true);
   };
@@ -115,12 +102,9 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
     const updData = { ...editForm };
     updateCustomer(selectedCustomer.id, updData);
     setIsEditModalOpen(false);
-  };     }
-    }
-  }
+  };
 
-  const currentBalance = currentCustomer ? calculateCustomerBalance(ledger, currentCustomer.id, currentCustomer) : 0;
-  const getCustomerTotals = (customer) => {
+  const currentBalance = currentCustomer ? calculateCustomerBalance(ledger, currentCustomer.id, currentCustomer) : 0;  const getCustomerTotals = (customer) => {
     if (!customer || !customer.id) return { totalBilled: 0, totalPaid: 0, outstanding: 0, advance: 0, totalBills: 0, openingBalance: 0 };
     
     const entries = getFilteredLedger(ledger, customer.id, 'customer') || [];
