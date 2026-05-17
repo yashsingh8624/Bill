@@ -159,12 +159,8 @@ export default function AllTransactions() {
       try {
         await ensureAllTransactionsSheet(spreadsheetId);
         const data = await getSheetData(spreadsheetId, 'ALL_TRANSACTIONS');
-        const filtered = data.filter(tx => {
-          const type = String(tx.type).toLowerCase();
-          return type.includes("sale") || type.includes("payment") || type.includes("purchase");
-        });
-        const sorted = filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-        setTransactions(sorted);
+        const processed = processLedgerData(data);
+        setTransactions(processed);
       } catch (err) {
         console.error('Failed to load transactions', err);
       } finally {
