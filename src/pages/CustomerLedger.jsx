@@ -87,14 +87,26 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
     ? customers.find(c => c.id === selectedCustomer.id) 
     : null;
 
-  const ledgerEntries = currentCustomer 
+  const rawLedgerEntries = currentCustomer 
     ? getFilteredLedger(ledger, currentCustomer.id, 'customer') 
     : [];
-
-  const openEditModal = (customer) => {
-    setEditForm({ name: customer.name, phone: customer.phone });
-    setIsEditModalOpen(true);
-  };
+    
+  const ledgerEntries = [...rawLedgerEntries];
+  if (currentCustomer) {
+    const openingBal = parseFloat(currentCustomer.openingBalance || currentCustomer.previous_balance || 0);
+    if (openingBal > 0) {
+      const hasOpeningEntry = ledgerEntries.some(e => String(e.type).toUpperCase() === 'OPENING');
+      if (!hasOpeningEntry) {
+        ledgerEntries.unshift({
+          id: `opening-${currentCustomer.id}`,
+          date: currentCustomer.created_at || currentCustomer.createdAt || new Date('2000-01-01').toISOString(),
+          type: 'OPENING',
+          amount: String(openingBal),
+          description: 'Opening Balance'
+        });
+      }
+    }
+  }
 
   const openEditModal = (customer) => {
     setEditForm({ name: customer.name, phone: customer.phone, openingBalance: customer.openingBalance || customer.previous_balance || 0 });
