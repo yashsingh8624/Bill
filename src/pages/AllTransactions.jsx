@@ -60,9 +60,7 @@ export default function AllTransactions() {
     return map[type] || type || 'Unknown';
   };
 
-  
-
-  // ===== FIREBASconst processLedgerData = (data) => {
+  const processLedgerData = (data) => {
     const mapped = data
       .filter(entry => {
         if (entry.is_void === true || entry.is_void === 'TRUE') return false;
@@ -83,63 +81,16 @@ export default function AllTransactions() {
         description: entry.description || ''
       }));
 
-    const openingTxns = [];
-    if (customers && customers.length > 0) {
-      customers.forEach(c => {
-        const openingBal = parseFloat(c.openingBalance || c.previous_balance || 0);
-        if (openingBal > 0) {
-          const hasOpening = mapped.some(tx => String(tx.party_id) === String(c.id) && String(tx.type).toLowerCase().includes('opening'));
-          if (!hasOpening) {
-             openingTxns.push({
-               id: `opening-cust-${c.id}`,
-               date: c.created_at || c.createdAt || new Date('2000-01-01').toISOString(),
-               party_name: c.name || c.businessName || 'Unknown',
-               customer_id: c.id,
-               party_id: c.id,
-               party_type: 'customer',
-               type: 'Opening Balance',
-               rawType: 'OPENING',
-               amount: openingBal,
-               description: 'Opening Balance'
-             });
-          }
-        }
-      });
-    }
-
-    if (suppliers && suppliers.length > 0) {
-      suppliers.forEach(s => {
-        const openingBal = parseFloat(s.openingBalance || s.previous_balance || 0);
-        if (openingBal > 0) {
-          const hasOpening = mapped.some(tx => String(tx.party_id) === String(s.id) && String(tx.type).toLowerCase().includes('opening'));
-          if (!hasOpening) {
-             openingTxns.push({
-               id: `opening-sup-${s.id}`,
-               date: s.created_at || s.createdAt || new Date('2000-01-01').toISOString(),
-               party_name: s.name || s.businessName || 'Unknown',
-               supplier_id: s.id,
-               party_id: s.id,
-               party_type: 'supplier',
-               type: 'Opening Balance',
-               rawType: 'SUPPLIER_OPENING',
-               amount: openingBal,
-               description: 'Opening Balance'
-             });
-          }
-        }
-      });
-    }
-
-    const combined = [...mapped, ...openingTxns];
-
     // Filter to only show relevant transaction types
-    const filtered = combined.filter(tx => {
+    const filtered = mapped.filter(tx => {
       const type = String(tx.type).toLowerCase();
       return type.includes("sale") || type.includes("payment") || type.includes("purchase") || type.includes("opening");
     });
 
     return filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
-  };E: Use ledger from BillContext (real-time) =====
+  };
+
+  // ===== FIREBASE: Use ledger from BillContext (real-time) =====
   useEffect(() => {
     if (!isReady || !useFirebase) return;
 
@@ -159,8 +110,12 @@ export default function AllTransactions() {
       try {
         await ensureAllTransactionsSheet(spreadsheetId);
         const data = await getSheetData(spreadsheetId, 'ALL_TRANSACTIONS');
-        const processed = processLedgerData(data);
-        setTransactions(processed);
+        const filtered = data.filter(tx => {
+          const type = String(tx.type).toLowerCase();
+          return type.includes("sale") || type.includes("payment") || type.includes("purchase");
+        });
+        const sorted = filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setTransactions(sorted);
       } catch (err) {
         console.error('Failed to load transactions', err);
       } finally {
