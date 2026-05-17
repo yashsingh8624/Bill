@@ -79,7 +79,8 @@ export default function Dashboard() {
         }
       }
     });
-return { recentBills: recent, analyticsData: byMonthIndex, totalItemsSold: totalItems };
+
+    return { recentBills: recent, analyticsData: byMonthIndex, totalItemsSold: totalItems };
   }, [bills, selectedYear, products]);
 
   const stats = useMemo(() => {
@@ -167,7 +168,8 @@ return { recentBills: recent, analyticsData: byMonthIndex, totalItemsSold: total
            cash -= parseFloat(b.change);
        }
     });
-// Add payment IN via cash from ledger
+    
+    // Add payment IN via cash from ledger
     ledger.filter(l => l.type === 'PAYMENT' && l.payment_mode === 'Cash Drawer').forEach(l => {
        cash += parseFloat(l.amount || 0);
     });
@@ -179,7 +181,7 @@ return { recentBills: recent, analyticsData: byMonthIndex, totalItemsSold: total
 
     return cash > 0 ? cash : 0;
   }, [bills, ledger]);
-
+  
   const customersWithDues = useMemo(() => customers.filter(c => calculateCustomerBalance(ledger, c.id, c) > 0), [customers, ledger]);
   const suppliersWithDues = useMemo(() => suppliers.filter(s => calculateSupplierBalance(ledger, s.id) > 0), [suppliers, ledger]);
 
@@ -248,15 +250,7 @@ return { recentBills: recent, analyticsData: byMonthIndex, totalItemsSold: total
           <div className="flex items-center gap-3 mb-3 relative z-10">
             <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-inner">
               <Wallet size={20} />
-            </div>
-            <h2 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest transition-colors duration-300">Drawer Cash</h2>
-          </div>
-          <h3 className="text-3xl font-black text-amber-600 dark:text-amber-500 relative z-10 tracking-tighter transition-colors duration-300">â‚¹{totalCashInDrawer.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
-          <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-2 font-black uppercase tracking-widest transition-colors duration-300">Physical Cash Balance</p>
-        </div>
-      </div>
-
-      {/* Sales Analytics Section */}
+            </div>{/* Sales Analytics Section */}
       <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[2.5rem] shadow-lg shadow-indigo-500/5 dark:shadow-none border border-slate-100 dark:border-slate-700/50 relative overflow-hidden transition-all duration-300 backdrop-blur-xl">
         <div className="absolute -left-20 -top-20 w-64 h-64 bg-indigo-50 dark:bg-indigo-900/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10">
@@ -290,7 +284,8 @@ return { recentBills: recent, analyticsData: byMonthIndex, totalItemsSold: total
                   <div className="w-full h-px bg-slate-400"></div>
                   <div className="w-full h-px bg-slate-400"></div>
                </div>
-{chartData.heights.map((bar, i) => (
+               
+               {chartData.heights.map((bar, i) => (
                  <div key={i} className="flex-1 flex flex-col items-center justify-end h-full relative group/bar">
                     <div 
                       className="w-full max-w-[2.5rem] bg-indigo-500 hover:bg-indigo-400 dark:bg-indigo-600 dark:hover:bg-indigo-500 rounded-t-lg transition-all duration-700 ease-out relative cursor-pointer shadow-sm group-hover/bar:shadow-md"
@@ -335,7 +330,12 @@ return { recentBills: recent, analyticsData: byMonthIndex, totalItemsSold: total
            </div>
         </div>
       </div>
-
+            <h2 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest transition-colors duration-300">Drawer Cash</h2>
+          </div>
+          <h3 className="text-3xl font-black text-amber-600 dark:text-amber-500 relative z-10 tracking-tighter transition-colors duration-300">â‚¹{totalCashInDrawer.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-2 font-black uppercase tracking-widest transition-colors duration-300">Physical Cash Balance</p>
+        </div>
+      </div>
       {/* Cloud Storage Section */}
       {!isOffline && (
         <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
@@ -438,7 +438,7 @@ return { recentBills: recent, analyticsData: byMonthIndex, totalItemsSold: total
             )}
           </div>
         </div>
-
+        
         {/* Inventory Watchlist */}
         <div id="low-stock-section" className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 overflow-hidden flex flex-col transition-colors duration-300">
           <div className="p-8 border-b border-slate-50 dark:border-slate-700/50 flex items-center justify-between bg-red-50/20 dark:bg-red-900/10">
@@ -555,3 +555,4 @@ function SparklesIcon(props) {
     </svg>
   );
 }
+      
