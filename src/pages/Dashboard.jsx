@@ -237,53 +237,107 @@ export default function Dashboard() {
             </div>
             <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest transition-colors duration-300">Cash In Hand</p>
           </div>
-          <h3 className={`text-3xl font-black relative z-10 tracking-tighter transition-colors duration-300 ${cashInHand >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-rose-600 dark:text-rose-500'}`}>
+          <h3 className={`text-3xl font-black relative z-10 tracking-tighter transition-c{/* Sales Analytics Section */}
+      <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[2.5rem] shadow-lg shadow-indigo-500/5 dark:shadow-none border border-slate-100 dark:border-slate-700/50 relative overflow-hidden transition-all duration-300 backdrop-blur-xl">
+        <div className="absolute -left-20 -top-20 w-64 h-64 bg-indigo-50 dark:bg-indigo-900/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10">
+           <div>
+             <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-1">
+               <TrendingUp size={24} className="text-indigo-600 dark:text-indigo-400" /> Sales Analytics
+             </h3>
+             <p className="text-sm text-slate-500 dark:text-slate-400 font-medium tracking-wide">Track business growth performance</p>
+             
+             {/* Growth Indicator */}
+             <div className="mt-4 flex items-center gap-2">
+               <span className={`px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1 shadow-sm transition-colors ${salesGrowth.trend === 'up' ? 'bg-emerald-50 text-emerald-600 border border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800/50' : 'bg-rose-50 text-rose-600 border border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800/50'}`}>
+                 {salesGrowth.trend === 'up' ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                 {salesGrowth.trend === 'up' ? '+' : '-'}{salesGrowth.percentage}% from last month
+               </span>
+             </div>
+           </div>
+           <div>
+              <select 
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="w-full sm:w-auto px-5 py-2.5 bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-600/50 border border-slate-200 dark:border-slate-600 rounded-xl font-bold text-slate-700 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none shadow-sm cursor-pointer transition-all duration-300"
+                style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.25rem', paddingRight: '2.5rem' }}
+              >
+                {availableYears.map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+           </div>
+        </div>
+        
+        <div className="h-[320px] w-full mt-6 relative z-10" style={{ touchAction: 'pan-y' }}>
+          {analyticsData.every(d => d.sales === 0) ? (
+            <div className="w-full h-full flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl bg-slate-50/50 dark:bg-slate-800/20">
+              <History size={32} className="text-slate-300 dark:text-slate-600 mb-3" />
+              <p className="text-sm font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">No sales data available</p>
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={analyticsData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#4f46e5" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#CBD5E1" strokeOpacity={0.2} className="dark:stroke-slate-700" />
+                <XAxis 
+                  dataKey="name" 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tickFormatter={(value) => value.toUpperCase()}
+                  tick={{ fontSize: 10, fontWeight: 800, fill: '#94a3b8' }} 
+                  dy={10}
+                  minTickGap={15}
+                />
+                <YAxis 
+                  axisLine={false} 
+                  tickLine={false} 
+                  tick={{ fontSize: 10, fontWeight: 800, fill: '#94a3b8' }}
+                  tickFormatter={(value) => `₹${value >= 1000 ? (value/1000).toFixed(value >= 10000 ? 0 : 1) + 'k' : value}`}
+                  dx={-10}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'var(--tooltip-bg, rgba(255,255,255,0.95))', 
+                    borderRadius: '20px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid rgba(226, 232, 240, 0.1)',
+                    padding: '12px 16px',
+                    backdropFilter: 'blur(8px)'
+                  }}
+                  itemStyle={{ color: '#4f46e5', fontWeight: 900, fontSize: '16px' }}
+                  labelStyle={{ color: '#64748b', marginBottom: '4px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 800 }}
+                  formatter={(value) => [`₹${Number(value).toLocaleString('en-IN', {minimumFractionDigits: 2})}`, 'SALES']}
+                  cursor={{ stroke: '#4f46e5', strokeWidth: 2, strokeDasharray: '4 4', opacity: 0.2 }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="sales" 
+                  stroke="#4f46e5" 
+                  strokeWidth={4}
+                  fillOpacity={1} 
+                  fill="url(#colorSales)" 
+                  activeDot={{ r: 6, strokeWidth: 0, fill: '#4f46e5', className: 'animate-pulse drop-shadow-[0_0_8px_rgba(79,70,229,0.5)]' }}
+                  animationDuration={1500}
+                  animationEasing="ease-out"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>olors duration-300 ${cashInHand >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-rose-600 dark:text-rose-500'}`}>
             ₹{cashInHand.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
           </h3>
           <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-2 font-black uppercase tracking-widest transition-colors duration-300">Physical Cash Balance</p>
         </div>
       </div>
 
-      {/* Sales Momentum Section */}
-      {/* Sales Momentum Section */}
-      <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[2.5rem] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100 dark:border-slate-600 relative overflow-hidden transition-colors duration-300">
-        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-           <div>
-             <h3 className="text-xl font-black text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-1 transition-colors duration-300">
-               <TrendingUp size={24} className="text-indigo-600 dark:text-indigo-400" /> Sales Momentum
-             </h3>
-             <p className="text-sm text-slate-500 dark:text-slate-400 font-bold transition-colors duration-300">Last 6 Months Performance</p>
-           </div>
-           <div>
-              <select 
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="w-full sm:w-auto px-5 py-2.5 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-xl font-bold text-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none shadow-sm cursor-pointer transition-colors duration-300"
-                style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%2364748b\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E")', backgroundRepeat: 'no-repeat', backgroundPosition: 'right 1rem center', backgroundSize: '1.25rem', paddingRight: '2.5rem' }}
-              >
-                {availableYears.map(year => (
-                  <option key={year} value={year}>{year} Year</option>
-                ))}
-              </select>
-           </div>
-        </div>
-        
-        <div className="flex flex-col divide-y divide-slate-100 dark:divide-slate-700 border border-slate-100 dark:border-slate-600 rounded-2xl bg-white dark:bg-slate-800 overflow-hidden shadow-sm transition-colors duration-300">
-          {chartData.map((d, i) => (
-            <div key={i} className="flex items-center justify-between p-4 sm:p-5 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
-               <span className="font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest text-sm sm:text-base transition-colors duration-300">{d.label}</span>
-               <div className="flex items-center gap-4 sm:gap-6">
-                  <span className="font-black text-slate-800 dark:text-slate-100 text-lg sm:text-xl tracking-tight transition-colors duration-300">₹{d.value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                  <div className="w-6 flex justify-center">
-                    {d.trend === 'up' && <span className="text-green-500 font-black text-2xl leading-none">↑</span>}
-                    {d.trend === 'down' && <span className="text-red-500 font-black text-2xl leading-none">↓</span>}
-                    {d.trend === 'flat' && <span className="text-slate-300 dark:text-slate-500 font-black text-2xl leading-none transition-colors duration-300">-</span>}
-                  </div>
-               </div>
-            </div>
-          ))}
-        </div>
-      </div>
+  
 
       {/* Cloud Storage Section */}
       {!isOffline && (
