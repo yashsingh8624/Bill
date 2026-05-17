@@ -237,7 +237,52 @@ export default function Dashboard() {
             </div>
             <p className="text-slate-400 dark:text-slate-500 text-[10px] font-black uppercase tracking-widest transition-colors duration-300">Cash In Hand</p>
           </div>
-          <h3 className={`text-3xl font-black relative z-10 tracking-tighter transition-c{/* Sales Analytics Section */}
+          
+                    borderRadius: '20px',
+                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+                    border: '1px solid rgba(226, 232, 240, 0.1)',
+                    padding: '12px 16px',
+                    backdropFilter: 'blur(8px)'
+                  }}
+                  itemStyle={{ color: '#4f46e5', fontWeight: 900, fontSize: '16px' }}
+                  labelStyle={{ color: '#64748b', marginBottom: '4px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 800 }}
+                  formatter={(value) => [`₹${Number(value).toLocaleString('en-IN', {minimumFractionDigits: 2})}`, 'SALES']}
+                  cursor={{ stroke: '#4f46e5', strokeWidth: 2, strokeDasharray: '4 4', opacity: 0.2 }}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="sales" 
+                  stroke="#4f46e5" 
+                  strokeWidth={4}
+                  fillOpacity={1} 
+                  fill="url(#colorSales)" 
+                  activeDot={{ r: 6, strokeWidth: 0, fill: '#4f46e5', className: 'animate-pulse drop-shadow-[0_0_8px_rgba(79,70,229,0.5)]' }}
+                  animationDuration={1500}
+                  animationEasing="ease-out"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>olors duration-300 ${cashInHand >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-rose-600 dark:text-rose-500'}`}>
+            ₹{cashInHand.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          </h3>
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-2 font-black uppercase tracking-widest transition-colors duration-300">Physical Cash Balance</p>
+        </div>
+      </div>
+
+  
+
+      {/* Cloud Storage Section */}
+      {!isOffline && (
+        <div className="bg-white dark:bg-slate-<h3 className={`text-3xl font-black relative z-10 tracking-tighter transition-colors duration-300 ${cashInHand >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-rose-600 dark:text-rose-500'}`}>
+            ₹{cashInHand.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+          </h3>
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-2 font-black uppercase tracking-widest transition-colors duration-300">Physical Cash Balance</p>
+        </div>
+      </div>
+
+      {/* Sales Analytics Section */}
       <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[2.5rem] shadow-lg shadow-indigo-500/5 dark:shadow-none border border-slate-100 dark:border-slate-700/50 relative overflow-hidden transition-all duration-300 backdrop-blur-xl">
         <div className="absolute -left-20 -top-20 w-64 h-64 bg-indigo-50 dark:bg-indigo-900/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10">
@@ -330,18 +375,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           )}
         </div>
-      </div>olors duration-300 ${cashInHand >= 0 ? 'text-slate-800 dark:text-slate-100' : 'text-rose-600 dark:text-rose-500'}`}>
-            ₹{cashInHand.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-          </h3>
-          <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-2 font-black uppercase tracking-widest transition-colors duration-300">Physical Cash Balance</p>
-        </div>
-      </div>
-
-  
-
-      {/* Cloud Storage Section */}
-      {!isOffline && (
-        <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
+      </div>800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
           <div className="absolute -right-4 -top-4 w-32 h-32 bg-blue-50 rounded-full blur-2xl group-hover:scale-110 transition-transform pointer-events-none"></div>
           <div className="relative z-10">
             <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
