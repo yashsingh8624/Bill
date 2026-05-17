@@ -73,18 +73,7 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
     }
   };
 
-  const openEditModal = (customer) => {
-    setEditForm({ name: customer.name, phone: customer.phone, openingBalance: customer.openingBalance || customer.previous_balance || 0 });
-    setIsEditModalOpen(true);
-  };
-
-  const handleEditSubmit = (e) => {
-    e.preventDefault();
-    if (!selectedCustomer) return;
-    const updData = { ...editForm, previous_balance: editForm.openingBalance }; // save as string/num depending on setup
-    updateCustomer(selectedCustomer.id, updData);
-    setIsEditModalOpen(false);
-  };
+  
 
   const handleDelete = () => {
     if (!selectedCustomer) return;
@@ -115,7 +104,18 @@ export default function CustomerLedger({ overrideCustomer = null, onBack = null 
           amount: String(openingBal),
           description: 'Opening Balance'
         });
-      }
+ const openEditModal = (customer) => {
+    setEditForm({ name: customer.name, phone: customer.phone });
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditSubmit = (e) => {
+    e.preventDefault();
+    if (!selectedCustomer) return;
+    const updData = { ...editForm };
+    updateCustomer(selectedCustomer.id, updData);
+    setIsEditModalOpen(false);
+  };     }
     }
   }
 
