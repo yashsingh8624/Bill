@@ -181,7 +181,7 @@ export default function Dashboard() {
 
     return cash > 0 ? cash : 0;
   }, [bills, ledger]);
-  
+
   const customersWithDues = useMemo(() => customers.filter(c => calculateCustomerBalance(ledger, c.id, c) > 0), [customers, ledger]);
   const suppliersWithDues = useMemo(() => suppliers.filter(s => calculateSupplierBalance(ledger, s.id) > 0), [suppliers, ledger]);
 
@@ -250,7 +250,15 @@ export default function Dashboard() {
           <div className="flex items-center gap-3 mb-3 relative z-10">
             <div className="w-10 h-10 rounded-2xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center shadow-inner">
               <Wallet size={20} />
-            </div>{/* Sales Analytics Section */}
+            </div>
+            <h2 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest transition-colors duration-300">Drawer Cash</h2>
+          </div>
+          <h3 className="text-3xl font-black text-amber-600 dark:text-amber-500 relative z-10 tracking-tighter transition-colors duration-300">â‚¹{totalCashInDrawer.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
+          <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-2 font-black uppercase tracking-widest transition-colors duration-300">Physical Cash Balance</p>
+        </div>
+      </div>
+
+      {/* Sales Analytics Section */}
       <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[2.5rem] shadow-lg shadow-indigo-500/5 dark:shadow-none border border-slate-100 dark:border-slate-700/50 relative overflow-hidden transition-all duration-300 backdrop-blur-xl">
         <div className="absolute -left-20 -top-20 w-64 h-64 bg-indigo-50 dark:bg-indigo-900/10 rounded-full blur-3xl pointer-events-none"></div>
         <div className="mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4 relative z-10">
@@ -304,144 +312,7 @@ export default function Dashboard() {
           )}
         </div>
         
-        {/* Trend Indicator */}
-        <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700/50 flex flex-wrap items-center justify-between gap-4 relative z-10">
-           <div className="flex items-center gap-3">
-             <div className={`p-2 rounded-xl ${salesTrendData.trend === 'up' ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'}`}>
-               {salesTrendData.trend === 'up' ? <TrendingUp size={16} /> : <ArrowDownRight size={16} />}
-             </div>
-             <div>
-               <p className="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Growth vs Last Month</p>
-               <p className={`font-black text-sm ${salesTrendData.trend === 'up' ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
-                 {salesTrendData.trend === 'up' ? '+' : '-'}{salesTrendData.percentage}%
-               </p>
-             </div>
-           </div>
-           
-           <div className="flex items-center gap-6">
-              <div className="text-right">
-                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Total Sales YTD</p>
-                <p className="font-black text-slate-800 dark:text-slate-100">â‚¹{analyticsData.reduce((s,d)=>s+d.saleTotal,0).toLocaleString('en-IN', {maximumFractionDigits:0})}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Items Sold</p>
-                <p className="font-black text-slate-800 dark:text-slate-100">{totalItemsSold}</p>
-              </div>
-           </div>
-        </div>
-      </div>
-            <h2 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest transition-colors duration-300">Drawer Cash</h2>
-          </div>
-          <h3 className="text-3xl font-black text-amber-600 dark:text-amber-500 relative z-10 tracking-tighter transition-colors duration-300">â‚¹{totalCashInDrawer.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</h3>
-          <p className="text-slate-400 dark:text-slate-500 text-[10px] mt-2 font-black uppercase tracking-widest transition-colors duration-300">Physical Cash Balance</p>
-        </div>
-      </div>
-      {/* Cloud Storage Section */}
-      {!isOffline && (
-        <div className="bg-white dark:bg-slate-800 p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-32 h-32 bg-blue-50 rounded-full blur-2xl group-hover:scale-110 transition-transform pointer-events-none"></div>
-          <div className="relative z-10">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-2">
-              <Cloud size={16} className="text-blue-500" /> Your Cloud Storage
-            </h3>
-            <div className="flex items-center gap-3">
-              <p className="font-black text-slate-800 dark:text-slate-100 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] animate-pulse"></span>
-                Connected via {useFirebase ? 'Firebase' : 'Google Sheets'}
-              </p>
-            </div>
-            {offlinePendingCount > 0 && (
-              <p className="text-xs text-amber-600 dark:text-amber-400 font-bold mt-2 flex items-center gap-1">
-                 <AlertTriangle size={12} /> {offlinePendingCount} pending uploads waiting.
-              </p>
-            )}
-          </div>
-          <button 
-            type="button"
-            onClick={() => {
-              if (useFirebase) {
-                navigate('/reports');
-              } else if (spreadsheetId) {
-                window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}`, '_blank');
-              }
-            }}
-            className="shrink-0 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-black text-sm transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 relative z-10"
-          >
-            {useFirebase ? 'Open Console' : 'Open Spreadsheets'} <ArrowUpRight size={16} />
-          </button>
-        </div>
-      )}
-
-      {/* Main Grid Sections */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Payable/Receivables */}
-        <div className="lg:col-span-2 bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 flex flex-col transition-colors duration-300">
-          <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6 flex items-center gap-2">
-            <Target size={16} className="text-indigo-500 dark:text-indigo-400" /> Pending Market Exposure
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div 
-              onClick={() => setDashboardModal('get')}
-              className="bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 p-6 rounded-3xl border border-emerald-100 dark:border-emerald-800/50 shadow-sm cursor-pointer transition-colors group relative overflow-hidden"
-            >
-              <div className="absolute right-0 top-0 w-24 h-24 bg-emerald-100 dark:bg-emerald-800/30 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
-              <p className="text-emerald-700 dark:text-emerald-400 text-xs font-black uppercase tracking-widest mb-1">
-                You'll Get
-              </p>
-              <h4 className="text-3xl font-black text-emerald-600 dark:text-emerald-500 tracking-tight mb-2">â‚¹{totalCustomerDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</h4>
-              <div className="flex items-center justify-between mt-4">
-                 <p className="text-emerald-500 dark:text-emerald-300 text-[10px] font-bold uppercase">From {customersWithDues.length} Customers</p>
-                 <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-emerald-500 shadow-sm group-hover:translate-x-1 transition-transform">
-                   <ChevronRight size={16} />
-                 </div>
-              </div>
-            </div>
-
-            <div 
-              onClick={() => setDashboardModal('give')}
-              className="bg-rose-50 dark:bg-rose-900/20 hover:bg-rose-100 dark:hover:bg-rose-900/40 p-6 rounded-3xl border border-rose-100 dark:border-rose-800/50 shadow-sm cursor-pointer transition-colors group relative overflow-hidden"
-            >
-              <div className="absolute right-0 top-0 w-24 h-24 bg-rose-100 dark:bg-rose-800/30 rounded-bl-[100px] -z-10 group-hover:scale-110 transition-transform"></div>
-              <p className="text-rose-700 dark:text-rose-400 text-xs font-black uppercase tracking-widest mb-1">
-                You'll Give
-              </p>
-              <h4 className="text-3xl font-black text-rose-600 dark:text-rose-500 tracking-tight mb-2">â‚¹{totalSupplierDue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</h4>
-              <div className="flex items-center justify-between mt-4">
-                 <p className="text-rose-500 dark:text-rose-300 text-[10px] font-bold uppercase">To {suppliersWithDues.length} Suppliers</p>
-                 <div className="w-8 h-8 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center text-rose-500 shadow-sm group-hover:translate-x-1 transition-transform">
-                   <ChevronRight size={16} />
-                 </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-8 pt-6 border-t border-slate-50 dark:border-slate-700/50 flex-1 flex flex-col">
-            <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2 transition-colors duration-300">
-              <Clock size={16} /> Recent Invoices
-            </h3>
-            {recentBills.length === 0 ? (
-              <div className="py-12 text-center text-slate-300 dark:text-slate-600 italic font-medium transition-colors duration-300">Ready for your first sale!</div>
-            ) : (
-              recentBills.map((bill, idx) => (
-                <div key={idx} className="flex items-center justify-between p-4 rounded-2xl border border-slate-50 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors group">
-                  <div className="min-w-0 flex-1">
-                    <p className="font-black text-slate-800 dark:text-slate-100 text-sm transition-colors duration-300 text-ellipsis overflow-hidden">#{bill.invoiceNo}</p>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-ellipsis overflow-hidden white-space-nowrap">{(bill.customerName || 'Unknown')}</p>
-                  </div>
-                  <div className="text-right flex-shrink-0">
-                    <p className="font-black text-slate-800 dark:text-slate-100 tracking-tighter transition-colors duration-300">â‚¹{(bill.grandTotal || bill.total || 0).toFixed(2)}</p>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium transition-colors duration-300">{(bill.readableDate || (bill.date ? new Date(bill.date).toLocaleDateString() : 'N/A'))}</p>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-        
-        {/* Inventory Watchlist */}
-        <div id="low-stock-section" className="bg-white dark:bg-slate-800 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-700/50 overflow-hidden flex flex-col transition-colors duration-300">
-          <div className="p-8 border-b border-slate-50 dark:border-slate-700/50 flex items-center justify-between bg-red-50/20 dark:bg-red-900/10">
+      50/20 dark:bg-red-900/10">
             <h3 className="text-xs font-black text-red-600 dark:text-red-400 uppercase tracking-widest flex items-center gap-2">
               <AlertTriangle size={16} className="text-red-500" /> Stock Watchlist
             </h3>
@@ -553,6 +424,5 @@ function SparklesIcon(props) {
       <path d="M4 17v2"/>
       <path d="M5 18H3"/>
     </svg>
-  );
-}
-      
+);
+} 
