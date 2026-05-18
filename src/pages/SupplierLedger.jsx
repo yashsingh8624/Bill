@@ -466,6 +466,16 @@ const handleEditSubmit = (e) => {
                   <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Phone Number</label>
                   <input type="text" value={editForm.phone} onChange={(e) => setEditForm({...editForm, phone: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-medium" />
                </div>
+               <div>
+                  <label className="text-gray-700 dark:text-gray-300 block text-sm font-bold mb-1.5">Opening Balance</label>
+                  <input 
+                    type="number" step="0.01" 
+                    value={editForm.openingBalance} 
+                    onChange={(e) => setEditForm({...editForm, openingBalance: e.target.value})} 
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500/50 bg-slate-50 dark:bg-slate-700/50 focus:bg-white dark:focus:bg-slate-800 text-slate-800 dark:text-slate-100 font-bold outline-none search-clean" 
+                    placeholder="0.00" 
+                  />
+               </div>
                <div className="pt-4"><button type="submit" className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-colors">Save Changes</button></div>
             </form>
           </div>
