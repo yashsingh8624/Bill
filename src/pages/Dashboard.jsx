@@ -465,17 +465,17 @@ return (
       {/* Dashboard Modal */}
       {dashboardModal && (
         <div className="fixed inset-0 bg-slate-900/60 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg border border-slate-100 dark:border-slate-700 flex flex-col max-h-[85vh] animate-in slide-in-from-bottom-4 sm:zoom-in-95">
-            <div className={`px-6 py-4 flex justify-between items-center ${dashboardModal === 'get' ? 'bg-emerald-50 border-b border-emerald-100' : 'bg-rose-50 border-b border-rose-100'}`}>
-              <h3 className={`text-lg font-black flex items-center gap-2 ${dashboardModal === 'get' ? 'text-emerald-800' : 'text-rose-800'}`}>
+          <div className="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg border border-slate-100 dark:border-slate-700 flex flex-col max-h-[85dvh] overflow-hidden animate-in slide-in-from-bottom-4 sm:zoom-in-95">
+            <div className={`shrink-0 px-6 py-4 flex justify-between items-center ${dashboardModal === 'get' ? 'bg-emerald-50 border-b border-emerald-100 dark:bg-emerald-900/20 dark:border-emerald-900/50' : 'bg-rose-50 border-b border-rose-100 dark:bg-rose-900/20 dark:border-rose-900/50'}`}>
+              <h3 className={`text-lg font-black flex items-center gap-2 ${dashboardModal === 'get' ? 'text-emerald-800 dark:text-emerald-400' : 'text-rose-800 dark:text-rose-400'}`}>
                 {dashboardModal === 'get' ? "You'll Get" : "You'll Give"}
               </h3>
-              <button onClick={() => setDashboardModal(null)} className="text-slate-400 hover:text-slate-700 p-1 bg-white/50 dark:bg-slate-700/50 rounded-full hover:bg-white dark:hover:bg-slate-700 transition-colors">
+              <button onClick={() => setDashboardModal(null)} className="text-slate-400 hover:text-slate-700 p-1 bg-white/50 dark:bg-slate-700/50 rounded-full hover:bg-white dark:hover:bg-slate-600 transition-colors">
                 <X size={20} />
               </button>
             </div>
-            <div className="overflow-y-auto p-0 flex-1 bg-slate-50">
-              <ul className="divide-y divide-slate-100">
+            <div className="overflow-y-auto overscroll-contain flex-1 bg-slate-50 dark:bg-slate-900/50">
+              <ul className="divide-y divide-slate-100 dark:divide-slate-800/60 pb-8 sm:pb-0">
                 {(dashboardModal === 'get' ? customersWithDues : suppliersWithDues).length === 0 ? (
                   <li className="p-8 text-center text-slate-500 font-bold">No pending balances.</li>
                 ) : (
