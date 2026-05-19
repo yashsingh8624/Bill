@@ -67,7 +67,9 @@ export const BillProvider = ({ children }) => {
       items: parsedItems,
       grandTotal: meta.grandTotal !== undefined ? meta.grandTotal : parseFloat(b.total || 0),
       previousBalance: meta.previousBalance || parseFloat(b.previous_balance || 0),
-      prevBalanceIncluded: meta.prevBalanceIncluded || 0,
+      prevBalanceIncluded: typeof meta.prevBalanceIncluded === 'boolean' 
+        ? (meta.prevBalanceIncluded ? (meta.previousBalance || parseFloat(b.previous_balance || 0)) : 0) 
+        : parseFloat(meta.prevBalanceIncluded || 0),
       paymentMode: meta.paymentMode || b.paymentMode || 'Cash',
       paymentStatus: meta.paymentStatus || 'Pending',
       outstanding: meta.outstanding !== undefined ? meta.outstanding : Math.max(0, parseFloat(b.total || 0) - parseFloat(b.amount_paid || b.amountPaid || 0)),
