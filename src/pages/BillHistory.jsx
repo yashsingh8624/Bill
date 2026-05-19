@@ -355,10 +355,10 @@ const yesterday = new Date();
                     <span>₹{((selectedBill.cgst || 0) + (selectedBill.sgst || 0)).toFixed(2)}</span>
                   </div>
                 )}
-                {selectedBill.prevBalanceIncluded > 0 && (
+                {Number(selectedBill.prevBalanceIncluded || 0) > 0 && (
                    <div className="flex justify-between items-center text-amber-600 text-sm font-bold pt-2 border-t border-amber-100">
                       <span>Previous Udhaar</span>
-                      <span>₹{selectedBill.prevBalanceIncluded.toFixed(2)}</span>
+                      <span>₹{Number(selectedBill.prevBalanceIncluded || 0).toFixed(2)}</span>
                    </div>
                 )}
                 <div className="flex justify-between items-center pt-3 mt-1 border-t border-slate-200 dark:border-slate-700 transition-colors duration-300">
