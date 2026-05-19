@@ -195,7 +195,7 @@ export default function NewBill() {
       grandTotal: grandTotal,
       totalAmount: grandTotal,
       previousBalance: enablePrevBalance ? customerPrevBalance : 0,
-      prevBalanceIncluded: enablePrevBalance,
+      prevBalanceIncluded: enablePrevBalance ? customerPrevBalance : 0,
       paymentMode,
       paymentStatus,
       paidAmount: amountPaid,
