@@ -132,7 +132,7 @@ const Style1 = ({ bill, settings }: any) => (
 const Style2 = ({ bill, settings }: any) => (
   <div className={`${A4_CONTAINER} p-10 mx-auto font-sans bg-white shadow-xl text-slate-800 mb-20`}>
     <div className="flex justify-between items-center pb-6 border-b border-slate-200 mb-8 mt-4">
-      <div className="flex items-center gap-4">
+  <div className="flex items-center gap-4">
          {settings.logo && <img src={settings.logo} alt="Logo" className="w-16 h-16 rounded shadow-sm" />}
          <div>
             <h1 className="text-3xl font-bold text-slate-900 uppercase tracking-wide">{settings.businessName}</h1>
@@ -269,7 +269,7 @@ const Style3 = ({ bill, settings }: any) => (
     </div>
 
     <table className="w-full text-sm mb-4 border-2 border-sky-900 rounded border-separate border-spacing-0 overflow-hidden">
-      <thead className="bg-sky-900 text-white">
+  <thead className="bg-sky-900 text-white">
         <tr>
           <th className="py-2 px-3 text-center border-r border-sky-700 w-12">#</th>
           <th className="py-2 px-3 text-left border-r border-sky-700">Description of Goods</th>
@@ -352,7 +352,7 @@ const Style4 = ({ bill, settings }: any) => (
        </div>
        <div className="text-right flex flex-col items-end">
          <div className="grid grid-cols-2 gap-x-8 gap-y-4 max-w-xs text-left">
-        <div className="text-right"><p className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 mb-1 text-right">Invoice No</p><p className="font-black text-lg text-zinc-900">{bill.invoiceNo}</p></div>
+             <div className="text-right"><p className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 mb-1 text-right">Invoice No</p><p className="font-black text-lg text-zinc-900">{bill.invoiceNo}</p></div>
              <div className="text-right"><p className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 mb-1 text-right">Date</p><p className="font-black text-lg text-zinc-900">{bill.readableDate}</p></div>
          </div>
        </div>
@@ -403,7 +403,7 @@ const Style4 = ({ bill, settings }: any) => (
     </div>
 
     <div className="absolute bottom-12 left-12 right-12 grid grid-cols-2 gap-12 font-sans">
-      <div>
+          <div>
          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 mb-2">Bank Details</p>
          <p className="text-sm font-bold">{settings.bankName}</p>
          <p className="text-sm text-zinc-600 font-mono mt-1">A/c: {settings.bankAccount}</p>
@@ -529,7 +529,7 @@ const Style5 = ({ bill, settings }: any) => (
         <div className="flex p-4 bg-white items-end justify-between">
            <div className="min-w-[250px] border border-slate-300 p-3 bg-slate-50 rounded">
              <p className="font-black text-[11px] uppercase tracking-wider mb-2 text-slate-800 pb-1 border-b border-slate-200">Company Bank Details</p>
-<div className="grid grid-cols-[80px_1fr] text-xs mb-1"><span className="font-bold text-slate-500">Bank:</span><span className="font-bold text-slate-900">{settings.bankName}</span></div>
+             <div className="grid grid-cols-[80px_1fr] text-xs mb-1"><span className="font-bold text-slate-500">Bank:</span><span className="font-bold text-slate-900">{settings.bankName}</span></div>
              <div className="grid grid-cols-[80px_1fr] text-xs mb-1"><span className="font-bold text-slate-500">A/c No:</span><span className="font-mono font-bold text-slate-900">{settings.bankAccount}</span></div>
              <div className="grid grid-cols-[80px_1fr] text-xs mb-1"><span className="font-bold text-slate-500">IFSC Code:</span><span className="font-mono font-bold text-slate-900">{settings.bankIFSC}</span></div>
            </div>
@@ -546,7 +546,6 @@ const Style5 = ({ bill, settings }: any) => (
     </div>
   </div>
 );
-
 const Style6 = ({ bill, settings }: any) => (
   <div className={`${A4_CONTAINER} p-8 mx-auto font-sans bg-white shadow-xl mb-20`}>
     <div className="border border-black h-full flex flex-col text-sm">
@@ -675,7 +674,7 @@ const Style7 = ({ bill, settings }: any) => (
 
     <div className="grid grid-cols-2 gap-6 mb-6 text-sm">
        <div className="border border-emerald-800 p-4 rounded bg-emerald-50/30">
-          <p className="text-emerald-700 font-bold uppercase mb-1 text-xs">Customer Details</p>
+  <p className="text-emerald-700 font-bold uppercase mb-1 text-xs">Customer Details</p>
           <p className="text-xl font-bold text-slate-800">{bill.customerName}</p>
           <p className="text-slate-600 mt-1">{bill.customerAddress}</p>
           <p className="text-slate-600 mt-1">{bill.customerPhone}</p>
@@ -701,7 +700,7 @@ const Style7 = ({ bill, settings }: any) => (
         </tr>
         <tr>
           <th className="py-1 px-1 border-r border-emerald-700">%</th>
-<th className="py-1 px-2 border-r border-emerald-700">Amt</th>
+          <th className="py-1 px-2 border-r border-emerald-700">Amt</th>
           <th className="py-1 px-1 border-r border-emerald-700">%</th>
           <th className="py-1 px-2 border-r border-emerald-700">Amt</th>
         </tr>
@@ -807,7 +806,7 @@ const Style8 = ({ bill, settings }: any) => (
       <tbody>
         {bill.items.map((item: any, idx: number) => (
           <tr key={idx} className="border-b-2 border-slate-200">
-            <td className="py-4 px-3 text-slate-800">{item.name}</td>
+          <td className="py-4 px-3 text-slate-800">{item.name}</td>
             <td className="py-4 px-2 text-center text-slate-600">{item.quantity}</td>
             <td className="py-4 px-2 text-right text-slate-600">{item.rate.toFixed(2)}</td>
             <td className="py-4 px-2 text-center text-slate-600">{item.gstRate}%</td>
@@ -882,7 +881,7 @@ const Style9 = ({ bill, settings }: any) => (
           <th className="py-2 px-2 text-left font-bold">Item Description</th>
           <th className="py-2 px-2 text-center font-bold">Batch</th>
           <th className="py-2 px-2 text-center font-bold">Exp</th>
-<th className="py-2 px-2 text-center font-bold">Qty</th>
+          <th className="py-2 px-2 text-center font-bold">Qty</th>
           <th className="py-2 px-2 text-right font-bold w-16">MRP</th>
           <th className="py-2 px-2 text-right font-bold w-16">Rate</th>
           <th className="py-2 px-2 text-center font-bold w-12">GST</th>
@@ -944,7 +943,7 @@ const Style9 = ({ bill, settings }: any) => (
 const Style10 = ({ bill, settings }: any) => (
   <div className={`${A4_CONTAINER} p-14 mx-auto font-serif bg-[#fdfbf7] text-[#2c2b29] shadow-xl mb-20`}>
     <header className="text-center mb-16">
-      <h1 className="text-4xl uppercase tracking-[0.25em] mb-4 font-light text-[#1a1a1a]">{settings.businessName}</h1>
+  <h1 className="text-4xl uppercase tracking-[0.25em] mb-4 font-light text-[#1a1a1a]">{settings.businessName}</h1>
       <p className="text-xs uppercase tracking-widest text-[#5c5c5c] font-sans">{settings.businessAddress}</p>
       <p className="text-[10px] uppercase tracking-widest font-sans mt-2 text-[#808080]">GSTIN . {settings.gstNumber} &nbsp;&nbsp;|&nbsp;&nbsp; Ph . {settings.ownerPhone}</p>
       <div className="mt-8 border-b border-[#e0ddcd] w-1/3 mx-auto"></div>
@@ -1058,4 +1057,4 @@ export default function App() {
       </footer>
     </div>
   )
-        }
+  }
