@@ -352,7 +352,7 @@ const Style4 = ({ bill, settings }: any) => (
        </div>
        <div className="text-right flex flex-col items-end">
          <div className="grid grid-cols-2 gap-x-8 gap-y-4 max-w-xs text-left">
-  <div className="text-right"><p className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 mb-1 text-right">Invoice No</p><p className="font-black text-lg text-zinc-900">{bill.invoiceNo}</p></div>
+        <div className="text-right"><p className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 mb-1 text-right">Invoice No</p><p className="font-black text-lg text-zinc-900">{bill.invoiceNo}</p></div>
              <div className="text-right"><p className="text-[10px] uppercase tracking-[0.2em] font-bold text-zinc-400 mb-1 text-right">Date</p><p className="font-black text-lg text-zinc-900">{bill.readableDate}</p></div>
          </div>
        </div>
